@@ -1,0 +1,30 @@
+#!/usr/local/bin/perl -w
+# $KmKId: make_size,v 1.3 2002-11-07 08:18:16-08 kadickey Exp $
+
+$repl = shift;
+
+while(<>) {
+	$line = $_;
+	if(/\.word	inst(..)_SYM\+(.)(.*)$/) {
+		if($repl eq "c") {
+			print "\t0x$2,	/* $1 */ $3\n";
+		} elsif($repl eq "s") {
+			print "\t.byte 0x$2,	/* $1 */ $3\n";
+		} else {
+			print "\t.word\tinst$1" . "_$repl" . "\t/*$2*/ $3\n";
+		}
+	} elsif (/\.block.*$/) {
+		if($repl eq "c") {
+			print "\n";
+		} elsif($repl eq "s") {
+			print "\n";
+		} else {
+			print $line;
+		}
+	} else {
+		print $line;
+	}
+}
+#	if(/^inst(..)_SYM		(.*)$/) {
+#		print "OPCODE($1)	/* $2 */\n";
+#	} else if(/^(

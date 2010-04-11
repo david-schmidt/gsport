@@ -1,0 +1,20 @@
+
+TARGET = gsportx
+OBJECTS = $(OBJECTS1) xdriver.o
+CC = cc
+CCOPTS = -O
+OPTS =  -DNDEBUG
+SUFFIX =
+NAME = gsportx
+LDFLAGS =
+LDOPTS =
+LD = $(CC)
+EXTRA_LIBS = -lXext -lX11 -lc
+EXTRA_SPECIALS = 
+
+AS = cc
+PERL = perl
+
+XOPTS = -I/usr/X11R6/include
+XLIBS = -L/usr/X11R6/lib
+

@@ -1,0 +1,467 @@
+
+Changes in KEGS v0.91 since v0.90 (12/06/04)
+- Fixed serious bug in engine_c.c that could cause Finder file copies to
+	silently corrupt data.
+- Virtual Modem support--modem appears on serial port, allows outgoing
+	and incoming connections.
+- Sockets (and Virtual Modem) supported on Windows.
+- Fixed various reset bugs (where pressing Ctrl-Reset would cause infinite
+	beeps, etc).
+- Allow user to select ROM file from config panel if not found.
+- Improved Mac OS X interface: Full Screen support and error dialogs.
+- Better floppy support by always having 5.25" read nearest track regardless
+	of head position (supports Last Gladiator game bad crack by
+	emulating other emulators).
+
+Changes in KEGS v0.90 since v0.89 (10/19/04)
+- Make Keypad Joystick the default joystick emulation
+- Fix timezone calculation on Mac OS X for central time zone.
+- Fix handling of long paths in config panel, reported by David Scruffham.
+- Always call joystick_init at startup.
+- Fix F2 keymappings for X Windows, to fix some issue reported by
+	David Wilson.
+- Fixed some documentation issues reported by David Wilson.
+- Fixed a bug in joystick_driver.c reported by Doug Mitton.
+- Add README.a2.compatibility to discuss known issues with programs.
+
+Changes in KEGS v0.89 since v0.88 (10/17/04)
+- Make old mouse button presses disappear after .5 seconds.
+- Add Keypad Joystick, along with configuration menu choices to enable it.
+	The keypad numbers move the joystick to the indicated direction,
+	with chording allowing in-between values.
+	The keypad '0' is button 0 and keypad '1' is button 1.
+- Also add jostick scaling factor and trim adjustment.
+- Allow user to increase keyboard and mouse scan rate to 240Hz from 60Hz
+	for some better game response.
+
+Changes in KEGS v0.88 since v0.87 (10/13/04)
+- Add configuration setting to debug halt on code red halts.  Also add
+	configuration mode (on by default) to shadow text page 2 on ROM 01,
+	which is an enhancement over a real IIgs.
+- Handle mac binary header on images.  Handle compressed .po images.
+- Fix refresh rate to 59.923Hz from 60Hz so that exactly 17030 1MHz cycles
+	pass in one screen refresh period.
+- Enhance trace-to-file function to also write out data values stored using
+	the Data_log info.
+- Debugger adds memory move and memory compare functions.
+- Support "floating bus" where reading certain $C0xx locations returns the
+	current video data.  This allows Bob Bishop's split-screen demos to
+	run and enables Drol's between-level animations to work fully.
+
+Changes in KEGS v0.87 since v0.86 (10/05/04)
+- Remove all of Jonathan Kalbfeld's and Gilles Tschopp's contributions.
+	All of Solaris audio is removed.
+- Fix config screen not drawing correctly if emulator was currently displaying
+	video page 2.
+- Fix STP instruction.
+- Fix mouse-joystick which was halving the Y dimension.
+
+Changes in KEGS v0.86 since v0.85 (03/23/04)
+- Add patch for Solaris sound by Jonathan Kalbfeld.
+- Fix so that F4 enters config panel even while running Prosel-16
+- Major mouse pointer changes, based on some ideas from Geoff Weiss.
+	The GSOS mouse now exactly tracks the host pointer automatically.
+- Fixed an accidental debug halt when Prosel-16 disables the keyboard/mouse.
+
+Changes in KEGS v0.85 since v0.84 (01/09/04)
+- Fix some minor 65816 bank-crossing bugs.
+- Add -noignhalt to allow user to stop on code red halts.
+- Fix Win32 capslock problem as reported by Edward Moore
+- Fixed DreamVoir app on the sample image (it was corrupt)
+
+Changes in KEGS v0.84 since v0.83 (11/21/03)
+- Add new speed, 8.0MHz directly using right-clicking or F6.
+- Sim speed and Video update interval added to Config panel.
+- Various cycle timing bugs in engine_c.c fixed.
+- Add Config Panel entry to mask serial output to 7-bit, to enable PR#2 to
+	work better with an external telnet.
+- In Config Panel file selection, typing a letter jumps to the first file
+	beginning with that letter.
+- Fixed various serial socket bugs.  Now you can disconnect a telnet session
+	and start a new one, and a Linux hang is fixed.
+- Default GS memory size increased to 8MB.
+- Small fix to double-hires color table.
+- X windows can now send displays to other-endian X servers.
+
+Changes in KEGS v0.83 since v0.82 (11/19/03)
+- Add Memory Size to config panel, with support for up to 14MB of memory
+	(Geoff Weiss)
+- Add $C04F EMUBYTE support which Bernie II the Rescue defined. (Geoff Weiss)
+- Fix $CFFF code red's reported by David Wilson.
+- Add smartport $C70A Format routine (David Wilson).
+
+Changes in KEGS v0.82 since v0.81 (11/06/03)
+- Fix superhires display glitch introduced in v0.81.
+- Improved border handling--XMAS demo looks great.
+- Fix some X build problems introduced in v0.81.
+
+Changes in KEGS v0.81 since v0.80 (11/04/03)
+- Code Red/Yellow warnings about emulation stability
+- Windows file browsing fixes
+- Built-in C600 ROM for Apple II 5.25" game compatibility
+- Turns key repeat back on when exiting from X-windows version
+- Windows F8 captures the cursor
+
+Changes in KEGS v0.80 since v0.71 (10/31/03)
+- Configuration Panel means no more hand-editing configuration files
+- All emulator state is now saved in "config.kegs"
+- 3200 color pictures!  Video system much improved for display accuracy.
+- F8 Pointer grabbing works on Mac
+- ZipGS emulation
+
+Changes in KEGS v0.71 since v0.70 (11/20/02)
+- Improved double-hires colors a lot.  -dhr140 is no longer the default
+- Airheart relies on the PC going from 0xffff to 0x0000, so I undid the
+	change from KEGS v0.54 which allowed PC to overflow to 0x10000.
+	This slows KEGS down by about 5%.
+- Fixed X shared memory bug in KEGS v0.70 with fix from Jonathan Stark.
+
+Changes in KEGS v0.70 since v0.60 (11/18/02)
+- New buttons: Middle button is enter-debugger, and right button changes speed
+- New function key mapping (see README.kegs)
+- Mac OS X port
+- Win32 port
+- Centralized much of what had been "xdriver.c" code into video.c, to move
+	true platform-specific stuff into the various *driver.c codes.
+	Kimage struct tracks video display buffers in a dev-independent way.
+	From video.c, the calls to the platform code start with "x_" mostly.
+	Code in video.c cleaned up somewhat.
+	Borders are now always in native buffer format, while text/hires/
+	and superhires are in 8-bit buffers and translated to native later.
+- Mac and Windows sound are all done in one process--no child sound process.
+- Revamped key press handling and mouse clicks--all is now handled in
+	adb.c for a consistent user interface.  Now KEGS implements the
+	same function keys on all platforms.  See README.kegs for fn key maps.
+- I copied the debugger help from Frederic Devernay's KEGS-SDL port.
+- Fixed an old IWM bug causing bad nibblization due to using uninit vars.
+- Gilles Tschopp workaround to use corrupted 2IMG files (from KEGS-OSX).
+- Gilles Tschopp provided code to zero //gs memory at startup (from KEGS-OSX)
+- Simple code to try to use Mac Diskcopy format disks
+- Ignore writes to 0xc0a8
+- Search in $HOME and the launch directory (for mac) for kegs_conf/ROM
+- Remove font65.sim file by integrating it into kegsfont.h.
+- "-bw" option forces black and white hires mode.
+
+
+Changes in KEGS v0.60 since v0.59 (10/03/00)
+- The 16-bit colors were still wrong due to another coding error.  It would
+	be much easier to get this right if I had a 16-bit color display...
+	A user says it works now.
+
+Changes in KEGS v0.59 since v0.58 (7/07/00)
+- Added support for multiple paths to the default files and also multiple
+	names for many default files.  This should make the .rpm distribution
+	work better.
+- Add another keycode to mean break according to mic@research.nj.nec.com.
+- Add support for various ROMs to get plugged into slot 1-7.
+- Fix code so that it should compile on 64-bit platforms.
+
+Changes in KEGS v0.58 since v0.57 (2/08/00)
+- Setting the execute bit on the disk image no longer means no-write-thru.
+	Too many new users were getting confused by this.
+- Fixed another bug with Apple //e bank switching created by v0.56
+	Reported by phoenyx.
+- Add command line option "-v" to turn on some verbose debugging flags.
+- Fixed potential core-dump bug with non-8 bit visuals.
+- Fixed double-lo-res color problem.
+- The X driver should work with any visual depth display now and get the
+	colors right.  Ian Schmidt reported his 16-bit card had bad colors.
+
+Changes in KEGS v0.57 since v0.56 (12/27/99)
+- Another try at making timezone stuff work across all Unix variants.
+	Let me know if the time in the Apple //gs control panel doesn't
+	match your real local time.
+- Fix a bug created in v0.56 where the fast //e bank switch code had a typo.
+	This prevented ZBasic from working correctly.
+
+Changes in KEGS v0.56 since v0.55 (10/31/99)
+- Faster Apple //e bank switch emulation.
+- Simplified number of global variables for various softswitches.
+- Fixed a bug which made 3.5" and 5.25" disk access much slower than necessary.
+- Improved scan-line interrupt accuracy (lets MEGADEMO run).
+- Improved sound interrupt accuracy (was hoping this would fix some sound
+	issues, but it doesn't seem to help).
+- Add Mode_switch as an alias for the Option key
+- I noticed the //gs self-tests were broken again--fixed.
+ 
+Changes in KEGS v0.55 since v0.54 (10/19/99)
+- In LOG_PC debug aid, add cycles to the trace
+- Fix MEGADEMO bug where 3.5" disks weren't properly ejected.  Needed to
+	look at iwm.motor_on35 not iwm.motor_on.
+- Temp fix for MEGADEMO to not halt if shadow-in-all-banks is on in $c036.
+- Another MEGADEMO fix to not take a scan-line int if the SCB was cleared
+	right before the raster got to this line.
+- Fix bug in smartport.c that was causing core dumps if you tried to init
+	a disk is s7dx.
+
+Changes in KEGS v0.54 since v0.53 (10/10/99)
+- Add support for Out Of This World's direct reading of ADB RAM loc 0xb to
+	get key status.  This lets shift/control work in OOTW.
+- Code simplification to get rid of most set_halt() calls and use halt_printf.
+- Speed improvement: track kpc (merged kbank and pc in one 32 bit variable)
+	which makes the inner loop faster.  This does make KEGS not
+	accurately model a 65816 code crossing bank boundaries, but just
+	about every other emulator gets it wrong, and the speed improvement
+	is 5-10%.  And I don't know of any code which relies on it
+	working correctly.
+- Fix to allow better GS/OS compatibility: after each smartport call,
+	set 0x7f8 = 0xc7.
+- Fixed ZipGS emulation bug where KEGS was not re-locking Zip at the right
+	time, which made double-hires not work after booting GS/OS.
+
+Changes in KEGS v0.53 since v0.52 (8/3/99)
+- Move all the "fcycles" timing calculations to use double instead of float.
+- Fix display shadowing bug reported by "phoenyx" which caused the text
+	display to not always be updated correctly with funny bank switching.
+- Added the "Home" key as an alias for the '=' on the keypad.
+- Changed the way X modifiers are interpreted to increase compatibility of
+	Caps Lock to more X servers.
+- Add -dhr140 option to use old double-hires color mode that results in
+	exactly 140 horizontal pixels with no bleeding.  It's set default
+	to "on" for now while I work out double-hires colors.
+- Started adding some ZipGS compatibility--control panels run, but all
+	the controls are effectively ignored by KEGS.
+
+Changes in KEGS v0.52 since v0.51 (6/27/99)
+- Small speed-up of interpreter loop to avoid checking the global variable
+	"halt_sim" after every instruction.
+- Smartport fixes to avoid halts when the SCSI CD player NDA is installed.
+- Fix to autodetect X visual depth (it didn't work at all in v0.51).
+- Fix to HP binary--KEGS v0.51 hit an HP linker bug which caused the
+	executable to not run correctly.  (It didn't obey an assembly-
+	language alignment command correctly).  Re-ordering the object
+	list works around the problem.
+
+Changes in KEGS v0.51 since v0.50 (6/1/99)
+- Fixed many bugs that crept into scanline interrupts over the last few months.
+- RAM size is now settable on the commandline: -mem 0x400000 will use
+	a 4MB expansion RAM card (giving you 4.25MB of memory with ROM 01).
+- VBL time used to be a variable (which was wrong)--it's now always the
+	same number of cycles.
+- Typo preventing joystick_driver.c from compiling fixed.
+- Auto senses X visual depth, searching for 8 bit, then 15 bit, then 24,
+	then 16 bit visuals.  Can still override this with commandline.
+
+Changes in KEGS v0.50 since v0.49 (5/31/99)
+- Added Linux joystick support with code provided by Jonathan Stark.
+	Activate with "-joystick" command line option.
+- Small improvements in s7 device handling.  If you have no s7 devices or no
+	bootable devices, KEGS launches Applesoft.
+- Bug fix in scan-line interrupts--they were occurring at the wrong time
+	previously.
+- Rewrote double-hires color routines.  They're still not quite right,
+	but it's a lot better than it used to be.
+
+Changes in KEGS v0.49 since v0.48 (5/3/99)
+- Fixed a key-repeat bug in v0.48 caused usually with shift-key sequences.
+- Fixed bug where GNO would not work with ROM 03.  ROM area at $C071-$C07F
+	is different from ROM 01.
+- Ian Schmidt pointed out a special Ensoniq case where an oscillator in
+	one-shot mode can cause it's partner to start if it is in swap mode.
+- Integrated in Geoff Weiss's Solaris x86 ports.  I might have broken it
+	making a few last-minute changes...
+
+Changes in KEGS v0.48 since v0.47 (4/13/99)
+- Even better ADB key repeat--key rollover works more like a real Apple //gs.
+- IWM fix: some "smarport" modes were being activated sometimes during
+   normal 3.5" accesses, resulting in some games not loading correctly.
+- Some fixes to serial port emulation to handle programs writing to
+   the serial port in MIDI mode when the chars will not be consumed.
+- Smartport fix to set zero-page locations $42-$47, needed by some poorly-
+   written game loaders
+- The "oscilloscope" effect in some sound-demos now shows the sounds
+   being played.
+
+Changes in KEGS v0.47 since v0.46 (4/7/99)
+- ADB fix #1: reading $c010 should give key-down status better
+- ADB fix #2: key repeat was stopping if modifier key pressed
+- ADB fix #3: The game "Pirates" was crashing on startup due to a small bug.
+- Bard's Tale 2 was freezing on startup due to a bug in the WAI instruction.
+- Major serial port rewrite.  Diversi-Tune now runs and sound OK (but there
+	are some small problems) and serial port emulation is better.
+
+Changes in KEGS v0.46 since v0.45 (3/21/99)
+- Fix for undefined var in engine_c.c.  Oops.
+- Fix for old bug in engine_c.c causing KEGS to sometimes misinterpret
+   instructions which cross page boundaries.  Was causing Thexder not
+   to work, at least.
+
+Changes in KEGS v0.45 since v0.44 (3/20/99)
+- Fix for COP instruction in engine_c.c.  Pointed out by Kelvin Sherlock.
+- Major fixes to Ensoniq emulation, SynthLab sounds much better.
+- Fix to iwm.c to deal with corrupt 2IMG archives a little better.
+
+Changes in KEGS v0.44 since v0.43 (2/23/99)
+- -audio 0 option would often cause programs to hang.  Bug was that the
+   audio rate was defaulting to '0' which confused KEGS.
+- Made keycode 0x072 be the XK_Break key for XFree86
+
+Changes in KEGS v0.43 since v0.42 (2/19/99)
+- Support .nib 5.25" format as read-only
+- Faster 3.5" nibblization routines (should make startup faster)
+- Fixed a very-old 3.5" disk writing bug that made bit-copiers not work
+
+Changes in KEGS v0.42 since v0.41 (2/1/99)
+- Include <errno.h> to fix Linux compile problem
+- Fix relative branch timing bug that was making IWM emulation flaky
+   (backward branches should count as 3 cycles if to the same page,
+    and 4 if to a different page in emulation mode.  Bug always counted
+    them as 4)
+- Gave up on fast 5.25" writes--KEGS always slows to 1MHz for 5.25"
+   writes since the timing and kludges just got too annoying.
+- add "-arate 22050" option to change audio sample rate on the command-line.
+   Slower audio rates can hit more audio bugs (I'm working on them).
+- fixed little-endian bug in smartport.c and partls.c
+- fixed side border redraw bug that would sometimes leave super-hires
+   images on the right-side border.
+
+Changes in KEGS v0.41 since v0.40 (1/19/99)
+- Fixed bug where fill-line mode would not always redraw the screen correctly
+- Changed some // comments to /* */ to help David Wilson's Solaris port
+- Fixed little-endian bugs in smartport.c preventing mounting of
+   parititioned disks.  Fix submitted by Jonathan Stark.
+- Christopher Neufeld noted that fast space/delete option in the control
+   panel caused KEGS to hit breakpoints.  I fixed this and fast arrows and
+   fast mouse options (they are now just ignored).
+- Solaris port by David Wilson now provides a Makefile_solaris
+
+Changes in KEGS v0.40 since v0.39 (10/25/98)
+- 15 and 24 bit depth displays now supported (though somewhat slower than
+	8 bit displays).  But Super-hires displays now show 256
+	simultaneous colors on a 16- or 24-bit X display.
+	Select a 15-bit display with the cmd line option "-15" and
+	a 24-bit display with "-24".  Otherwise, KEGS defaults to looking
+	for an 8-bit display, and fails if it cannot find one.
+- Some border fixes--border colors now update correctly when palette
+	changes occur (like via F10).
+- Alias F1 to ESC for OS/2.
+
+Changes in KEGS v0.39 since v0.38 (9/13/98)
+- OS/2 port by Tschopp Gilles
+	- handle cr&lf better in disk_conf
+	- Drive letters work and are not confused with partition names, so
+		s7d1 = D:\images\cd:1 will open partition 1 correctly.
+	- KEGS no longer uses system() to do file copies, it does it all
+		using POSIX calls.
+	- Unix-specific socket calls moved from scc.c to scc_driver.h
+	- Default X handler re-installed properly now for better debug
+- Nasty core dump bug found and fixed by Tschopp Gilles in disk switch code
+
+Changes in KEGS v0.38 since v0.37 (7/28/98)
+- IWM bugs:
+	- fast_disk_emul off under GS/OS caused I/O errors.
+	  KEGS was always slowing down to 1MHz when 5.25" drive was on, when
+	  it should have been obeying the $C036 register.
+	- bug in IWM on little-endian processors
+- disk ejection should now work, but a beta user claimed some bugs on
+	x86 Linux.
+- 2IMG support, but only lightly tested.
+- Removed some internal breaks on access to $C0B0 for tool033.
+- Modulae also stumbled into some breakpoints by writing to $C02F,
+	which does nothing.
+- Screen refresh simplified (for me) by redrawing the screen while
+	raster is on first scan-line, rather than line 200.
+	However, a side effect is some of the graphics during the XMAS DEMO
+	look a bit choppier.
+- More SCC fixes to avoid breakpoints under GNO.
+- Start support for sound under Linux, but it sounds horrible right now.
+	Any Linux sound gurus want to help out?
+- Fixed possible array-overrun bug in video.c around border effects.
+	Maybe shared memory works under x86 Linux now?
+- Made changes for OS/2 port to fopen() text files.  From Blue Neon.
+
+
+Changes in KEGS v0.37 since v0.36 (7/13/98)
+- Linux PPC port completed and functional.  KEGS has been tested to
+  run quite well and quite fast on a 240MHz 604e running
+  MkLinux pre-DR3.
+- Change LITTLE_ENDIAN define to KEGS_LITTLE_ENDIAN since Linux
+  always defines LITTLE_ENDIAN as a silly macro.
+- Dumb bug in IWM 3.5" routines could cause core dumps if disk arm moved
+  from outer track to inner track very quickly.
+- Deleted some breakpoints that some Second Sight searching code would hit.
+- Ignore some SCC reset commands GNO would use that caused KEGS to stop.
+- Handle odd partitions better--some //gs formatted Zips had a blocksize
+  of 0, which defaults to 512 now.
+- Handle some keysyms better to avoid MkLinux bug with keysym 0.
+
+Changes in KEGS v0.36 since v0.35 (5/30/98)
+
+- Linux x86 port completed and functional with help from Karl Pfleger
+- Linux clock fixes--should handle daylight savings better on Linux
+- LITTLE_ENDIAN defines
+- Start making fixes for NeXTStep due to Eric Sunshine
+- Fixed bug in HP asm code with I/O fetches--caused //gs selftests to fail
+  and a bug in scc.c was also causing self-tests to fail.
+
+Changes in KEGS v0.35 since v0.34 (5/17/98)
+
+- engine_c.c fully implemented--KEGS now has a version completely written
+   in C, and now portable to other Unix machines.
+- KEGS got another 5% faster with more tweaks to the asm dispatch loop.
+
+Changes in KEGS v0.34 since v0.33
+
+- KEGS is 10-15% faster due to finally implementing a planned recoding
+   of the dispatch loop.
+
+Changes in KEGS v0.33 since v0.32 (5/7/98)
+
+- Fixed bug in engine_s.s that prevented compiling on pre-10.20 systems.
+- ADB mouse interrupts work now.  Fixed "bug" where GSHK would think
+   mouse button was depressed at startup. (GS/OS is looking at mouse
+   button 1 status, which accidentally was reading as down).
+- ADB emulation of read char_sets and read_kbd_layouts now matches a real
+   //gs.
+- optimization to allow dereferencing page_info[] even if BANK_IO is set,
+   to get a small speed improvement in engines_s:dispatch().
+- SCC logs are 'Z' at the disas prompt.
+- Tool decoded is 'T' at the disas prompt.
+- SCC changes to support slot 1 == port 6501 and slot 2 == port 6502,
+   with limited interrupt support.  Most serial tasks won't work still,
+   but some do.  PR#1/2 and IN#1/2 work fine.  getty under GNO doesn't.
+- -audio [0/1] forces audio off/on.  This just stops the sound playing--
+   internally all Ensoniq interrupts/etc are fully emulated.  If display
+   is not using shared memory (i.e., it's remote), audio defaults to off.
+   (but can be forced on with -audio 1).
+- -display {foo} sends X display to {foo}.
+
+Changes in KEGS v0.32 since v0.31 (10/23/97)
+
+- Faster dispatch loop, for a 10-15% overall performance improvement
+- Fixed sound bug where Oversampler would make KEGS halt (Oversampler
+   said turn on 128 oscillators, and KEGS tried to...)
+- Fixed bug where KEGS would not work on 24-bit displays due to a typo.
+- Added frame skipping support (-skip n) and auto frame skipping if you
+   are not using shared memory (like displaying KEGS to a remote machine).
+- Added -noshm support for forcing off shared memory, so you can see how
+   much it helps.
+
+Changes in KEGS v0.31 since v0.30 (9/23/97)
+
+- New mouse handling--Press F8 to hide X windows cursor and constrain
+	cursor inside window.  Makes using the mouse much easier.
+	F8 toggles back to normal.
+- Add revision to status area.
+- Remove "slow memory" calculation.  KEGS was emulating slowing down to
+	1MHz to write to slow memory (bank $E0 or $E1).  But true //gs
+	accelerators have a smarter trick, so I just removed it from
+	KEGS.  KEGS still slows down for I/O reads and writes.
+	This eliminates the confusing 40MHz speed numbers you'd sometimes get.
+	KEGS can also now run faster when it would have slowed down to
+	1MHz before.
+- Turn off accurate IWM emulation be default, for much faster emulation.
+	Bit copiers won't work by default now.  Toggle accurate IWM
+	with F7.  Accurate IWM forces 1MHz speed for 5.25" and 2.5MHz for
+	3.5", but less accurate IWM runs as fast as possible.
+- Add optional size to s7dx entries in disk_conf, to allow using /dev/rfloppy.
+- Allow mounting partitions by number, instead of just by name, since some
+	Mac-formatted Zip disks don't have partition names.
+- Add -ignbadacc to ignore bad memory accesses.
+- Increase MAX_C030_TIMES.  Otherwise, fast workstations could generate too
+	many clicks per VBL, causing an assertion to fail.
+- Small speed increase detecting changes in the superhires screen.
+- Alt_L is now Open-Apple, and Alt_R is Closed-Apple.
+- KEGS now uses just one private colormap, so xwd can get screendumps.
+
+

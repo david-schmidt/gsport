@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>2mg</string>
+				<string>2MG</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>2mg.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Apple II 2MG Disk Image</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>a2mg</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>kegs</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>525.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>GSport Configuration File</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>kegs</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>GSPORTMAC</string>
+	<key>CFBundleName</key>
+	<string>GSPORTMAC</string>
+	<key>CFBundleIconFile</key>
+	<string>kegsicon.icns</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>GSPORT</string>
+	<key>CFBundleVersion</key>
+	<string>0.1</string>
+	<key>CFBundleShortVersionString</key>
+	<string>GSPORTMAC version 0.1</string>
+	<key>CFBundleGetInfoString</key>
+	<string>GSPORTMAC v0.1, Copyright 2010 GSport Contributors, http://gsport.sourceforge.net</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright 2010 GSport Contributors</string>
+</dict>
+</plist>

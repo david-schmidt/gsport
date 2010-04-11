@@ -1,0 +1,148 @@
+
+xdriver.c contains the routines for interfacing to X windows.  The rest
+of KEGS interacts with X windows only through xdriver.c routines.
+
+Externally called routines are:
+show_xcolor_array():	Debug routine, it does not need to do anything.
+dev_video_init():	Called at startup, it should open up the
+			 window and do other initialization.
+update_physical_colormap(): Updates the X windows palette with the colors
+			from xcolor_a2vid_array[], which is maintained by
+			other xdriver routines.
+update_status_line():	Call to update the internal array of chars
+			  representing the status lines at the bottom of
+			  the window.  Does not draw the chars to the screen.
+xdriver_end():		Shutdown routine
+check_input_events():	Called up to 60 times a second (see video_update() in
+			 video.c) to handle any X window events and get
+			 keypresses.
+			 On a mouse press, call update_mouse() with the
+			 new x, y coordinates, and the status of the mouse
+			 button.
+			 If g_warp_pointer is set, constrain mouse within
+			 the window.
+			 On keypress, calls handle_keysym().
+	handle_keysym(): Takes X keysym, and converts to the appropriate
+			a2code using the a2_key_to_xsym[] lookup table.
+			The a2codes are the Apple // ADB keycodes.
+			Special work is done to handle shift and control
+			properly since Apple only has one keycode for both
+			shift and control keys.  Then call
+			adb_physical_key_update() with the a2 keycode and
+			is_up = 1 if keyup, 0 = if key down.
+			In addition, this routine handles all the Function
+			keys doing special actions, which should be easy to
+			port.
+x_refresh_ximage():	Redraws the window using the a2_line_* arrays.
+			Described in more detail below.
+update_color_array():	Interface to the color map.  Sets color[col_num]
+			of the internal colormap array to a2_color.
+			a2_color is the 12 bit apple color of the form:
+			(red << 8) + (green << 4) + (blue).
+			There are 16 palettes of 16 colors each, managed as
+			one 256-color colormap.  See discussion of
+			g_a2vid_palette below.
+x_auto_repeat_on():	The X routines turn off key repeat when the cursor
+			enters the graphics window automatically, and turn
+			it back on when the cursor leaves.  But if the
+			debugger gets control due to a breakpoint, keyrepeat
+			would be left off.  So the debugger calls this
+			routine to make sure key repeat is back on.
+redraw_status_lines():	Draw the status lines from the g_status_buf[][] array
+			to the graphics window.
+
+Externally referenced data:
+
+g_use_shmem:		Set by main() to enable/disable MIT-SHM for X.
+			Also used by sound routines to auto-turn-off sound
+			if not using MIT-SHM.
+
+Bytes representing screen data:
+byte *data_text[2]:	Array of bytes for the lores and text pages 1 and 2.
+			Just 400*640 bytes.
+byte *data_hires[2]:	Array of bytes for the hires pages 1 and 2.
+byte *data_superhires:	Array of bytes for superhires screen.
+byte *data_border_sides: Array of bytes representing the border sides.
+			Basically just A2_WINDOW_HEIGHT*EFF_BORDER_WIDTH bytes.
+byte *data_border_special: Top and bottom border bytes.
+			(X_A2_WINDOW_HEIGHT - A2_WINDOW_HEIGHT + 2*8) *
+				(X_A2_WINDOW_WIDTH) bytes.
+
+Handles used for X windows drawing:
+XImage *ximage_hires[2]: Opaque handle to XImage object for hires page 1 and
+			 page 2.
+XImage *ximage_text[2]:	Text pages 1 and 2.
+XImage *ximage_superhires: Superhires graphics XImage
+XImage *ximage_border_special: Top and bottom border XImage.
+XImage *ximage_border_sides: Left and right sides (only one copy, it is
+			drawn at two different locations to be both sides).
+
+Basic operation of xdriver:
+--------------------------
+
+X windows can push arrays of bytes to the screen through structures
+called XImages.  An XImage is a structure describing an offscreen bitmap.
+For efficiency of page flipping, KEGS maintains separate bitmaps for the
+two lores/text screens, the two hires screens, and the superhires screen.
+It also maintains bitmaps for the border.  For MIT-SHM to work, X
+requires a unique XImage for each bitmap, and the bitmap must be allocated
+within xdriver.c since it must be obtained through an shmat() call.
+The X code also has non-MIT-SHM code which allocates the data_* buffers
+just through malloc().
+
+All bitmaps are 8-bits of Pseudo-color.  The color arrays are managed
+through the update_color_array() and update_physical_colormap() routines.
+KEGS manages all 256 colors in the colormap as 16 palettes of 16 colors.
+One of the palettes is reserved for the 16 lores colors, and is
+indicated by the variable g_a2vid_palette.  It defaults to 0xe.
+Update_color_array() is called to update superhires colormap entries.
+Update_color_array must not update colors corresponding to g_a2vid_palette.
+Update_physical_colormap() pushes the color array managed by
+update_color_array() to the screen, but first forces the lores colors into
+the g_a2vid_palette palette.  g_installed_full_superhires_colormap is
+always false in KEGS for now.  video.c calls update_color_array and changes
+g_a2vid_palette.  No xdriver routines gets notified when g_a2vid_palette
+changes, so update_physical_colormap must handle the case where
+g_a2vid_palette might have changed since it was last called.
+
+x_redraw_ximage():
+Routines in video.c are free to draw into the corresponding data_*
+arrays to change any byte at any time.  video.c manages remembering
+which lines need to be redrawn and which parts of the screen are in
+which video mode via the a2_line_* arrays.
+
+KEGS divides the video screen up into 25 groups, corresponding to each
+text line.  Each of these groups consists of 16 sublines.  25*8 = 400 lines.
+(video.c has already doubled the vertical resolution in all video modes).
+KEGS can allow any group to be from any of the five screens it manages:
+The two text/lores pages, the two hires pages, and the superhires screen.
+For each group, KEGS keeps track of what part of it needs to be redrawn.
+g_a2_screen_buffer_changed has a bit set for each group which has changed
+since the last call to x_redraw_ximage().  The rightmost bit (bit 0)
+corresponds to group 0.  If g_a2_screen_buffer_changed == 0, no groups
+need to be redrawn.  x_redraw_ximage clears out g_a2_screen_buffer_changed
+after drawing the screen.
+
+For each group, a2_line_left_edge[] and a2_line_right_edge give the pixel
+offsets of what should be redrawn.  a2_line_xim[] gives the ximage handle
+of what needs to be redrawn.  KEGS always redraws 8 verticals of a group.
+g_full_refresh_needed also has one bit set in it for each group, which
+indicates overriding the a2_line_*_edge functions and redraw from 0 to
+640 pixels of each group that needs to be redrawn.  x_redraw_ximage()
+interprets this information now using a simple algorithm: Skip over
+groups which have not changed (using g_a2_screen_buffer_changed).
+Save the ximage of this group, the left pixel and the right pixel.
+Continue with the next group if it has changed.  Widen the pixel region
+and keep sucking up new groups to the same ximage.  At group 25, or
+when the ximage changes, call x_refresh_lines to redraw this large
+rectangle from this ximage.  x_refresh_lines() knows the ximage
+corresponding to the border for the last group has to be handled
+specially since the border group is not 640*400 pixels like the others.
+
+Other porting info:
+a2_key_to_xsym[][3] contains the mapping function from X keysyms to
+a2 keycodes.  The first element is the a2 keycode, the second element
+is the unshifted X keysym, and the third element is the shifted keysym.
+A port must make the conversion to a2 keycodes, and provide up and
+down events.
+

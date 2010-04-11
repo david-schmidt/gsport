@@ -1,0 +1,20 @@
+
+TARGET = gsportx
+OBJECTS = $(OBJECTS1) xdriver.o
+CC = gcc
+CCOPTS = -O
+OPTS =  -DNDEBUG -DSOLARIS -DKEGS_LITTLE_ENDIAN -DSOLARISSOUND
+SUFFIX =
+NAME = gsportx
+LDFLAGS =
+LDOPTS =
+LD = $(CC)
+EXTRA_LIBS = -lXext -lX11 -lsocket -lnsl
+EXTRA_SPECIALS =
+
+AS = cc
+PERL = perl
+
+XOPTS = -I/usr/X/include
+XLIBS = -L/usr/X/lib
+

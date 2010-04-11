@@ -1,0 +1,130 @@
+/*
+ GSport - an Apple //gs Emulator
+ Copyright (C) 2010 by GSport contributors
+ 
+ Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
+
+ This program is free software; you can redistribute it and/or modify it 
+ under the terms of the GNU General Public License as published by the 
+ Free Software Foundation; either version 2 of the License, or (at your 
+ option) any later version.
+
+ This program is distributed in the hope that it will be useful, but 
+ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ for more details.
+
+ You should have received a copy of the GNU General Public License along 
+ with this program; if not, write to the Free Software Foundation, Inc., 
+ 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
+#include <windows.h>
+#include "winresource.h"
+
+// $Id: $
+
+#ifndef IDC_STATIC
+#define IDC_STATIC (-1)
+#endif
+
+IDD_DLG_DISKCONF DIALOGEX 0, 0, 268, 182
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Disk Configuration"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,150,161,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,203,161,50,14
+    LTEXT           "S5D1",IDC_STATIC,19,46,19,8
+    EDITTEXT        IDC_EDIT_S5D1,43,42,156,14,ES_AUTOHSCROLL,
+                    WS_EX_ACCEPTFILES
+    PUSHBUTTON      "Browse",IDC_BTN_S5D1,203,42,50,14
+    LTEXT           "S5D2",IDC_STATIC,19,62,19,8
+    EDITTEXT        IDC_EDIT_S5D2,43,60,155,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BTN_S5D2,203,60,50,14
+    LTEXT           "S6D1",IDC_STATIC,19,80,19,8
+    EDITTEXT        IDC_EDIT_S6D1,43,77,156,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BTN_S6D1,203,77,50,14
+    LTEXT           "S6D2",IDC_STATIC,19,98,19,8
+    EDITTEXT        IDC_EDIT_S6D2,43,95,156,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BTN_S6D2,203,96,50,14
+    LTEXT           "S7D1",IDC_STATIC,19,118,19,8
+    EDITTEXT        IDC_EDIT_S7D1,43,115,155,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BTN_S7D1,203,115,50,14
+    LTEXT           "S7D2",IDC_STATIC,19,137,19,8
+    EDITTEXT        IDC_EDIT_S7D2,43,135,155,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse",IDC_BTN_S7D2,203,135,50,14
+    GROUPBOX        "Disk settings",IDC_STATIC,7,7,254,148
+    LTEXT           "Configure your disk images for each drive.  Disk image formats supported\nare *.2MG,*.PO and *.DSK.  ",
+                    IDC_STATIC,19,20,234,16
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDC_KEGS32 MENU DISCARDABLE 
+BEGIN
+    POPUP "&Emulator"
+    BEGIN
+        MENUITEM "&Set Disk Configuration\tALT-F1", ID_FILE_DISK
+        MENUITEM "Send CTRL Open-Apple Reset\tCTRL-ALT-BREAK", 
+                                                ID_FILE_SENDRESET
+        MENUITEM "Toggle &Joystick",            ID_FILE_JOYSTICK
+        MENUITEM "Toggle Debug Statistics",     ID_FILE_DEBUGSTAT
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tALT-F4",               ID_FILE_EXIT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",                      ID_HELP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_TOOLBAR             BITMAP  DISCARDABLE     "wintoolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_ACCEL ACCELERATORS DISCARDABLE 
+BEGIN
+    VK_F1,          ID_FILE_DISK,           VIRTKEY, ALT, NOINVERT
+    VK_F4,          ID_FILE_EXIT,           VIRTKEY, ALT, NOINVERT
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDC_KEGS32              ICON    DISCARDABLE     "win32.ico"
+KEGS32_ICON             ICON    DISCARDABLE     "win32.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUT_DIALOG DIALOG DISCARDABLE  0, 0, 207, 82
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,78,61,50,14
+    LTEXT           "KEGS32: GS Emulator.\nBased on KEGS by Kent Dickey\nWindows Port by Chea Chee Keong\n\nThis software is free for non-commercial use.",
+                    IDC_STATIC,38,7,162,45,NOT WS_GROUP
+    ICON            "KEGS32_ICON",IDC_STATIC,7,7,21,20,0
+END
+
+

@@ -1,0 +1,31 @@
+#!/usr/local/bin/perl -w
+
+# $KmKId: make_inst,v 1.5 2002-11-07 08:18:16-08 kadickey Exp $
+
+$is_c = shift;
+$repl = shift;
+
+$count = 0;
+
+while(<>) {
+	$line = $_;
+	if(/^inst(..)_SYM(.*)$/) {
+		if($is_c eq "c") {
+			if($count > 0) {
+				printf("\tbreak;\n");
+			}
+			print "case 0x$1:	$2\n";
+			$count++;
+		} else {
+			print "\t.align\t8\n";
+			print "inst" . "$1" . "_$repl" . "$2\n";
+		}
+	} elsif(/^(.*)_SYM(.*)$/) {
+		print "$1" . "_$repl" . "$2\n";
+	} else {
+		print $line;
+	}
+}
+#	if(/^inst(..)_SYM		(.*)$/) {
+#		print "OPCODE($1)	/* $2 */\n";
+#	} else if(/^(

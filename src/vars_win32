@@ -1,0 +1,10 @@
+
+TARGET = gsportwin.exe
+OBJECTS = $(OBJECTS1) win32snd_driver.o windriver.o
+CCOPTS = -O2 -DKEGS_LITTLE_ENDIAN
+SUFFIX = ".exe"
+NAME = gsportwin
+
+XOPTS = -Wall -fomit-frame-pointer -march=pentium
+XLIBS =
+

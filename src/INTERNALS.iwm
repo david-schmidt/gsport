@@ -1,0 +1,239 @@
+
+KEGS's Apple //gs IWM emulation routines.
+
+The IWM code does 5.25" and 3.5" reads & writes, and updates the Unix disk
+image on writes.  It is also nearly cycle-accurate--Let me know if you
+have a program which can detect it's not a real Apple II.  There are
+a few 5.25" features missing (No 1/4 or 1/2 tracks, no support for Unix nibble
+images, limited disk switching), but what's there is pretty accurate.
+The low-level code support 1/4 and 1/2 tracks--it's the arm movement
+and image-handling routines which don't.  And lack of Unix nibble images
+are also due to lack of higher-level routines to make those features work.
+
+How my disk emulation works: The routines have a nibblized image of each
+track of each drive (two 5.25" and two 3.5" drives are supported) in memory.
+The nibble images are declared as arrays, but it could be made to use
+more dynamic memory allocation.
+
+Each track's data format is a series of two-byte pairs.  The first byte
+of the pair is the number of bits in this disk byte, and the second byte
+is the value.  So a size of 8 is normal.  A size of 10 means that there
+are 2 sync bits written before this byte on the disk.  So for 5.25" disk
+accesses, 40 cycles need to pass in the simulator before providing a
+valid nibble.  Partial nibbles are correctly formed if a read happens
+too early (this actually makes things slower, but is required if you
+want to make nibble copiers work).  Similarly, writing to the disk
+watches timing carefully to write out the correct number of bits per
+disk byte.  These routines will definitely test out your emulator's cycle
+counting ability.
+
+If a long delay occurs between a read (or a write) the routines skips
+the correct number of bits to return the correctly formed disk byte.
+After a long delay, for efficiency, I always return a full disk byte,
+instead of a partial one, even if the timing would put it in the middle
+of a disk byte.
+
+The arm stepping is really lame.  I will clean it up soon.
+
+Smartport support is sufficient to claim that there are no smartport
+devices.  This is necessary since the ROM tries to see if there are
+smartport devices at power-on.
+
+I tested my 5.25" drive routines on EDD, which could correctly measure
+drive speed and other disk factors.  I also nibble-copied some disks,
+which also worked fine.  I tested the 3.5" routines using Copy II+,
+which successfully nibble-copied several disks.
+
+
+Code description:
+
+Most code is in iwm.c, with some defines in iwm.h, and some stuff in
+iwm_35_525.h.
+
+Code only supports DOS3.3 ordered 5.25" images now, and ProDOS-ordered 3.5"
+images.  Well, the code supports ProDOS-order 5.25" also, but has no
+mechanism to tell it an image is prodos-order yet.  :-)
+
+Iwm state is encoded in the Iwm structure.
+
+	drive525[2]: Disk structure for each 5.25" disk
+	drive35[2]: Disk structure for each 3.5" disk
+	smarport[32]: Disk structure for each "smartport" device emulated
+		via slot 7 (this code not included)
+	motor_on:  True if IWM motor_on signal (c0e9) is asserted.  Some
+		drive is on.
+	motor_off: True if motor has been turned off in software, but the
+			1 second timeout has not expired yet.
+	motor_on35: True if 3.5" motor is on (controlled differently than
+			5.25" c0e9).
+	motor_off_vbl_count:  VBL count to turn motor off.
+	head35, step_direction35: 3.5" controls, useless.
+	iwm_phase[4]: Has '1' for each 5.25" phase that is on.
+	iwm_mode:	IWM mode register.
+	drive_select: 0 = drive 1, 1 = drive 2.
+	q6, q7:	IWM q6, q7 registers.
+	enable2:	Smartport /ENABLE2 asserted.
+	reset:		Smartport /RESET asserted.
+	previous_write_val: Partial write value.
+	previous_write_bits: How many bits are valid in previous_write_val.
+
+Each disk (3.5" and 5.25") is encoded in the Disk struct:
+	fd:	Unix file descriptor.  If < 0, no disk.
+	name_ptr: Unix file name for this disk.
+	image_start: offset from beginning of file for this partition.
+	image_size: size of this partition.
+	smartport: 1 if this is a smartport image, 0 if it is 5.25" or 3.5"
+	disk_525: 1 if this is a 5.25" image, 0 if it is 3.5"
+	drive: 0 = drive 1, 1 = drive 2.
+	cur_qtr_track:	Current qtr track.  So track 1 == qtr_track 4.
+		For 3.5", cur_qtr_track encodes the side also, so track 3
+		side 1 would be qtr_track 7.
+	prodos_order:	True if Unix image is ProDOS order.
+	vol_num:	DOS3.3 volume number to use.  Always 254.
+	write_prot:	True if disk is write protected.
+	write_through_to_unix: True if writes should be passed through to
+			the unix image.  If this is false, you can write
+			to the image in memory, but it won't get reflected
+			into the Unix file.  If you create a non-DOS3.3
+			or ProDOS format image, it automatically sets this
+			false.
+	disk_dirty:	Some track has dirty data that need to be flushed.
+	just_ejected:	Ejection flag.
+	dcycs_last_read: Cycle count of last disk data register access.
+	last_phase:	Phase number last accessed.
+	nib_pos:	Nibble offset ptr--points to a byte.
+	num_tracks:	Number of tracks: 140 for 5.25" and 160 for 3.5"
+	track[MAX_TRACKS]: nibble image of all possible tracks.
+
+Each track is represented by the Track structure:
+	track_dirty:	Contains data that needs to be written back to
+			the Unix image file.
+	overflow_size:	Count of overflow bits, used in writing.
+	track_len:	Number of nibbles on this track.
+	dsk:		Handy pointer to parent Disk structure.
+	nib_area[]:	ptr to memory containing pairs of [size,data],
+			encoding disk data bytes.
+	pad1:		If the structure is 32 bytes long, some array
+			indexing is done better by my compiler.
+
+
+Externally callable routines:
+iwm_init():	Init various data structures at simulation start.
+iwm_reset():	Called at Apple //gs reset time.
+iwm_vbl_update():	Called every VBL (60 Hz) period.  Used to turn motor
+			off, and flush out dirty data.
+			g_vbl_count is the count of VBL ticks (so it counts
+			at 60 times a second).
+iwm_read_c0ec(double dcycs): Optimized routine to handle reading $C0EC
+		faster.  Exactly the same as read_iwm(0xc, dcycs);
+read_iwm(loc, dcycs):
+		Read from 0xc0e0 + loc.  Loc is between 0x0 and 0xf.
+		Dcycs is an artifact from my simulator.  Dcycs is a
+		double holding the number of Apple //gs cycles since the
+		emulator started.  Dcycs always counts at 1.024MHz.  If
+		you are running at 2.5MHz, it increments by 0.4 every
+		"cycle".  This is a very convenient timing strategy.  It
+		also allows emulating the delay caused by synchronizing
+		the fast part of a real Apple //gs with slow memory,
+		which means my emulator knows that reading softswitches
+		takes longer than reading fast memory.
+write_iwm(int loc, int val, double dcycs):
+	Write to 0xc0e0 + loc.  Just like read_iwm, but write "val" into
+	loc.
+
+
+Tricky routines:
+
+IWM_READ_ROUT():	called by read_iwm() if q6,q7 = 0,0.
+		This is actually in the file iwm_35_525.h.  This is so I
+		write the basic code once for 5.25" and 3.5" disk reads,
+		but then include the file with some macros set to create
+		the correct function optimized for 5.25" or 3.5"
+		accesses.  The function for 5.25" is called
+		iwm_read_data_525, and iwm_read_data_35 for 3.5".
+		Returns next disk byte.
+		Takes three arguments: ptr to the Disk structure for
+		the active drive, fast_disk_emul, and dcycs.  dcycs is
+		so that it can see how many cycles have passed since
+		the last read (stored in dsk->dcycs_last_read).
+		16.0 dcycs need to pass for an 8 bit nibble for 3.5"
+		accesses, and 32.0 dcycs for an 8 bit nibble for 5.25".
+		Fast_disk_emul == 1 says don't mess around with accuracy,
+		and always return the next fully-formed nibble.
+		There is a lot of complexity in this routine.  All IWM
+		routines must skip over nibbles (stored as byte pairs in
+		dsk->nib_area[]) which have a size of 0 (special padding
+		trick, described later).  It then determines how much
+		time has passed, and so how many bits are valid.
+		If too many bits have gone by (11 cycs is almost 3 5.25"
+		bit times, which is about the nibble valid time in 
+		the Apple //gs IWM hardware latch), it tries to skip
+		to the correct position.
+		Handles IWM latch mode for 3.5" or 5.25" accesses.  If a
+		partial read is indicated, it ensures that the high bit
+		is clear by shifting the nibble to the right
+		appropriately.  Again, nib_area[] is an array of bytes,
+		which are treated as pairs.  Byte 0 = size, byte 1 =
+		disk nibble.
+
+IWM_WRITE_ROUT():	called by write_iwm() if q6,q7 = 1,1.
+		Similar to above.  Handles async and sync mode writes.
+		Handles partial writes.  Handles the ROM writing
+		0xff, 0x3f, 0xcf, 0xf3, 0xfc to be four 10-bit nibbles.
+		Routine disk_nib_out(dsk, val, bits_read) does the
+		actual work of merging the bits into the track image.
+
+disk_nib_out():	called by IWM_WRITE_ROUTE() and iwm_nibblize_track_*().
+		Writes byte into nib_area[].  If size > 10, makes it 10.
+		If high order bit not set, it sets it (makes certain routines
+		in EDD happy).
+
+overflow_size:
+		Writing to the disk creates some problems.  I need to
+		maintain 2 things at all times on the track:	
+			1) Constant number of bits for the entire track.
+			2) know where each synchronized byte starts on
+				the track.
+		If the track was just stored as raw bits, then correctly
+		simulating a delay of 300*4 cycles is tough, since it has to
+		be done by reading through all 300 bits on the track,
+		so that we keep in sync with where bytes really start.
+		But if you just store the bytes themselves, then sync
+		bytes look like every other byte.  And if you now add
+		the size field, you have a situation where a track could
+		gain or lose bits when rewritten.  Here's the case:
+		Assume the track contains:  10,ff 10,ff 10,ff 10,ff.
+		(That is 4 self-sync disk bytes of 10 bits each).
+		If we rewrite that area of the track with 'D5 AA 96 FF',
+		where each byte is 8 bits, we would have:
+		8,D5 8,AA, 8,96, 8,FF.
+		Looks OK, but we just lost 8 bits!  The original 4 nibbles
+		were using 40 bits of space on the disk.  Our new 4 nibbles
+		are using 32 bits.  8 bits are lost.
+		Solution: log these missing bits via overflow_size.
+		When writing, if overflow_size gets > 8, force out a 0,0
+		nibble.  So sync bytes get written as:
+		10,FF 10,FF 10,FF 10,FF 0,0 10,FF 10,FF 10,FF 10,FF, 0,0.
+		So when they get re-written with 8,xx, we don't lose any
+		bytes on the disk.
+
+		Unfortunately, it doesn't quite work that easily, and bits
+		can still be lost when sync fields are partially overwritten.
+		This happens when all the 0,0's end up in a place on the
+		track where few overwrites occur, but other sync bytes
+		are being turned into 8,xx.  So overflow_size goes negative,
+		saying we've got too much on the track.
+		The code prints an error when it gains more than 64 bits.
+		If someone can come up with a better scheme, I'd love to
+		hear it.  A partial solution would be to have a routine
+		re-space the track to spread the needed 0,0's around
+		a little better when overflow_size gets too negative.
+
+
+In iwm_nibblize_track_35(), the comments with hex numbers correspond
+to the ROM 01 addresses which I disassembled to determine the checksum
+algorithm.  The code is not well written--it's basically hand-translated
+65816 assembly code.  I'll clean it up someday.
+
+Much of the code is not well-optimized.  I'll get to that someday, but
+the speed has been adequate for me so far.

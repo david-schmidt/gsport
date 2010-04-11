@@ -1,0 +1,169 @@
+<?xml version="1.0" standalone="yes"?>
+<object class="NSIBObjectData">
+  <string name="targetFramework">IBCarbonFramework</string>
+  <object name="rootObject" class="NSCustomObject" id="1">
+    <string name="customClass">NSApplication</string>
+  </object>
+  <array count="18" name="allObjects">
+    <object class="IBCarbonMenu" id="29">
+      <string name="title">main</string>
+      <array count="3" name="items">
+        <object class="IBCarbonMenuItem" id="185">
+          <string name="title">GSPORTMAC</string>
+          <object name="submenu" class="IBCarbonMenu" id="184">
+            <string name="title">GSPORTMAC</string>
+            <array count="3" name="items">
+              <object class="IBCarbonMenuItem" id="187">
+                <string name="title">About GSPORTMAC</string>
+                <int name="keyEquivalentModifier">0</int>
+                <ostype name="command">abou</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="199">
+                <boolean name="separator">TRUE</boolean>
+              </object>
+              <object class="IBCarbonMenuItem" id="198">
+                <string name="title">Quit</string>
+                <int name="keyEquivalentModifier">0</int>
+                <ostype name="command">quit</ostype>
+              </object>
+            </array>
+            <string name="name">_NSAppleMenu</string>
+          </object>
+        </object>
+        <object class="IBCarbonMenuItem" id="127">
+          <string name="title">File</string>
+          <object name="submenu" class="IBCarbonMenu" id="131">
+            <string name="title">File</string>
+            <array count="1" name="items">
+              <object class="IBCarbonMenuItem" id="200">
+                <string name="title">Configuration     F4</string>
+                <int name="keyEquivalentModifier">0</int>
+                <ostype name="command">KCFG</ostype>
+                <string name="helpTagText">Enter GSport Configuration Panel</string>
+              </object>
+            </array>
+          </object>
+        </object>
+        <object class="IBCarbonMenuItem" id="192">
+          <string name="title">Window</string>
+          <object name="submenu" class="IBCarbonMenu" id="195">
+            <string name="title">Window</string>
+            <array count="6" name="items">
+              <object class="IBCarbonMenuItem" id="197">
+                <string name="title">Zoom Window</string>
+                <ostype name="command">zoom</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="190">
+                <boolean name="dynamic">TRUE</boolean>
+                <string name="title">Minimize Window</string>
+                <int name="keyEquivalentModifier">0</int>
+                <ostype name="command">mini</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="191">
+                <boolean name="dynamic">TRUE</boolean>
+                <string name="title">Minimize All Windows</string>
+                <int name="keyEquivalentModifier">0</int>
+                <ostype name="command">mina</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="194">
+                <boolean name="separator">TRUE</boolean>
+              </object>
+              <object class="IBCarbonMenuItem" id="196">
+                <boolean name="dynamic">TRUE</boolean>
+                <string name="title">Bring All to Front</string>
+                <ostype name="command">bfrt</ostype>
+              </object>
+              <object class="IBCarbonMenuItem" id="193">
+                <boolean name="dynamic">TRUE</boolean>
+                <string name="title">Arrange in Front</string>
+                <int name="keyEquivalentModifier">1572864</int>
+                <ostype name="command">frnt</ostype>
+              </object>
+            </array>
+            <string name="name">_NSWindowsMenu</string>
+          </object>
+        </object>
+      </array>
+      <string name="name">_NSMainMenu</string>
+    </object>
+    <reference idRef="127"/>
+    <reference idRef="131"/>
+    <object class="IBCarbonMenuItem" id="153">
+      <string name="title">Window</string>
+      <object name="submenu" class="IBCarbonMenu">
+        <string name="title">Window</string>
+        <array count="5" name="items">
+          <object class="IBCarbonMenuItem">
+            <boolean name="dynamic">TRUE</boolean>
+            <string name="title">Minimize Window</string>
+            <string name="keyEquivalent">m</string>
+            <ostype name="command">mini</ostype>
+          </object>
+          <object class="IBCarbonMenuItem">
+            <boolean name="dynamic">TRUE</boolean>
+            <string name="title">Minimize All Windows</string>
+            <string name="keyEquivalent">m</string>
+            <int name="keyEquivalentModifier">1572864</int>
+            <ostype name="command">mini</ostype>
+          </object>
+          <object class="IBCarbonMenuItem">
+            <boolean name="separator">TRUE</boolean>
+          </object>
+          <object class="IBCarbonMenuItem">
+            <boolean name="dynamic">TRUE</boolean>
+            <string name="title">Bring All to Front</string>
+            <ostype name="command">frnt</ostype>
+          </object>
+          <object class="IBCarbonMenuItem">
+            <boolean name="dynamic">TRUE</boolean>
+            <string name="title">Bring in Front</string>
+            <int name="keyEquivalentModifier">1572864</int>
+            <ostype name="command">frnt</ostype>
+          </object>
+        </array>
+        <string name="name">_NSWindowsMenu</string>
+      </object>
+    </object>
+    <reference idRef="184"/>
+    <reference idRef="185"/>
+    <reference idRef="187"/>
+    <reference idRef="190"/>
+    <reference idRef="191"/>
+    <reference idRef="192"/>
+    <reference idRef="193"/>
+    <reference idRef="194"/>
+    <reference idRef="195"/>
+    <reference idRef="196"/>
+    <reference idRef="197"/>
+    <reference idRef="198"/>
+    <reference idRef="199"/>
+    <reference idRef="200"/>
+  </array>
+  <array count="18" name="allParents">
+    <reference idRef="1"/>
+    <reference idRef="29"/>
+    <reference idRef="127"/>
+    <reference idRef="29"/>
+    <reference idRef="185"/>
+    <reference idRef="29"/>
+    <reference idRef="184"/>
+    <reference idRef="195"/>
+    <reference idRef="195"/>
+    <reference idRef="29"/>
+    <reference idRef="195"/>
+    <reference idRef="195"/>
+    <reference idRef="192"/>
+    <reference idRef="195"/>
+    <reference idRef="195"/>
+    <reference idRef="184"/>
+    <reference idRef="184"/>
+    <reference idRef="131"/>
+  </array>
+  <dictionary count="2" name="nameTable">
+    <string>Files Owner</string>
+    <reference idRef="1"/>
+    <string>MenuBar</string>
+    <reference idRef="29"/>
+  </dictionary>
+  <unsigned_int name="nextObjectID">201</unsigned_int>
+</object>
