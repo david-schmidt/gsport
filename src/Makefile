@@ -23,35 +23,39 @@ specials_clean:
 
 
 # Mac builds:
-kegsmac: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) -arch ppc $(OBJECTS) compile_time.o $(LDFLAGS) -o kegsmac $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
-	mkdir -p ../KEGSMAC.app/Contents/Resources/English.lproj/main.nib
-	mkdir -p ../KEGSMAC.app/Contents/MacOS
-	mv kegsmac ../KEGSMAC.app/Contents/MacOS/KEGSMAC
-	echo "APPL????" > ../KEGSMAC.app/Contents/PkgInfo
-	cp -f Info.plist ../KEGSMAC.app/Contents/
-	cp -f info.nib ../KEGSMAC.app/Contents/Resources/English.lproj/main.nib
-	cp -f classes.nib ../KEGSMAC.app/Contents/Resources/English.lproj/main.nib
-	cp -f objects.xib ../KEGSMAC.app/Contents/Resources/English.lproj/main.nib
-	cp -f kegsicon.icns ../KEGSMAC.app/Contents/Resources/
-	cp -f 525.icns ../KEGSMAC.app/Contents/Resources/
-	cp -f 2mg.icns ../KEGSMAC.app/Contents/Resources/
-	touch '../KEGSMAC.app/Icon?'
+gsportmac: $(OBJECTS) compile_time.o
+	$(CC) $(CCOPTS) $(LDOPTS) -arch ppc $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
+	mkdir -p ../GSPORT.app/Contents/Resources/English.lproj/main.nib
+	mkdir -p ../GSPORT.app/Contents/MacOS
+	mv gsport ../GSPORT.app/Contents/MacOS/GSPORTMAC
+	echo "APPL????" > ../GSPORT.app/Contents/PkgInfo
+	cp -f Info.plist ../GSPORT.app/Contents/
+	cp -f info.nib ../GSPORT.app/Contents/Resources/English.lproj/main.nib
+	cp -f classes.nib ../GSPORT.app/Contents/Resources/English.lproj/main.nib
+	cp -f objects.xib ../GSPORT.app/Contents/Resources/English.lproj/main.nib
+	cp -f kegsicon.icns ../GSPORT.app/Contents/Resources/
+	cp -f 525.icns ../GSPORT.app/Contents/Resources/
+	cp -f 2mg.icns ../GSPORT.app/Contents/Resources/
+	touch '../GSPORT.app/Icon?'
+	cp -f ../config.template ../config.txt 
 
 # Linux for X builds:
-xkegs: $(OBJECTS) compile_time.o
+gsportx: $(OBJECTS) compile_time.o
 	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11
-	mv xkegs ..
+	mv gsportx ..
+	cp -f ../config.template ../config.txt 
 
 # Cygwin for X builds:
-kegs.exe: $(OBJECTS) compile_time.o
+gsport.exe: $(OBJECTS) compile_time.o
 	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lXext -lX11 -lm
-	mv kegs.exe ..
+	mv gsport.exe ..
+	cp -f ../config.template ../config.txt 
 
 # Mingw32 (native windows) builds:
-kegswin.exe: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lcomdlg32 -lws2_32
+gsportwin.exe: $(OBJECTS) compile_time.o
+	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32
 	mv $(NAME)$(SUFFIX) ..
+	cp -f ../config.template ../config.txt 
 
 
 8inst_c.h: instable.h
