@@ -24,6 +24,10 @@
 #include "config.h"
 #include <dirent.h>
 
+#ifdef HAVE_TFE
+#include "protos_tfe.h" 
+#endif
+
 #if defined (WIN32) || (WIN64)
 #define snprintf _snprintf
 typedef unsigned int mode_t;

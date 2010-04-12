@@ -39,6 +39,8 @@
 #include "../defc.h"
 #include "tfesupp.h"
 
+#include "types.h"
+#include "../protos_tfe.h"
 
 /**/
 

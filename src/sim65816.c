@@ -26,6 +26,9 @@ const char rcsid_sim65816_c[] = "@(#)$KmKId: sim65816.c,v 1.367 2004-11-22 02:39
 #define INCLUDE_RCSID_C
 #include "defc.h"
 #undef INCLUDE_RCSID_C
+#ifdef HAVE_TFE
+  #include "protos_tfe.h" 
+#endif
 #ifdef HAVE_PARALLEL
   #include "printer.h"
 #endif

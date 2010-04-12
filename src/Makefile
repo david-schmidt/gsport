@@ -5,6 +5,8 @@ OBJECTS1 = adb.o clock.o config.o dis.o engine_c.o scc.o iwm.o \
 	sound.o sound_driver.o video.o scc_socket_driver.o scc_windriver.o \
 	scc_macdriver.o
 
+OBJECTS2 = tfe/tfe.o tfe/tfesupp.o tfe/arch/win32/tfearch.o
+
 include vars
 
 .SUFFIXES: .dep .proto
