@@ -41,6 +41,13 @@
 
 extern FILE*      g_fh;				// Filehandle for log file
 
-// Moved to protos.h
+extern void *lib_malloc(size_t size);
+extern void *lib_realloc(void *p, size_t size);
+extern void lib_free(void *ptr);
+extern char *lib_stralloc(const char *str);
+
+extern int util_string_set(char **str, const char *new_value);
+
+extern unsigned long crc32_buf(const char *buffer, unsigned int len);
 
 #endif

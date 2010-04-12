@@ -3,6 +3,7 @@
  *
  * Written by
  *  Spiro Trikaliotis <Spiro.Trikaliotis@gmx.de>
+ *  Christian Vogelgsang <chris@vogelgsang.org>
  * 
  * This file is part of VICE, the Versatile Commodore Emulator.
  * See README for copyright notice.
@@ -25,37 +26,34 @@
  */
 
 
-#include "tfe/types.h"
-#include "tfe/uilib.h"
-#include <winsock.h>
-#include <winsock2.h>
 
 
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #ifdef DOS_TFE
 #include <pcap.h>
 #endif
 
-#include "defc.h"
+#include "..\defc.h"
+#include "tfesupp.h"
 
-#include "tfe/tfe_protos.h"
-
-#include "tfe/tfe.h"
-#include "tfe/tfearch.h"
-#include "tfe/tfesupp.h"
 
 /**/
-/** #define TFE_DEBUG_DUMP 1 **/
 
-/* #define TFE_DEBUG_FRAMES - might be defined in TFE.H! */
+/* warn illegal behaviour */
+/* #define TFE_DEBUG_WARN_REG 1 */   /* warn about invalid register accesses */
+/* #define TFE_DEBUG_WARN_RXTX 1 */  /* warn about invalid rx or tx conditions */
 
-#define TFE_DEBUG_WARN 1 /* this should not be deactivated */
-#define TFE_DEBUG_INIT 1
-#define TFE_DEBUG 1
-
-/** #define TFE_DEBUG_LOAD 1 **/
-/** #define TFE_DEBUG_STORE 1 **/
-/**/
+/** #define TFE_DEBUG_INIT 1  **/
+/** #define TFE_DEBUG_LOAD 1  **/          /* enable to see tfe port reads */
+/** #define TFE_DEBUG_STORE 1 **/          /* enable to see tfe port writes */
+/** #define TFE_DEBUG_REGISTERS 1 **/      /* enable to see CS8900a register I/O */
+/** #define TFE_DEBUG_IGNORE_RXEVENT 1 **/ /* enable to ignore RXEVENT in DEBUG_REGISTERS */
+/** #define TFE_DEBUG_RXTX_STATE 1 **/     /* enable to see tranceiver state changes */
+/** #define TFE_DEBUG_RXTX_DATA 1 **/      /* enable to see data in/out flow */
+/** #define TFE_DEBUG_FRAMES 1 **/         /* enable to see arch frame send/recv */
 
 /* ------------------------------------------------------------------------- */
 /*    variables needed                                                       */
@@ -65,31 +63,30 @@
  because tfe_init() is not yet called
 */
 static int should_activate = 0;
-
-
 static int init_tfe_flag = 0;
+typedef signed int log_t;
+#define LOG_ERR     ((log_t)-1)
+#define LOG_DEFAULT ((log_t)-2)
+
+static log_t tfe_log = LOG_ERR;
+
 
 /* status which received packages to accept 
    This is used in tfe_should_accept().
 */
-static BYTE  tfe_ia_mac[6];
+static byte  tfe_ia_mac[6] = { 0,0,0,0,0,0 };
 
 /* remember the value of the hash mask */
 static DWORD tfe_hash_mask[2];
 
+/* reveiver setup */
+static word16 tfe_recv_control     = 0; /* copy of CC_RXCTL (contains all bits below) */
 static int  tfe_recv_broadcast   = 0; /* broadcast */
 static int  tfe_recv_mac         = 0; /* individual address (IA) */
 static int  tfe_recv_multicast   = 0; /* multicast if address passes the hash filter */
 static int  tfe_recv_correct     = 0; /* accept correct frames */
 static int  tfe_recv_promiscuous = 0; /* promiscuous mode */
 static int  tfe_recv_hashfilter  = 0; /* accept if IA passes the hash filter */
-
-
-#ifdef TFE_DEBUG_WARN
-/* remember if the TXCMD has been completed before a new one is issued */
-static int tfe_started_tx       = 0;
-#endif
-
 
 /* Flag: Can we even use TFE, or is the hardware not available? */
 static int tfe_cannot_use = 0;
@@ -98,9 +95,9 @@ static int tfe_cannot_use = 0;
 int tfe_enabled = 0;
 
 /* Flag: Do we use the "original" memory map or the memory map of the RR-Net? */
-//static int tfe_as_rr_net = 0;
+int tfe_as_rr_net = 0;
 
-char *tfe_interface = NULL;
+static char *tfe_interface = NULL;
 
 /* TFE registers */
 /* these are the 8 16-bit-ports for "I/O space configuration"
@@ -111,16 +108,16 @@ char *tfe_interface = NULL;
 */
 #define TFE_COUNT_IO_REGISTER 0x10 /* we have 16 I/O register */
 
-static BYTE *tfe = NULL;
+static byte *tfe = NULL;
 /*
-	RW: RXTXDATA   = DE00/DE01
-	RW: RXTXDATA2  = DE02/DE03 (for 32-bit-operation)
-	-W: TXCMD      = DE04/DE05 (TxCMD, Transmit Command)   mapped to PP + 0144 (Reg. 9, Sec. 4.4, page 46)
-	-W: TXLENGTH   = DE06/DE07 (TxLenght, Transmit Length) mapped to PP + 0146 
-	R-: INTSTQUEUE = DE08/DE09 (Interrupt Status Queue)    mapped to PP + 0120 (ISQ, Sec. 5.1, page 78)
-	RW: PP_PTR     = DE0A/DE0B (PacketPage Pointer)        (see. page 75p: Read -011.---- ----.----)
-	RW: PP_DATA0   = DE0C/DE0D (PacketPage Data (Port 0))  
-	RW: PP_DATA1   = DE0E/DE0F (PacketPage Data (Port 1))  (for 32 bit only)
+    RW: RXTXDATA   = DE00/DE01
+    RW: RXTXDATA2  = DE02/DE03 (for 32-bit-operation)
+    -W: TXCMD      = DE04/DE05 (TxCMD, Transmit Command)   mapped to PP + 0144 (Reg. 9, Sec. 4.4, page 46)
+    -W: TXLENGTH   = DE06/DE07 (TxLenght, Transmit Length) mapped to PP + 0146 
+    R-: INTSTQUEUE = DE08/DE09 (Interrupt Status Queue)    mapped to PP + 0120 (ISQ, Sec. 5.1, page 78)
+    RW: PP_PTR     = DE0A/DE0B (PacketPage Pointer)        (see. page 75p: Read -011.---- ----.----)
+    RW: PP_DATA0   = DE0C/DE0D (PacketPage Data (Port 0))  
+    RW: PP_DATA1   = DE0E/DE0F (PacketPage Data (Port 1))  (for 32 bit only)
 */
 
 #define TFE_ADDR_RXTXDATA   0x00 /* RW */
@@ -130,28 +127,28 @@ static BYTE *tfe = NULL;
 #define TFE_ADDR_INTSTQUEUE 0x08 /* R- Interrupt status queue, maps to PP + 0120 */
 #define TFE_ADDR_PP_PTR     0x0a /* RW PacketPage Pointer */
 #define TFE_ADDR_PP_DATA    0x0c /* RW PacketPage Data, Port 0 */
-#define TFE_ADDR_PP_DATA2   0x0e /* RW PacketPage Data, Port 1 - 32 bit only */	
+#define TFE_ADDR_PP_DATA2   0x0e /* RW PacketPage Data, Port 1 - 32 bit only */    
 
 /* Makros for reading and writing the visible TFE register: */
 #define GET_TFE_8(  _xxx_ ) \
-	( assert(_xxx_<TFE_COUNT_IO_REGISTER), \
+    ( assert(_xxx_<TFE_COUNT_IO_REGISTER), \
       tfe[_xxx_]                           \
     )
 
 #define SET_TFE_8( _xxx_, _val_ ) \
-	do { \
-	    assert(_xxx_<TFE_COUNT_IO_REGISTER); \
+    do { \
+        assert(_xxx_<TFE_COUNT_IO_REGISTER); \
         tfe[_xxx_  ] = (_val_     ) & 0xff; \
     } while (0) 
 
 #define GET_TFE_16(  _xxx_ ) \
-	( assert(_xxx_<TFE_COUNT_IO_REGISTER), \
+    ( assert(_xxx_<TFE_COUNT_IO_REGISTER), \
       tfe[_xxx_] | (tfe[_xxx_+1] << 8)     \
     )
 
 #define SET_TFE_16( _xxx_, _val_ ) \
-	do { \
-	    assert(_xxx_<TFE_COUNT_IO_REGISTER); \
+    do { \
+        assert(_xxx_<TFE_COUNT_IO_REGISTER); \
         tfe[_xxx_  ] = (_val_     ) & 0xff; \
         tfe[_xxx_+1] = (_val_ >> 8) & 0xff; \
     } while (0) 
@@ -161,28 +158,28 @@ static BYTE *tfe = NULL;
 
 #define MAX_PACKETPAGE_ARRAY 0x1000 /* 4 KB */
 
-static BYTE *tfe_packetpage = NULL;
+static byte *tfe_packetpage = NULL;
 
-static WORD tfe_packetpage_ptr = 0;
+static word16 tfe_packetpage_ptr = 0;
 
 /* Makros for reading and writing the PacketPage register: */
 
 #define GET_PP_8(  _xxx_ ) \
-	(assert(_xxx_<MAX_PACKETPAGE_ARRAY), \
+    (assert(_xxx_<MAX_PACKETPAGE_ARRAY), \
      tfe_packetpage[_xxx_] \
     )
 
 #define GET_PP_16(  _xxx_ ) \
-	( assert(_xxx_<MAX_PACKETPAGE_ARRAY),   \
+    ( assert(_xxx_<MAX_PACKETPAGE_ARRAY),   \
       assert((_xxx_ & 1) == 0 ),            \
-	  ((WORD)tfe_packetpage[_xxx_]        ) \
-    | ((WORD)tfe_packetpage[_xxx_+1] <<  8) \
+      ((word16)tfe_packetpage[_xxx_]        ) \
+    | ((word16)tfe_packetpage[_xxx_+1] <<  8) \
     )
 
 #define GET_PP_32(  _xxx_ ) \
-	( assert(_xxx_<MAX_PACKETPAGE_ARRAY),     \
+    ( assert(_xxx_<MAX_PACKETPAGE_ARRAY),     \
       assert((_xxx_ & 3) == 0 ),              \
-	  (((long)tfe_packetpage[_xxx_  ])      ) \
+      (((long)tfe_packetpage[_xxx_  ])      ) \
     | (((long)tfe_packetpage[_xxx_+1]) <<  8) \
     | (((long)tfe_packetpage[_xxx_+2]) << 16) \
     | (((long)tfe_packetpage[_xxx_+3]) << 24) \
@@ -190,13 +187,13 @@ static WORD tfe_packetpage_ptr = 0;
 
 #define SET_PP_8( _xxx_, _val_ ) \
     do { \
-	    assert(_xxx_<MAX_PACKETPAGE_ARRAY);           \
+        assert(_xxx_<MAX_PACKETPAGE_ARRAY);           \
         tfe_packetpage[_xxx_  ] = (_val_    ) & 0xFF; \
     } while (0) 
 
 #define SET_PP_16( _xxx_, _val_ ) \
     do { \
-	    assert(_xxx_<MAX_PACKETPAGE_ARRAY);           \
+        assert(_xxx_<MAX_PACKETPAGE_ARRAY);           \
         assert((_xxx_ & 1) == 0 ),                    \
         tfe_packetpage[_xxx_  ] = (_val_    ) & 0xFF; \
         tfe_packetpage[_xxx_+1] = (_val_>> 8) & 0xFF; \
@@ -204,7 +201,7 @@ static WORD tfe_packetpage_ptr = 0;
 
 #define SET_PP_32( _xxx_, _val_ ) \
     do { \
-	    assert(_xxx_<MAX_PACKETPAGE_ARRAY);           \
+        assert(_xxx_<MAX_PACKETPAGE_ARRAY);           \
         assert((_xxx_ & 3) == 0 ),                    \
         tfe_packetpage[_xxx_  ] = (_val_    ) & 0xFF; \
         tfe_packetpage[_xxx_+1] = (_val_>> 8) & 0xFF; \
@@ -275,9 +272,29 @@ static WORD tfe_packetpage_ptr = 0;
 /* ------------------------------------------------------------------------- */
 /*    more variables needed                                                  */
 
-static WORD txcollect_buffer = TFE_PP_ADDR_TX_FRAMELOC;
-static WORD rx_buffer        = TFE_PP_ADDR_RXSTATUS;
+static word16 tx_buffer = TFE_PP_ADDR_TX_FRAMELOC;
+static word16 rx_buffer = TFE_PP_ADDR_RXSTATUS;
 
+static word16 tx_count  = 0;
+static word16 rx_count  = 0;
+static word16 tx_length = 0;
+static word16 rx_length = 0;
+
+#define TFE_TX_IDLE         0
+#define TFE_TX_GOT_CMD      1
+#define TFE_TX_GOT_LEN      2
+#define TFE_TX_READ_BUSST   3
+
+#define TFE_RX_IDLE         0
+#define TFE_RX_GOT_FRAME    1
+
+/* tranceiver state */
+static int tx_state = TFE_TX_IDLE;
+static int rx_state = TFE_RX_IDLE;
+static int tx_enabled = 0;
+static int rx_enabled = 0;
+
+static int rxevent_read_mask = 3; /* set if L and/or H byte was read in RXEVENT? */
 
 
 /* ------------------------------------------------------------------------- */
@@ -297,7 +314,7 @@ static WORD rx_buffer        = TFE_PP_ADDR_RXSTATUS;
 
 static int TfeDebugMaxFrameLengthToDump = 150;
 
-char *debug_outbuffer(const int length, const unsigned char * const buffer)
+static char *debug_outbuffer(const int length, const unsigned char * const buffer)
 {
 #define MAXLEN_DEBUG 1600
 
@@ -322,80 +339,51 @@ char *debug_outbuffer(const int length, const unsigned char * const buffer)
 
 #endif
 
+/* ------------------------------------------------------------------------- */
+/*    initialization and deinitialization functions                          */
 
-#ifdef TFE_DEBUG_DUMP
-
-#define NUMBER_PER_LINE 8
-
-static
-void tfe_debug_output_general( char *what, WORD (*getFunc)(int), int count )
+static void tfe_set_tx_status(int ready,int error)
 {
-    int i;
-    char buffer[7+(6*NUMBER_PER_LINE)+2];
-
-    printf("%s contents:", what );
-    for (i=0; i<count; i += 2*NUMBER_PER_LINE )
-    {
-        int j;
-        char *p = buffer + 7;
-
-        sprintf( buffer, "%04X:  ", i );
-
-        for (j=0; j<NUMBER_PER_LINE; j++) 
-        {
-            sprintf( p, "%04X, ", (*getFunc)(i+j+j) );
-            p += 6;
-        }
-        *p = 0;
-
-        printf("%s", buffer );
+    word16 old_status = GET_PP_16(TFE_PP_ADDR_SE_BUSST);
+    
+    /* mask out TxBidErr and Rdy4TxNOW */
+    word16 new_status = old_status & ~0x180;
+    if(ready)
+        new_status |= 0x100; /* set Rdy4TxNOW */
+    if(error)
+        new_status |= 0x080; /* set TxBidErr */
+    
+    if(new_status!=old_status) {
+        SET_PP_16(TFE_PP_ADDR_SE_BUSST,new_status);
+#ifdef TFE_DEBUG_RXTX_STATE
+        log_message(tfe_log,"TX: set status Rdy4TxNOW=%d TxBidErr=%d",
+                    ready,error);
+#endif
     }
 }
 
-static 
-WORD tfe_debug_output_io_getFunc( int i )
+static void tfe_set_receiver(int enabled)
 {
-    return GET_TFE_16(i);
+    rx_enabled = enabled;
+    rx_state = TFE_RX_IDLE;
+
+    rxevent_read_mask = 3; /* was L or H byte read in RXEVENT? */
 }
 
-static
-void tfe_debug_output_io( void )
+static void tfe_set_transmitter(int enabled)
 {
-    tfe_debug_output_general( "TFE I/O", tfe_debug_output_io_getFunc, TFE_COUNT_IO_REGISTER );
+    tx_enabled = enabled;
+    tx_state = TFE_TX_IDLE;
+    
+    tfe_set_tx_status(0,0);
 }
-#define TFE_DEBUG_OUTPUT_IO() tfe_debug_output_io()
-
-static 
-WORD tfe_debug_output_pp_getFunc( int i )
-{
-    return GET_PP_16(i);
-}
-
-static
-void tfe_debug_output_pp( void )
-{
-    tfe_debug_output_general( "PacketPage", tfe_debug_output_pp_getFunc, 0x0160 /* MAX_PACKETPAGE_ARRAY */ );
-}
-#define TFE_DEBUG_OUTPUT_PP() tfe_debug_output_pp()
-
-#define TFE_DEBUG_OUTPUT_REG() \
-    do { TFE_DEBUG_OUTPUT_IO(); TFE_DEBUG_OUTPUT_PP(); } while (0)
-
-#else
-
-    #define TFE_DEBUG_OUTPUT_IO()
-    #define TFE_DEBUG_OUTPUT_PP()
-    #define TFE_DEBUG_OUTPUT_REG()
-
-#endif
-
-/* ------------------------------------------------------------------------- */
-/*    initialization and deinitialization functions                          */
 
 void tfe_reset(void)
 {
     if (tfe_enabled && !should_activate)
     {
+        int i;
+        
         assert( tfe );
         assert( tfe_packetpage );
 
@@ -406,8 +394,8 @@ void tfe_reset(void)
         memset( tfe_packetpage, 0, MAX_PACKETPAGE_ARRAY );
 
         /* according to page 19 unless stated otherwise */
-        SET_PP_32(TFE_PP_ADDR_PRODUCTID,      0x0700630E ); /* p.41: 0E630007 for Rev. B; reversed order! */
-        SET_PP_16(TFE_PP_ADDR_IOBASE,         0x0300);
+        SET_PP_32(TFE_PP_ADDR_PRODUCTID,      0x0900630E ); /* p.41: 0E630009 for Rev. D; reversed order! */
+		SET_PP_16(TFE_PP_ADDR_IOBASE,         0x0300);
         SET_PP_16(TFE_PP_ADDR_INTNO,          0x0004); /* xxxx xxxx xxxx x100b */
         SET_PP_16(TFE_PP_ADDR_DMA_CHAN,       0x0003); /* xxxx xxxx xxxx xx11b */
 
@@ -445,10 +433,27 @@ void tfe_reset(void)
         SET_PP_16(TFE_PP_ADDR_SE_SELFST,      0x0016);
         SET_PP_16(TFE_PP_ADDR_SE_BUSST,       0x0018);
         SET_PP_16(TFE_PP_ADDR_SE_TDR,         0x001C);
+        
+        SET_PP_16(TFE_PP_ADDR_TXCMD,          0x0009);
+
+        /* 4.4.19 Self Status Register, p. 65
+           Important: set INITD (Bit 7) to signal device is ready */
+        SET_PP_16(TFE_PP_ADDR_SE_SELFST,      0x0896);
+
+        tfe_recv_control = GET_PP_16(TFE_PP_ADDR_CC_RXCTL);
+        
+        /* spec: mac address is undefined after reset.
+           real HW: keeps the last set address. */
+        for(i=0;i<6;i++)
+            SET_PP_8(TFE_PP_ADDR_MAC_ADDR+i,tfe_ia_mac[i]);
+        
+        /* reset state */
+        tfe_set_transmitter(0);
+        tfe_set_receiver(0);
 
         tfe_arch_post_reset();
 
-        TFE_DEBUG_OUTPUT_REG();
+        printf("CS8900a rev.D reset\n");
     }
 }
 
@@ -468,28 +473,26 @@ int tfe_activate_i(void)
     assert( tfe_packetpage == NULL );
 
 #ifdef TFE_DEBUG
-    printf( "tfe_activate_i()." );
+    log_message( tfe_log, "tfe_activate_i()." );
 #endif
 
     /* allocate memory for visible IO register */
-	/* RGJ added BYTE * for AppleWin */
-	tfe = (BYTE * )lib_malloc( TFE_COUNT_IO_REGISTER );
+    tfe = lib_malloc( TFE_COUNT_IO_REGISTER );
     if (tfe==NULL)
     {
 #ifdef TFE_DEBUG_INIT
-        printf("tfe_activate_i: Allocating tfe failed.");
+        log_message(tfe_log, "tfe_activate_i: Allocating tfe failed.");
 #endif
         tfe_enabled = 0;
         return 0;
     }
 
     /* allocate memory for PacketPage register */
-	/* RGJ added BYTE * for AppleWin */
-	tfe_packetpage = (BYTE * ) lib_malloc( MAX_PACKETPAGE_ARRAY );
+    tfe_packetpage = lib_malloc( MAX_PACKETPAGE_ARRAY );
     if (tfe_packetpage==NULL)
     {
 #ifdef TFE_DEBUG_INIT
-        printf("tfe_activate: Allocating tfe_packetpage failed.");
+        log_message(tfe_log, "tfe_activate: Allocating tfe_packetpage failed.");
 #endif
         lib_free(tfe);
         tfe=NULL;
@@ -498,8 +501,8 @@ int tfe_activate_i(void)
     }
 
 #ifdef TFE_DEBUG_INIT
-    printf("tfe_activate: Allocated memory successfully.");
-    printf("\ttfe at $%p, tfe_packetpage at $%p", tfe, tfe_packetpage );
+    log_message(tfe_log, "tfe_activate: Allocated memory successfully.");
+    log_message(tfe_log, "\ttfe at $%08X, tfe_packetpage at $%08X", tfe, tfe_packetpage );
 #endif
 
 #ifdef DOS_TFE
@@ -526,7 +529,7 @@ static
 int tfe_deactivate_i(void)
 {
 #ifdef TFE_DEBUG
-    printf( "tfe_deactivate_i()." );
+    log_message( tfe_log, "tfe_deactivate_i()." );
 #endif
 
     assert(tfe && tfe_packetpage);
@@ -537,23 +540,16 @@ int tfe_deactivate_i(void)
     tfe = NULL;
     lib_free(tfe_packetpage);
     tfe_packetpage = NULL;
-	return 0;
+    return 0;
 }
 
 static
 int tfe_activate(void) {
 #ifdef TFE_DEBUG
-    printf( "tfe_activate()." );
+    log_message( tfe_log, "tfe_activate()." );
 #endif
 
-    //if (should_activate)
-    //    should_activate = 1;
-    //else {
-    //    if (g_fh != NULL)
-    //        return tfe_activate_i();
-    //}
-
- if (init_tfe_flag) {
+    if (init_tfe_flag) {
         return tfe_activate_i();
     }
     else {
@@ -565,13 +561,13 @@ int tfe_activate(void) {
 static
 int tfe_deactivate(void) {
 #ifdef TFE_DEBUG
-    printf( "tfe_deactivate()." );
+    log_message( tfe_log, "tfe_deactivate()." );
 #endif
 
     if (should_activate)
         should_activate = 0;
     else {
-        if (init_tfe_flag)
+        if (tfe_log != LOG_ERR)
             return tfe_deactivate_i();
     }
 
@@ -580,8 +576,9 @@ int tfe_deactivate(void) {
 
 void tfe_init(void)
 {
-    init_tfe_flag = 1;
-
+	tfe_enabled = 1;
+	init_tfe_flag = 1;
+	should_activate = 1;
     if (!tfe_arch_init()) {
         tfe_enabled = 0;
         tfe_cannot_use = 1;
@@ -632,7 +629,7 @@ TFE_PP_ADDR_MAC_ADDR        0x0158 * # RW - 4.6., p. 71 - 5.3., p. 86 *
     { \
         int retval = _x_; \
         \
-        printf("%s correct_mac=%u, broadcast=%u, multicast=%u, hashed=%u, hash_index=%u", (retval? "+++ ACCEPTED":"--- rejected"), *pcorrect_mac, *pbroadcast, *pmulticast, *phashed, *phash_index); \
+        log_message(tfe_log, "%s correct_mac=%u, broadcast=%u, multicast=%u, hashed=%u, hash_index=%u", (retval? "+++ ACCEPTED":"--- rejected"), *pcorrect_mac, *pbroadcast, *pmulticast, *phashed, *phash_index); \
         \
         return retval; \
     }
@@ -648,7 +645,7 @@ TFE_PP_ADDR_MAC_ADDR        0x0158 * # RW - 4.6., p. 71 - 5.3., p. 86 *
 int tfe_should_accept(unsigned char *buffer, int length, int *phashed, int *phash_index, 
                       int *pcorrect_mac, int *pbroadcast, int *pmulticast) 
 {
-	int hashreg; /* Hash Register (for hash computation) */
+    int hashreg; /* Hash Register (for hash computation) */
 
     assert(length>=6); /* we need at least 6 octets since the DA has this length */
 
@@ -660,7 +657,7 @@ int tfe_should_accept(unsigned char *buffer, int length, int *phashed, int *phas
     *pmulticast   = 0;
 
 #ifdef TFE_DEBUG_FRAMES
-    printf("tfe_should_accept called with %02X:%02X:%02X:%02X:%02X:%02X, length=%4u and buffer %s", 
+    log_message(tfe_log, "tfe_should_accept called with %02X:%02X:%02X:%02X:%02X:%02X, length=%4u and buffer %s", 
         tfe_ia_mac[0], tfe_ia_mac[1], tfe_ia_mac[2],
         tfe_ia_mac[3], tfe_ia_mac[4], tfe_ia_mac[5],
         length,
@@ -701,9 +698,8 @@ int tfe_should_accept(unsigned char *buffer, int length, int *phashed, int *phas
             return((tfe_recv_broadcast || tfe_recv_promiscuous) ? 1 : 0);
     }
 
-	/* now check if DA passes the hash filter */
-	/* RGJ added (const char *) for AppleWin */
-	hashreg = (~crc32_buf((const char *)buffer,6) >> 26) & 0x3F;
+    /* now check if DA passes the hash filter */
+    hashreg = (~crc32_buf((char *)buffer,6) >> 26) & 0x3F;
 
     *phashed = (tfe_hash_mask[(hashreg>=32)?1:0] & (1 << (hashreg&0x1F))) ? 1 : 0;
     if (*phashed) {
@@ -731,11 +727,11 @@ int tfe_should_accept(unsigned char *buffer, int length, int *phashed, int *phas
 #endif
 
 static 
-WORD tfe_receive(void)
+word16 tfe_receive(void)
 {
-    WORD ret_val = 0x0004;
+    word16 ret_val = 0x0004;
 
-    BYTE buffer[MAX_RXLENGTH];
+    byte buffer[MAX_RXLENGTH];
 
     int  len;
     int  hashed;
@@ -749,10 +745,6 @@ WORD tfe_receive(void)
     int  newframe;
 
     int  ready;
-
-#ifdef TFE_DEBUG_FRAMES
-    printf( "");
-#endif
 
     do {
         len = MAX_RXLENGTH;
@@ -776,7 +768,7 @@ WORD tfe_receive(void)
             if (hashed || correct_mac || broadcast) {
                 /* we already know the type of frame: Trust it! */
 #ifdef TFE_DEBUG_FRAMES
-                printf( "+++ tfe_receive(): *** hashed=%u, correct_mac=%u, "
+                log_message( tfe_log, "+++ tfe_receive(): *** hashed=%u, correct_mac=%u, "
                     "broadcast=%u", hashed, correct_mac, broadcast);
 #endif
             }
@@ -834,163 +826,324 @@ WORD tfe_receive(void)
                  * According to 4.10.9 (pp. 76-77), we start with RxStatus and RxLength!
                  */
                 rx_buffer = TFE_PP_ADDR_RXSTATUS;
+                rx_length = len;
+                rx_count  = 0;
+#ifdef TFE_DEBUG_WARN_RXTX
+                if(rx_state!=TFE_RX_IDLE) {
+                    log_message(tfe_log,"WARNING! New frame overwrites pending one!");
+                }
+#endif
+                rx_state  = TFE_RX_GOT_FRAME;
+#ifdef TFE_DEBUG_RXTX_STATE
+                log_message(tfe_log,"RX: recvd frame (length=%04x,status=%04x)",
+                            rx_length,ret_val);
+#endif
             }
         }
     } while (!ready);
 
 #ifdef TFE_DEBUG_FRAMES
     if (ret_val != 0x0004)
-        printf( "+++ tfe_receive(): ret_val=%04X", ret_val);
+        log_message( tfe_log, "+++ tfe_receive(): ret_val=%04X", ret_val);
 #endif
 
     return ret_val;
 }
 
+/* ------------------------------------------------------------------------- */
+/* TX/RX buffer handling */
 
-
-static
-void tfe_sideeffects_write_pp_on_txframe(WORD ppaddress)
+static void tfe_write_tx_buffer(byte value,int odd_address)
 {
-    if (ppaddress==TFE_PP_ADDR_TX_FRAMELOC+GET_PP_16(TFE_PP_ADDR_TXLENGTH)-1) {
-
-        /* we have collected the whole frame, now start transmission */
-        WORD txcmd = GET_PP_16(TFE_PP_ADDR_TXCMD);
-        WORD txlen = GET_PP_16(TFE_PP_ADDR_TXLENGTH);
-        WORD busst = GET_PP_16(TFE_PP_ADDR_SE_BUSST);
-
-        if (    (txlen>MAX_TXLENGTH)
-            || ((txlen>MAX_TXLENGTH-4) && (!(txcmd&0x1000)))
-            ||  (txlen<MIN_TXLENGTH)
-           ) {
-#ifdef TFE_DEBUG_WARN
-            printf("WARNING! Should send %u octets: Not allowed, thus ignoring!", txlen);
+    /* write tx data only if valid buffer is ready */
+    if(tx_state != TFE_TX_READ_BUSST) {
+#ifdef TFE_DEBUG_WARN_RXTX
+        log_message(tfe_log, "WARNING! Ignoring TX Write without correct Transmit Condition! (odd=%d,value=%02x)",
+                    odd_address,value);
 #endif
+        /* ensure correct tx state (needed if transmit < 4 was started) */
+        tfe_set_tx_status(0,0);
+    } else {
+#ifdef TFE_DEBUG_RXTX_STATE
+        if(tx_count==0) {
+            log_message(tfe_log,"TX: write frame (length=%04x)",tx_length);
         }
-        else {
-            /* clear BusST */
-            SET_PP_16(TFE_PP_ADDR_SE_BUSST, busst & ~0x180);
+#endif
 
+        /* always write LH, LH... to tx buffer */
+        word16 addr = tx_buffer;
+        if(odd_address) {
+            addr++;
+            tx_buffer += 2;
+        }
+        tx_count++;            
+        SET_PP_8(addr, value);
+        
+#ifdef TFE_DEBUG_RXTX_DATA
+        log_message(tfe_log, "TX: %04x/%04x: %02x (buffer=%04x,odd=%d)",
+                    tx_count,tx_length,value,addr,odd_address);
+#endif                
+
+        /* full frame transmitted? */
+        if(tx_count==tx_length) {
 #ifdef TFE_DEBUG_FRAMES
-            printf("tfe_arch_transmit() called with:                 "
-                "length=%4u and buffer %s", txlen,
-                debug_outbuffer(txlen, &tfe_packetpage[TFE_PP_ADDR_TX_FRAMELOC])
+            log_message(tfe_log, "tfe_arch_transmit() called with:                 "
+                "length=%4u and buffer %s", tx_length,
+                debug_outbuffer(tx_length, &tfe_packetpage[TFE_PP_ADDR_TX_FRAMELOC])
                 );
 #endif
 
-            tfe_arch_transmit(
-                txcmd & 0x0100 ? 1 : 0,   /* FORCE: Delete waiting frames in transmit buffer */
-                txcmd & 0x0200 ? 1 : 0,   /* ONECOLL: Terminate after just one collision */
-                txcmd & 0x1000 ? 1 : 0,   /* INHIBITCRC: Do not append CRC to the transmission */
-                txcmd & 0x2000 ? 1 : 0,   /* TXPADDIS: Disable padding to 60/64 octets */
-                txlen,
-                &tfe_packetpage[TFE_PP_ADDR_TX_FRAMELOC]         
-                );
-
-        txcollect_buffer = TFE_PP_ADDR_TX_FRAMELOC;
-
-#ifdef TFE_DEBUG_WARN
-            /* remember that the TXCMD has been completed */
-            tfe_started_tx = 0;
+            if(!tx_enabled) {
+#ifdef TFE_DEBUG_WARN_RXTX
+                log_message(tfe_log,"WARNING! Can't transmit frame (Transmitter is not enabled)!");
 #endif
+            } else {
+                /* send frame */
+                word16 txcmd = GET_PP_16(TFE_PP_ADDR_CC_TXCMD);
+                tfe_arch_transmit(
+                    txcmd & 0x0100 ? 1 : 0,   /* FORCE: Delete waiting frames in transmit buffer */
+                    txcmd & 0x0200 ? 1 : 0,   /* ONECOLL: Terminate after just one collision */
+                    txcmd & 0x1000 ? 1 : 0,   /* INHIBITCRC: Do not append CRC to the transmission */
+                    txcmd & 0x2000 ? 1 : 0,   /* TXPADDIS: Disable padding to 60/64 octets */
+                    tx_length,
+                    &tfe_packetpage[TFE_PP_ADDR_TX_FRAMELOC]         
+                    );
+            }
+
+            /* reset transmitter state */
+            tx_state = TFE_TX_IDLE;
+    
+#ifdef TFE_DEBUG_RXTX_STATE
+            log_message(tfe_log, "TX: sent  frame (length=%04x)",tx_length);
+#endif
+
+            /* reset tx status */
+            tfe_set_tx_status(0,0);
         }
     }
 }
+
+static byte tfe_read_rx_buffer(int odd_address)
+{
+    if(rx_state != TFE_RX_GOT_FRAME) {
+#ifdef TFE_DEBUG_WARN_RXTX
+        log_message(tfe_log, "WARNING! RX Read without frame available! (odd=%d)",
+                    odd_address);
+#endif
+        /* always reads zero on HW */
+        return 0;
+    } else {
+        /*
+         According to the CS8900 spec, the handling is the following:
+         first read H, then L (RX_STATUS), then H, then L (RX_LENGTH).
+         Inside the RX frame data, we always get L then H, until the end is reached.
+
+                                     even    odd
+         TFE_PP_ADDR_RXSTATUS:         -     proceed
+         TFE_PP_ADDR_RXLENGTH:         -     proceed 
+         TFE_PP_ADDR_RX_FRAMELOC:      -       -
+         TFE_PP_ADDR_RX_FRAMELOC+2: proceed    -
+         TFE_PP_ADDR_RX_FRAMELOC+4: proceed    -
+
+         */
+        word16 addr = odd_address ? 1:0; 
+        byte value;
+        /* read RXSTATUS or RX_LENGTH */
+        if(rx_count<4) {
+            addr  += rx_buffer;
+            value  = GET_PP_8(addr);
+            rx_count++;
+
+            /* incr after RXSTATUS or RX_LENGTH even (L) read */
+            if(!odd_address)
+                rx_buffer += 2;
+        } 
+        /* read frame data */
+        else {
+            /* incr before frame read (but not in first word) */
+            if((rx_count>=6) && (!odd_address))
+                rx_buffer += 2;
+
+            addr += rx_buffer;
+            value = GET_PP_8(addr);
+            rx_count++;
+        }
+        
+#ifdef TFE_DEBUG_RXTX_DATA
+        log_message(tfe_log,"RX: %04x/%04x: %02x (buffer=%04x,odd=%d)",
+                    rx_count,rx_length+4,value,addr,odd_address);
+#endif
+
+        /* check frame end */
+        if(rx_count>=rx_length+4) {
+            /* reset receiver state to idle */
+            rx_state = TFE_RX_IDLE;
+#ifdef TFE_DEBUG_RXTX_STATE
+            log_message(tfe_log,"RX: read  frame (length=%04x)",rx_length);
+#endif
+        }        
+        return value;
+    }
+}
+
+/* ------------------------------------------------------------------------- */
+/* handle side-effects of read and write operations */
 
 /*
  This is called *after* the relevant octets are written
 */
 static
-void tfe_sideeffects_write_pp(WORD ppaddress, int oddaddress)
+void tfe_sideeffects_write_pp(word16 ppaddress, int odd_address)
 {
-    WORD content = GET_PP_16( ppaddress );
+    const char *on_off[2] = { "on","off" };
+#define on_off_str(x) ((x) ? on_off[0] : on_off[1])
+    word16 content = GET_PP_16( ppaddress );
 
     assert((ppaddress & 1) == 0);
-
-    oddaddress = oddaddress ? 1 : 0;
 
     switch (ppaddress)
     {
     case TFE_PP_ADDR_CC_RXCFG:
-        if (content & 0x40)
-        {
-            /* remove 1 */
+        /* Skip_1 Flag: remove current (partial) tx frame and restore state */
+        if (content & 0x40) {
+            
 /*          tfe_arch_receive_remove_committed_frame(); */            
-             
+            
+            /* restore tx state */ 
+            if(tx_state!=TFE_TX_IDLE) {
+                tx_state = TFE_TX_IDLE;
+#ifdef TFE_DEBUG_RXTX_STATE
+                log_message(tfe_log,"TX: skipping current frame");
+#endif
+            }
+
+            /* reset transmitter */
+            tfe_set_transmitter(tx_enabled);
+                         
             /* this is an "act once" bit, thus restore it to zero. */
             content &= ~0x40; 
             SET_PP_16( ppaddress, content );
         }
-
-        /* @SRT TODO: Other bits are not used by TFE */
         break;
 
-
     case TFE_PP_ADDR_CC_RXCTL:
-        tfe_recv_broadcast   = content & 0x0800; /* broadcast */
-        tfe_recv_mac         = content & 0x0400; /* individual address (IA) */
-        tfe_recv_multicast   = content & 0x0200; /* multicast if address passes the hash filter */
-        tfe_recv_correct     = content & 0x0100; /* accept correct frames */
-        tfe_recv_promiscuous = content & 0x0080; /* promiscuous mode */
-        tfe_recv_hashfilter  = content & 0x0040; /* accept if IA passes the hash filter */
+        if(tfe_recv_control!=content) {
+            tfe_recv_broadcast   = content & 0x0800; /* broadcast */
+            tfe_recv_mac         = content & 0x0400; /* individual address (IA) */
+            tfe_recv_multicast   = content & 0x0200; /* multicast if address passes the hash filter */
+            tfe_recv_correct     = content & 0x0100; /* accept correct frames */
+            tfe_recv_promiscuous = content & 0x0080; /* promiscuous mode */
+            tfe_recv_hashfilter  = content & 0x0040; /* accept if IA passes the hash filter */
+            tfe_recv_control     = content;
+        
+            /*log_message(tfe_log,"setup receiver: broadcast=%s mac=%s multicast=%s correct=%s promiscuous=%s hashfilter=%s",
+                        on_off_str(tfe_recv_broadcast),
+                        on_off_str(tfe_recv_mac),
+                        on_off_str(tfe_recv_multicast),
+                        on_off_str(tfe_recv_correct),
+                        on_off_str(tfe_recv_promiscuous),
+                        on_off_str(tfe_recv_hashfilter));*/
 
-        tfe_arch_recv_ctl( tfe_recv_broadcast,
-                           tfe_recv_mac,
-                           tfe_recv_multicast,
-                           tfe_recv_correct,
-                           tfe_recv_promiscuous,
-						   tfe_recv_hashfilter
-                         );
+            tfe_arch_recv_ctl( tfe_recv_broadcast,
+                               tfe_recv_mac,
+                               tfe_recv_multicast,
+                               tfe_recv_correct,
+                               tfe_recv_promiscuous,
+                               tfe_recv_hashfilter
+                             );
+        }
         break;
 
     case TFE_PP_ADDR_CC_LINECTL:
-        tfe_arch_line_ctl( content & 0x0080, /* enable transmitter */
-                           content & 0x0040  /* enable receiver    */
-                         );
-        break;
-
-    case TFE_PP_ADDR_SE_RXEVENT:
-#ifdef TFE_DEBUG_WARN
-        printf("WARNING! Written read-only register TFE_PP_ADDR_SE_RXEVENT: IGNORED");
-#endif
-        break;
-
-    case TFE_PP_ADDR_SE_BUSST:
-#ifdef TFE_DEBUG_WARN
-        printf("WARNING! Written read-only register TFE_PP_ADDR_SE_BUSST: IGNORED");
-#endif
-        break;
-
-    case TFE_PP_ADDR_TXCMD:
-        /* The transmit status command gets the last transmit command */
-        SET_PP_16(TFE_PP_ADDR_CC_TXCMD, GET_PP_16(TFE_PP_ADDR_TXCMD));
-
-#ifdef TFE_DEBUG_WARN
-        /* check if we had a TXCMD, but not all octets were written */
-        if (tfe_started_tx && !oddaddress) {
-            printf("WARNING! Early abort of transmitted frame");
+        {
+            int enable_tx = (content & 0x0080) == 0x0080;
+            int enable_rx = (content & 0x0040) == 0x0040;
+    
+            if((enable_tx!=tx_enabled)||(enable_rx!=rx_enabled)) {
+                tfe_arch_line_ctl(enable_tx,enable_rx);
+                tfe_set_transmitter(enable_tx);
+                tfe_set_receiver(enable_rx);
+            
+                /*log_message(tfe_log,"line control: transmitter=%s receiver=%s",
+                            on_off_str(enable_tx),
+                            on_off_str(enable_rx));*/
+            }
         }
-        tfe_started_tx = 1;
-#endif
+        break;
 
-        /* make sure we put the octets to transmit at the right place */
-        txcollect_buffer = TFE_PP_ADDR_TX_FRAMELOC;
+    case TFE_PP_ADDR_CC_SELFCTL:
+        {
+            /* reset chip? */
+            if((content & 0x40)==0x40) {
+                tfe_reset();
+            }
+        }
+        break;
+        
+    case TFE_PP_ADDR_TXCMD:
+        {
+            if(odd_address) {
+                word16 txcommand = GET_PP_16(TFE_PP_ADDR_TXCMD);
+                
+                /* already transmitting? */
+                if(tx_state == TFE_TX_READ_BUSST) {
+#ifdef TFE_DEBUG_WARN_RXTX
+                    log_message(tfe_log, "WARNING! Early abort of transmitted frame");
+#endif
+                }
+                
+                /* The transmit status command gets the last transmit command */
+                SET_PP_16(TFE_PP_ADDR_CC_TXCMD, txcommand);
+                
+                /* set transmit state */
+                tx_state = TFE_TX_GOT_CMD;
+                tfe_set_tx_status(0,0);
+                
+#ifdef TFE_DEBUG_RXTX_STATE
+                log_message(tfe_log, "TX: COMMAND accepted (%04x)",txcommand);
+#endif
+            }
+        }
         break;
 
     case TFE_PP_ADDR_TXLENGTH:
         {
+            if(odd_address && (tx_state == TFE_TX_GOT_CMD)) {
+                word16 txlength = GET_PP_16(TFE_PP_ADDR_TXLENGTH);
+                word16 txcommand = GET_PP_16(TFE_PP_ADDR_CC_TXCMD);
+                
+                if(txlength<4) {
+                    /* frame to short */
+#ifdef TFE_DEBUG_RXTX_STATE
+                    log_message(tfe_log, "TX: LENGTH rejected - too short! (%04x)",txlength);
+#endif
+                    /* mask space available but do not commit */
+                    tx_state = TFE_TX_IDLE;
+                    tfe_set_tx_status(1,0);
+                }
+                else if (    (txlength>MAX_TXLENGTH)
+                         || ((txlength>MAX_TXLENGTH-4) && (!(txcommand&0x1000)))
+                        ) {
+                    tx_state = TFE_TX_IDLE;
+#ifdef TFE_DEBUG_RXTX_STATE
+                    log_message(tfe_log, "TX: LENGTH rejected - too long! (%04x)",txlength);
+#endif
+                    /* txlength too big, mark an error */
+                    tfe_set_tx_status(0,1);
+                }
+                else {
+                    /* make sure we put the octets to transmit at the right place */
+                    tx_buffer = TFE_PP_ADDR_TX_FRAMELOC;
+                    tx_count  = 0;
+                    tx_length = txlength;
+                    tx_state  = TFE_TX_GOT_LEN;
 
-            WORD txlength = GET_PP_16(TFE_PP_ADDR_TXLENGTH);
-            WORD txcommand = GET_PP_16(TFE_PP_ADDR_TXCMD);
-
-            if (    (txlength>MAX_TXLENGTH)
-                || ((txlength>MAX_TXLENGTH-4) && (!(txcommand&0x1000)))
-               ) {
-                /* txlength too big, mark an error */
-                SET_PP_16(TFE_PP_ADDR_SE_BUSST, (GET_PP_16(TFE_PP_ADDR_SE_BUSST) | 0x80) & ~0x100);
-            }
-            else {
-                /* all right, signal that we're ready for the next frame */
-                SET_PP_16(TFE_PP_ADDR_SE_BUSST, (GET_PP_16(TFE_PP_ADDR_SE_BUSST) & ~0x80) | 0x100);
+#ifdef TFE_DEBUG_RXTX_STATE
+                    log_message(tfe_log, "TX: LENGTH accepted (%04x)",txlength);
+#endif
+                    /* all right, signal that we're ready for the next frame */
+                    tfe_set_tx_status(1,0);
+                }
             }
         }
         break;
@@ -999,394 +1152,691 @@ void tfe_sideeffects_write_pp(WORD ppaddress, int oddaddress)
     case TFE_PP_ADDR_LOG_ADDR_FILTER+2:
     case TFE_PP_ADDR_LOG_ADDR_FILTER+4:
     case TFE_PP_ADDR_LOG_ADDR_FILTER+6:
-		{
-			unsigned int pos = 8 * (ppaddress - TFE_PP_ADDR_LOG_ADDR_FILTER + oddaddress);
-			DWORD *p = (pos < 32) ? &tfe_hash_mask[0] : &tfe_hash_mask[1];
+        {
+            unsigned int pos = 8 * (ppaddress - TFE_PP_ADDR_LOG_ADDR_FILTER + odd_address);
+            DWORD *p = (pos < 32) ? &tfe_hash_mask[0] : &tfe_hash_mask[1];
 
-			*p &= ~(0xFF << pos); /* clear out relevant bits */
-			*p |= GET_PP_8(ppaddress+oddaddress) << pos;
+            *p &= ~(0xFF << pos); /* clear out relevant bits */
+            *p |= GET_PP_8(ppaddress+odd_address) << pos;
 
-			tfe_arch_set_hashfilter(tfe_hash_mask);
-		}
-		break;
+            tfe_arch_set_hashfilter(tfe_hash_mask);
+
+#if 0
+            if(odd_address && (ppaddress == TFE_PP_ADDR_LOG_ADDR_FILTER+6))
+                log_message(tfe_log,"set hash filter: %02x:%02x:%02x:%02x:%02x:%02x",
+                            tfe_hash_mask[0],
+                            tfe_hash_mask[1],
+                            tfe_hash_mask[2],
+                            tfe_hash_mask[3],
+                            tfe_hash_mask[4],
+                            tfe_hash_mask[5]);
+#endif
+        }
+        break;
 
     case TFE_PP_ADDR_MAC_ADDR:
     case TFE_PP_ADDR_MAC_ADDR+2:
     case TFE_PP_ADDR_MAC_ADDR+4:
         /* the MAC address has been changed */
-        tfe_ia_mac[ppaddress-TFE_PP_ADDR_MAC_ADDR+oddaddress] = 
-            GET_PP_8(ppaddress+oddaddress);
+        tfe_ia_mac[ppaddress-TFE_PP_ADDR_MAC_ADDR+odd_address] = 
+            GET_PP_8(ppaddress+odd_address);
         tfe_arch_set_mac(tfe_ia_mac);
-		break;
+        
+        if(odd_address && (ppaddress == TFE_PP_ADDR_MAC_ADDR+4))
+            /*log_message(tfe_log,"set MAC address: %02x:%02x:%02x:%02x:%02x:%02x",
+                        tfe_ia_mac[0],tfe_ia_mac[1],tfe_ia_mac[2],
+                        tfe_ia_mac[3],tfe_ia_mac[4],tfe_ia_mac[5]);*/
+        break;
     }
+#undef on_off_str
 }
 
 /*
  This is called *before* the relevant octets are read
 */
 static
-void tfe_sideeffects_read_pp(WORD ppaddress)
+void tfe_sideeffects_read_pp(word16 ppaddress,int odd_address)
 {
-    assert((ppaddress & 1) == 0);
-
     switch (ppaddress)
     {
     case TFE_PP_ADDR_SE_RXEVENT:
         /* reading this before all octets of the frame are read
            performs an "implied skip" */
         {
-            WORD ret_val = tfe_receive();
+            int access_mask = (odd_address) ? 1 : 2;
+            
+            /* update the status register only if the full word of the last
+               status was read! unfortunately different access patterns are
+               possible: either the status is read LH, LH, LH...
+               or HL, HL, HL, or even L, L, L or H, H, H */
+            if((access_mask & rxevent_read_mask)!=0) {
+                /* receiver is not enabled */
+                if(!rx_enabled) {
+#ifdef TFE_DEBUG_WARN_RXTX
+                    log_message(tfe_log,"WARNING! Can't receive any frame (Receiver is not enabled)!");
+#endif
+                } else {
+                    /* perform frame reception */
+                    word16 ret_val = tfe_receive();
 
-            /*
-             RXSTATUS and RXEVENT are the same, except that RXSTATUS buffers
-             the old value while RXEVENT sets a new value whenever it is called
-            */
-            SET_PP_16(TFE_PP_ADDR_RXSTATUS,   ret_val); 
-            SET_PP_16(TFE_PP_ADDR_SE_RXEVENT, ret_val);
+                    /* RXSTATUS and RXEVENT are the same, except that RXSTATUS buffers
+                       the old value while RXEVENT sets a new value whenever it is called
+                    */
+                    SET_PP_16(TFE_PP_ADDR_RXSTATUS,   ret_val); 
+                    SET_PP_16(TFE_PP_ADDR_SE_RXEVENT, ret_val); 
+                }
+                
+                /* reset read mask of (possible) other access */
+                rxevent_read_mask = access_mask;
+            } else {
+                /* add access bit to mask */
+                rxevent_read_mask |= access_mask;
+            }
         }
 
         break;
 
     case TFE_PP_ADDR_SE_BUSST:
-        break;
-
-    case TFE_PP_ADDR_TXCMD:
-#ifdef TFE_DEBUG_WARN
-        printf("WARNING! Read write-only register TFE_PP_ADDR_TXCMD: IGNORED");
+        if(odd_address) {
+            /* read busst before transmit condition is fullfilled */
+            if(tx_state == TFE_TX_GOT_LEN) {
+                word16 bus_status = GET_PP_16(TFE_PP_ADDR_SE_BUSST);
+                /* check Rdy4TXNow flag */
+                if((bus_status & 0x100) == 0x100) {
+                    tx_state = TFE_TX_READ_BUSST;
+#ifdef TFE_DEBUG_RXTX_STATE
+                    log_message(tfe_log, "TX: Ready4TXNow set! (%04x)",
+                                bus_status);
 #endif
-        break;
-
-    case TFE_PP_ADDR_TXLENGTH:
-#ifdef TFE_DEBUG_WARN
-        printf("WARNING! Read write-only register TFE_PP_ADDR_TXLENGTH: IGNORED");
-#endif
-        break;
-    }
-}
-
-
-void tfe_proceed_rx_buffer(int oddaddress) {
-    /*
-     According to the CS8900 spec, the handling is the following:
-     first read H, then L, then H, then L.
-     Now, we're inside the RX frame, now, we always get L then H, until the end is reached.
-
-                                 even    odd
-     TFE_PP_ADDR_RXSTATUS:         -     proceed 1)
-     TFE_PP_ADDR_RXLENGTH:         -    proceed 
-     TFE_PP_ADDR_RX_FRAMELOC:    2),3)       -
-     TFE_PP_ADDR_RX_FRAMELOC+2: proceed     -
-     TFE_PP_ADDR_RX_FRAMELOC+4: like TFE_PP_ADDR_RX_FRAMELOC+2
-
-     1) set status "Inside FRAMELOC" FALSE
-     2) set status "Inside FRAMELOC" TRUE if it is not already
-     3) if "Inside FRAMELOC", proceed
-     
-     */
-
-    static int inside_frameloc;
-    int proceed = 0;
-
-    if (rx_buffer==TFE_PP_ADDR_RX_FRAMELOC+GET_PP_16(TFE_PP_ADDR_RXLENGTH)) {
-        /* we've read all that is available, go to start again */
-        rx_buffer = TFE_PP_ADDR_RXSTATUS;
-        inside_frameloc = 0;
-    }
-    else {
-        switch (rx_buffer) {
-        case TFE_PP_ADDR_RXSTATUS:
-            if (oddaddress) {
-                proceed = 1;
-                inside_frameloc = 0;
-            }
-            break;
-
-        case TFE_PP_ADDR_RXLENGTH:
-            if (oddaddress) {
-                proceed = 1;
-            }
-            break;
-
-        case TFE_PP_ADDR_RX_FRAMELOC:
-            if (oddaddress==0) {
-                if (inside_frameloc) {
-                    proceed = 1;
-                } 
-                else {
-                    inside_frameloc = 1;
+                } else {
+#ifdef TFE_DEBUG_RXTX_STATE
+                    log_message(tfe_log, "TX: waiting for Ready4TXNow! (%04x)",
+                                bus_status);
+#endif                    
                 }
             }
-            break;
-
-        default:
-            proceed = (oddaddress==0) ? 1 : 0;
-            break;
         }
-    }
-    
-    if (proceed) {
-        SET_TFE_16(TFE_ADDR_RXTXDATA, GET_PP_16(rx_buffer));
-        rx_buffer += 2;
+        break;
     }
 }
 
+/* ------------------------------------------------------------------------- */
+/* read/write from packet page register */
 
-BYTE REGPARM1 tfe_read(WORD ioaddress)
+/* read a register from packet page */
+static word16 tfe_read_register(word16 ppaddress)
 {
-    BYTE retval;
+  word16 value = GET_PP_16(ppaddress);
+  
+  /* --- check the register address --- */
+  if(ppaddress<0x100) {
+    /* reserved range reads 0x0300 on real HW */
+    if((ppaddress>=0x0004)&&(ppaddress<0x0020)) {
+      return 0x0300;
+    }
+  }
+  
+  /* --- read control register range --- */
+  else if(ppaddress<0x120) {
+    word16 regNum = ppaddress - 0x100;
+    regNum &= ~1;
+    regNum ++;
+#ifdef TFE_DEBUG_REGISTERS
+    log_message(tfe_log,
+                "Read  Control Register %04x: %04x (reg=%02x)",
+                ppaddress,value,regNum);
+#endif
+ 
+    /* reserved register? */
+    if((regNum==0x01)||(regNum==0x11)||(regNum>0x19)) {
+#ifdef TFE_DEBUG_WARN_REG
+      log_message(tfe_log,
+                  "WARNING! Read reserved Control Register %04x (reg=%02x)",
+                  ppaddress,regNum);
+#endif
+      /* real HW returns 0x0300 in reserved register range */
+      return 0x0300;
+    }
+
+    /* make sure interal address is always valid */
+    assert((value&0x3f) == regNum); 
+  }
+  
+  /* --- read status register range --- */
+  else if(ppaddress<0x140) {
+    word16 regNum = ppaddress - 0x120;
+    regNum &= ~1;
+#ifdef TFE_DEBUG_REGISTERS
+#ifdef TFE_DEBUG_IGNORE_RXEVENT
+    if(regNum!=4) // do not show RXEVENT
+#endif
+    log_message(tfe_log,
+                "Read  Status  Register %04x: %04x (reg=%02x)",
+                ppaddress,value,regNum);
+#endif
+
+    /* reserved register? */
+    if((regNum==0x02)||(regNum==0x06)||(regNum==0x0a)||
+       (regNum==0x0e)||(regNum==0x1a)||(regNum==0x1e)) {
+#ifdef TFE_DEBUG_WARN_REG
+      log_message(tfe_log,
+                  "WARNING! Read reserved Status Register %04x (reg=%02x)",
+                  ppaddress,regNum);
+#endif
+      /* real HW returns 0x0300 in reserved register range */
+      return 0x0300;
+    }
+
+    /* make sure interal address is always valid */
+    assert((value&0x3f) == regNum);
+  }
+  
+  /* --- read transmit register range --- */
+  else if(ppaddress<0x150) {
+    if(ppaddress==0x144) {
+      /* make sure interal address is always valid */
+      assert((value&0x3f) == 0x09);
+#ifdef TFE_DEBUG_REGISTERS
+      log_message(tfe_log,
+                  "Read  TX Cmd  Register %04x: %04x",
+                  ppaddress,value);
+#endif
+    }
+    else if(ppaddress==0x146) {
+#ifdef TFE_DEBUG_REGISTERS
+      log_message(tfe_log,
+                  "Read  TX Len  Register %04x: %04x",
+                  ppaddress,value);
+#endif
+    }
+    /* reserved range */
+    else {
+#ifdef TFE_DEBUG_WARN_REG
+      log_message(tfe_log,
+                  "WARNING! Read reserved Initiate Transmit Register %04x",
+                  ppaddress);
+#endif
+      /* real HW returns 0x0300 in reserved register range */
+      return 0x0300;
+    }
+  }
+  
+  /* --- read address filter register range --- */
+  else if(ppaddress<0x160) {
+    /* reserved range */
+    if(ppaddress>=0x15e) {
+#ifdef TFE_DEBUG_WARN_REG
+      log_message(tfe_log,
+                  "WARNING! Read reserved Address Filter Register %04x",
+                  ppaddress);
+#endif
+      /* real HW returns 0x0300 in reserved register range */
+      return 0x0300;
+    }
+  }
+ 
+  /* --- reserved range below 0x400 ---
+     returns 0x300 on real HW 
+  */
+  else if(ppaddress<0x400) {
+#ifdef TFE_DEBUG_WARN_REG
+    log_message(tfe_log,
+                "WARNING! Read reserved Register %04x",
+                ppaddress);
+#endif
+    return 0x0300;
+  }
+  
+  /* --- range from 0x400 .. 0x9ff --- RX Frame */
+  else if(ppaddress<0xa00) {
+#ifdef TFE_DEBUG_WARN_REG
+    log_message(tfe_log,
+                "WARNING! Read from RX Buffer Range %04x",
+                ppaddress);
+#endif
+    return 0x0000;
+  }
+  
+  /* --- range from 0xa00 .. 0xfff --- TX Frame */
+  else {
+#ifdef TFE_DEBUG_WARN_REG
+    log_message(tfe_log,
+                "WARNING! Read from TX Buffer Range %04x",
+                ppaddress);
+#endif
+    return 0x0000;
+  }
+  
+  /* actually read from pp memory */
+  return value;
+}
+
+void tfe_write_register(word16 ppaddress,word16 value)
+{
+  /* --- write bus interface register range --- */
+  if(ppaddress<0x100) {
+    int ignore = 0;
+    if(ppaddress<0x20) {
+      ignore = 1;
+    } else if((ppaddress>=0x26)&&(ppaddress<0x2c)) {
+      ignore = 1;
+    } else if(ppaddress==0x38) {
+      ignore = 1;
+    } else if(ppaddress>=0x44) {
+      ignore = 1;
+    }
+    if(ignore) {
+#ifdef TFE_DEBUG_WARN_REG
+      log_message(tfe_log,
+                  "WARNING! Ignoring write to read only/reserved Bus Interface Register %04x",
+                  ppaddress);
+#endif
+      return;
+    }
+  }
+  
+  /* --- write to control register range --- */
+  else if(ppaddress<0x120) {
+    word16 regNum = ppaddress - 0x100;
+    regNum &= ~1;
+    regNum += 1;
+    /* validate internal address */
+    if((value&0x3f) != regNum) {
+      /* fix internal address */
+      value &= ~0x3f;
+      value |= regNum;
+    }
+#ifdef TFE_DEBUG_REGISTERS
+    log_message(tfe_log,
+                "Write Control Register %04x: %04x (reg=%02x)",
+                ppaddress,value,regNum);
+#endif
+
+    /* invalid register? -> ignore! */
+    if((regNum==0x01)||(regNum==0x11)||(regNum>0x19)) {
+#ifdef TFE_DEBUG_WARN_REG
+      log_message(tfe_log,
+                  "WARNING! Ignoring write to reserved Control Register %04x (reg=%02x)",
+                  ppaddress,regNum);
+  #endif
+      return;
+    }
+  }
+  
+  /* --- write to status register range --- */
+  else if(ppaddress<0x140) {
+#ifdef TFE_DEBUG_WARN_REG
+    log_message(tfe_log,
+                "WARNING! Ignoring write to read-only Status Register %04x",
+                ppaddress);
+#endif
+    return;
+  }
+
+  /* --- write to initiate transmit register range --- */
+  else if(ppaddress<0x150) {
+    /* check tx_cmd register */
+    if(ppaddress==0x144) {
+      /* validate internal address */
+      if((value&0x3f) != 0x09) {
+        /* fix internal address */
+        value &= ~0x3f;
+        value |= 0x09;
+      }
+      /* mask out reserved bits */
+      value &= 0x33ff;
+#ifdef TFE_DEBUG_REGISTERS
+      log_message(tfe_log,
+                  "Write TX Cmd  Register %04x: %04x",
+                  ppaddress,value);
+#endif
+    }
+    /* check tx_length register */
+    else if(ppaddress==0x146) {
+      /* HW always masks 0x0fff */
+      value &= 0x0fff;
+#ifdef TFE_DEBUG_REGISTERS
+      log_message(tfe_log,
+                  "Write TX Len  Register %04x: %04x",
+                  ppaddress,value);
+#endif
+    }
+    /* reserved range */
+    else if((ppaddress<0x144)||(ppaddress>0x147)) {
+#ifdef TFE_DEBUG_WARN_REG
+      log_message(tfe_log,
+                  "WARNING! Ignoring write to reserved Initiate Transmit Register %04x",
+                  ppaddress);
+#endif
+      return;
+    }
+  }
+
+  /* --- write to address filter register range --- */
+  else if(ppaddress<0x160) {
+    /* reserved range */
+    if(ppaddress>=0x15e) {
+#ifdef TFE_DEBUG_WARN_REG
+      log_message(tfe_log,
+                  "WARNING! Ingoring write to reserved Address Filter Register %04x",
+                  ppaddress);
+#endif
+      return;
+    }
+  }
+
+  /* --- ignore write outside --- */
+  else if(ppaddress<0x400) {
+#ifdef TFE_DEBUG_WARN_REG
+    log_message(tfe_log,
+                "WARNING! Ingoring write to reserved Register %04x",
+                ppaddress);
+#endif
+    return;
+  }
+  else if(ppaddress<0xa00){
+#ifdef TFE_DEBUG_WARN_REG
+    log_message(tfe_log,
+                "WARNING! Ignoring write to RX Buffer Range %04x",
+                ppaddress);
+#endif
+    return;
+  }
+  else {
+#ifdef TFE_DEBUG_WARN_REG
+    log_message(tfe_log,
+                "WARNIGN! Ignoring write to TX Buffer Range %04x",
+                ppaddress);
+#endif
+    return;
+  }
+
+  /* actually set value */
+  SET_PP_16(ppaddress, value);  
+}
+
+#define PP_PTR_AUTO_INCR_FLAG 0x8000 /* auto increment flag in package pointer */
+#define PP_PTR_FLAG_MASK      0xf000 /* is always : x y 1 1 (with x=auto incr) */
+#define PP_PTR_ADDR_MASK      0x0fff /* address portion of packet page pointer */
+
+static void tfe_auto_incr_pp_ptr(void)
+{
+  /* perform auto increment of packet page pointer */
+  if((tfe_packetpage_ptr & PP_PTR_AUTO_INCR_FLAG)==PP_PTR_AUTO_INCR_FLAG) {
+    /* pointer is always increment by one on real HW */
+    word16 ptr   = tfe_packetpage_ptr & PP_PTR_ADDR_MASK;
+    word16 flags = tfe_packetpage_ptr & PP_PTR_FLAG_MASK;
+    ptr++;
+    tfe_packetpage_ptr = ptr | flags;
+  }
+}
+
+/* ------------------------------------------------------------------------- */
+/* read/write TFE registers from VICE */
+
+#define LO_BYTE(x)      (byte)((x) & 0xff)
+#define HI_BYTE(x)      (byte)(((x) >> 8) & 0xff)
+#define LOHI_WORD(x,y)  ( (word16)(x) | ( ((word16)(y)) <<8 ) )
+
+/* ----- read byte from I/O range in VICE ----- */
+byte tfe_read(word16 io_address)
+{
+	byte retval,lo,hi;
+    word16 word_value;
+    word16 reg_base;
 
     assert( tfe );
     assert( tfe_packetpage );
+    assert( io_address < 0x10);
 
-	assert( ioaddress < 0x10);
-
-    switch (ioaddress) {
-
-    case TFE_ADDR_TXCMD:
-    case TFE_ADDR_TXCMD+1:
-    case TFE_ADDR_TXLENGTH:
-    case TFE_ADDR_TXLENGTH+1:
-#ifdef TFE_DEBUG_WARN
-        printf("WARNING! Reading write-only TFE register $%02X!", ioaddress);
-#endif
-        /* @SRT TODO: Verify with reality */
-        retval = GET_TFE_8(ioaddress); 
-        break;
-
-    case TFE_ADDR_RXTXDATA2:
-    case TFE_ADDR_RXTXDATA2+1:
-    case TFE_ADDR_PP_DATA2:
-    case TFE_ADDR_PP_DATA2+1:
-#ifdef TFE_DEBUG_WARN
-        printf("WARNING! Reading not supported TFE register $%02X!", ioaddress);
-#endif
-        /* @SRT TODO */
-        retval = GET_TFE_8(ioaddress);
-        break;
-
-    case TFE_ADDR_PP_DATA:
-    case TFE_ADDR_PP_DATA+1:
-        /* make sure the TFE register have the correct content */
-        {
-            WORD ppaddress = tfe_packetpage_ptr & (MAX_PACKETPAGE_ARRAY-1);
-
-            /* perform side-effects the read may perform */
-            tfe_sideeffects_read_pp( ppaddress );
-
-            /* [3] make sure the data matches the real value - [1] assumes this! */
-            SET_TFE_16( TFE_ADDR_PP_DATA, GET_PP_16(ppaddress) );
+    /*if (tfe_as_rr_net) {
+        /* rr status register is handled by rr cartidge 
+        if (io_address < 0x02) {
+            return 0;
         }
+        io_address ^= 0x08;
+    }*/
+    /* register base addr */
+    reg_base = io_address & ~1;
 
+    /* RX register is special as it reads from RX buffer directly */
+    if((reg_base==TFE_ADDR_RXTXDATA)||(reg_base==TFE_ADDR_RXTXDATA2)) {
+        //io_source=IO_SOURCE_TFE_RR_NET;
+        return tfe_read_rx_buffer(io_address & 0x01);
+    }
+    
+    /* read packet page pointer */
+    if(reg_base==TFE_ADDR_PP_PTR) {
+        word_value = tfe_packetpage_ptr;
+    }
+    /* read a register from packet page */
+    else {
+        word16 ppaddress;
+
+        /* determine read addr in packet page */
+        switch (reg_base) {
+            /* PP_DATA2 behaves like PP_DATA on real HW
+               both show the contents at the page pointer */
+        case TFE_ADDR_PP_DATA:
+        case TFE_ADDR_PP_DATA2:
+            /* mask and align address of packet pointer */
+            ppaddress = tfe_packetpage_ptr & PP_PTR_ADDR_MASK;
+            ppaddress &= ~1;
+            /* if flags match then auto incr pointer */
+            tfe_auto_incr_pp_ptr();
+            break;
+        case TFE_ADDR_INTSTQUEUE:
+            ppaddress = TFE_PP_ADDR_SE_ISQ;
+            break;
+        case TFE_ADDR_TXCMD:
+            ppaddress = TFE_PP_ADDR_TXCMD;
+            break;
+        case TFE_ADDR_TXLENGTH:
+            ppaddress = TFE_PP_ADDR_TXLENGTH;
+            break;
+        default:
+            /* invalid! */
+            assert(0);
+            break;
+        }
+            
+        /* do side effects before access */
+        tfe_sideeffects_read_pp(ppaddress,io_address&1);
+
+        /* read register value */
+        word_value = tfe_read_register(ppaddress);
+        
+#ifdef TFE_DEBUG_LOAD
+        log_message(tfe_log, "reading PP Ptr: $%04X => $%04X.",ppaddress,word_value);
+#endif
+    }
+
+    /* extract return value from word_value */
+    lo = LO_BYTE(word_value);
+    hi = HI_BYTE(word_value);
+    if((io_address & 1) == 0) {
+        /* low byte on even address */
+        retval = lo;
+    } else {
+        /* high byte on odd address */
+        retval = hi;
+    }
 
 #ifdef TFE_DEBUG_LOAD
-        printf("reading PP Ptr: $%04X => $%04X.", 
-            tfe_packetpage_ptr, GET_PP_16(tfe_packetpage_ptr) );
+    log_message(tfe_log, "read [$%02X] => $%02X.", io_address, retval);
 #endif
-
-        retval = GET_TFE_8(ioaddress);
-        break;
-
-    case TFE_ADDR_INTSTQUEUE:
-    case TFE_ADDR_INTSTQUEUE+1:
-        SET_TFE_16( TFE_ADDR_INTSTQUEUE, GET_PP_16(0x0120)  );
-        retval = GET_TFE_8(ioaddress);
-        break;
-
-    case TFE_ADDR_RXTXDATA:
-    case TFE_ADDR_RXTXDATA+1:
-        /* we're trying to read a new 16 bit word, get it from the
-           receive buffer
-         */
-        tfe_proceed_rx_buffer(ioaddress & 0x01);
-        retval = GET_TFE_8(ioaddress);
-        break;
-
-    default:
-        retval = GET_TFE_8(ioaddress);
-        break;
-    };
-
-#ifdef TFE_DEBUG_LOAD
-    printf("read [$%02X] => $%02X.", ioaddress, retval);
-#endif
+    
+    /* update _word_ value in register bank */
+    tfe[reg_base]   = lo;
+    tfe[reg_base+1] = hi;
+    
+    //io_source=IO_SOURCE_TFE_RR_NET;
     return retval;
 }
 
-void REGPARM2 tfe_store(WORD ioaddress, BYTE byte)
+/* ----- write byte to I/O range of VICE ----- */
+void tfe_store(word16 io_address, byte var)
 {
+	word16 reg_base;
+    word16 word_value;
     assert( tfe );
     assert( tfe_packetpage );
-    
-	assert( ioaddress < 0x10);
+    assert( io_address < 0x10);
 
-    switch (ioaddress)
-    {
-    case TFE_ADDR_RXTXDATA:
-    case TFE_ADDR_RXTXDATA+1:
-        SET_PP_8(txcollect_buffer, byte);
-        tfe_sideeffects_write_pp_on_txframe(txcollect_buffer++);
-        break;
-
-    case TFE_ADDR_INTSTQUEUE:
-    case TFE_ADDR_INTSTQUEUE+1:
-#ifdef TFE_DEBUG_WARN
-        printf("WARNING! Writing read-only TFE register $%02X!", ioaddress);
+    /*if (tfe_as_rr_net) {
+        /* rr control register is handled by rr cartidge
+        if (io_address < 0x02) {
+            return;
+        }
+        io_address ^= 0x08;
+    }*/
+#ifdef TFE_DEBUG_STORE
+    log_message(tfe_log, "store [$%02X] <= $%02X.", io_address, (int)byte);
 #endif
-        /* @SRT TODO: Verify with reality */
-        /* do nothing */
+
+    /* register base addr */
+    reg_base = io_address & ~1;
+
+    /* TX Register is special as it writes to TX buffer directly */
+    if((reg_base==TFE_ADDR_RXTXDATA)||(reg_base==TFE_ADDR_RXTXDATA2)) {
+        tfe_write_tx_buffer(var,io_address & 1);
         return;
-
-    case TFE_ADDR_RXTXDATA2:
-    case TFE_ADDR_RXTXDATA2+1:
-    case TFE_ADDR_PP_DATA2:
-    case TFE_ADDR_PP_DATA2+1:
-#ifdef TFE_DEBUG_WARN
-        printf("WARNING! Writing not supported TFE register $%02X!", ioaddress);
-#endif
-        /* do nothing */
-        return;
-
-    case TFE_ADDR_TXCMD:
-    case TFE_ADDR_TXCMD+1:
-        SET_TFE_8(ioaddress, byte);
-        SET_PP_8((ioaddress-TFE_ADDR_TXCMD)+TFE_PP_ADDR_TXCMD, byte); /* perform the mapping to PP+0144 */
-        tfe_sideeffects_write_pp(TFE_PP_ADDR_TXCMD, ioaddress-TFE_ADDR_TXCMD);
-        break;
-
-    case TFE_ADDR_TXLENGTH:
-    case TFE_ADDR_TXLENGTH+1:
-
-        SET_TFE_8(ioaddress, byte);
-        SET_PP_8((ioaddress-TFE_ADDR_TXLENGTH)+TFE_PP_ADDR_TXLENGTH, byte ); /* perform the mapping to PP+0144 */
-
-        tfe_sideeffects_write_pp(TFE_PP_ADDR_TXLENGTH, ioaddress-TFE_ADDR_TXLENGTH);
-        break;
-
-/*
-#define TFE_ADDR_TXCMD      0x04 * -W Maps to PP+0144 *
-#define TFE_ADDR_TXLENGTH   0x06 * -W Maps to PP+0146 *
-#define TFE_ADDR_INTSTQUEUE 0x08 * R- Interrupt status queue, maps to PP + 0120 *
-*/
-    case TFE_ADDR_PP_DATA:
-    case TFE_ADDR_PP_DATA+1:
-
-        /* [2] make sure the data matches the real value - [1] assumes this! */
-        SET_TFE_16(TFE_ADDR_PP_DATA, GET_PP_16(tfe_packetpage_ptr));
-        /* FALL THROUGH */
-
-    default:
-        SET_TFE_8(ioaddress, byte);
     }
 
-#ifdef TFE_DEBUG_STORE
-    printf("store [$%02X] <= $%02X.", ioaddress, (int)byte);
-#endif
-
-    /* now check if we have to do any side-effects */
-    switch (ioaddress)
-    {
-    case TFE_ADDR_PP_PTR:
-    case TFE_ADDR_PP_PTR+1:
-        tfe_packetpage_ptr = GET_TFE_16(TFE_ADDR_PP_PTR);
-
-#ifdef TFE_DEBUG_STORE
-        printf("set PP Ptr to $%04X.", tfe_packetpage_ptr);
-#endif
-
-        if ((tfe_packetpage_ptr & 1) != 0) {
-
-#ifdef TFE_DEBUG_WARN
-            printf(
-                "WARNING! PacketPage register set to odd address $%04X (not allowed!)",
-                tfe_packetpage_ptr );
-#endif /* #ifdef TFE_DEBUG_WARN */
-
-            /* "correct" the address to the next lower address 
-             REMARK: I don't know how a real cs8900a will behave in this case,
-                     since it is not allowed. Nevertheless, this "correction"
-                     prevents assert()s to fail.
-            */
-            tfe_packetpage_ptr -= 1;
-        }
-
-        /*
-         [1] The TFE_ADDR_PP_DATA does not need to be modified here,
-         since it will be modified just before a read or store operation
-         is to be performed.
-         See [2] and [3]
-        */
-        break;
-
-    case TFE_ADDR_PP_DATA:
-    case TFE_ADDR_PP_DATA+1:
-
-        {
-            WORD ppaddress = tfe_packetpage_ptr & (MAX_PACKETPAGE_ARRAY-1);
-
-#ifdef TFE_DEBUG_STORE
-            printf("before writing to PP Ptr: $%04X <= $%04X.", 
-                ppaddress, GET_PP_16(ppaddress) );
-#endif
-            {
-                register WORD tmpIoAddr = ioaddress & ~1; /* word-align the address */
-                SET_PP_16(ppaddress, GET_TFE_16(tmpIoAddr));
-            }
-
-            /* perform side-effects the write may perform */
-            /* the addresses are always aligned on the whole 16-bit-word */
-            tfe_sideeffects_write_pp(ppaddress, ioaddress-TFE_ADDR_PP_DATA);
-
-#ifdef TFE_DEBUG_STORE
-            printf("after  writing to PP Ptr: $%04X <= $%04X.", 
-                ppaddress, GET_PP_16(ppaddress) );
-#endif
-        }
-        break;
+    /* combine stored value with new written byte */
+    if((io_address & 1) == 0) {
+        /* overwrite low byte */
+        word_value = LOHI_WORD(var,tfe[reg_base+1]);
+    } else {
+        /* overwrite high byte */
+        word_value = LOHI_WORD(tfe[reg_base],var);
     }
 
-    TFE_DEBUG_OUTPUT_REG();
+    if(reg_base==TFE_ADDR_PP_PTR) {
+        /* cv: we store the full package pointer in tfe_packetpage_ptr variable.
+            this includes the mask area (0xf000) and the addr range (0x0fff).
+            we ensure that the bits 0x3000 are always set (as in real HW).
+            odd values of the pointer are valid and supported.
+            only register read and write have to be mapped to word boundary. */
+        word_value |= 0x3000;
+        tfe_packetpage_ptr = word_value;
+#ifdef TFE_DEBUG_STORE
+        log_message(tfe_log, "set PP Ptr to $%04X.", tfe_packetpage_ptr);
+#endif
+    } else {
+        /* write a register */
+
+        /*! \TODO: Find a reasonable default */
+        word16 ppaddress = TFE_PP_ADDR_PRODUCTID;
+
+        /* now determine address of write in packet page */
+        switch(reg_base) {
+        case TFE_ADDR_PP_DATA:
+        case TFE_ADDR_PP_DATA2:
+            /* mask and align ppaddress from page pointer */
+            ppaddress = tfe_packetpage_ptr & (MAX_PACKETPAGE_ARRAY-1);
+            ppaddress &= ~1;
+            /* auto increment pp ptr */
+            tfe_auto_incr_pp_ptr();
+            break;
+        case TFE_ADDR_TXCMD:
+            ppaddress = TFE_PP_ADDR_TXCMD;
+            break;    
+        case TFE_ADDR_TXLENGTH:
+            ppaddress = TFE_PP_ADDR_TXLENGTH;
+            break;
+        case TFE_ADDR_INTSTQUEUE:
+            ppaddress = TFE_PP_ADDR_SE_ISQ;
+            break;
+        case TFE_ADDR_PP_PTR:
+            break;
+        default:
+            /* invalid */
+            assert(0);
+            break;
+        }
+
+#ifdef TFE_DEBUG_STORE
+        log_message(tfe_log, "before writing to PP Ptr: $%04X <= $%04X.", 
+                    ppaddress,word_value);
+#endif
+
+        /* perform the write */
+        tfe_write_register(ppaddress,word_value);
+
+        /* handle sideeffects */
+        tfe_sideeffects_write_pp(ppaddress, io_address&1);
+
+        /* update word value if it was changed in write register or by side effect */
+        word_value = GET_PP_16(ppaddress);
+
+#ifdef TFE_DEBUG_STORE
+        log_message(tfe_log, "after  writing to PP Ptr: $%04X <= $%04X.", 
+                    ppaddress,word_value);
+#endif
+    }
+
+    /* update tfe registers */
+    tfe[reg_base]   = LO_BYTE(word_value);
+    tfe[reg_base+1] = HI_BYTE(word_value);
 }
 
-
-
-static
-int set_tfe_disabled(void *v, void *param)
+/* ------------------------------------------------------------------------- */
+/*    resources support functions                                            */
+static int set_tfe_disabled(int val, void *param)
 {
     /* dummy function since we don't want "disabled" to be stored on disk */
     return 0;
 }
 
-
-static
-int set_tfe_enabled(void *v, void *param)
+/*static int set_tfe_rr_net(int val, void *param)
 {
     if (!tfe_cannot_use) {
+        if (!val) {
+            /* TFE should not be used as rr net 
+            if (tfe_as_rr_net) {
+                tfe_as_rr_net = 0;
 
-        if (!(int)v) {
+                /* if adapter is already enabled then reset the LAN chip 
+                if (tfe) {
+                    tfe_reset();
+                }
+            }
+            return 0;
+        } else { 
+            if (!tfe_as_rr_net) {
+                tfe_as_rr_net = 1;
+            
+                /* if adapter is already enabled then reset the LAN chip
+                if (tfe) {
+                    tfe_reset();
+                }
+            }
+            return 0;
+        }
+    }
+
+    return 0;
+}*/
+
+static int set_tfe_enabled(int val, void *param)
+{
+    if (!tfe_cannot_use) {
+        if (!val) {
             /* TFE should be deactived */
             if (tfe_enabled) {
                 tfe_enabled = 0;
-				/* RGJ Commented out forAppleWin */
-                //c64export_remove(&export_res);
                 if (tfe_deactivate() < 0) {
                     return -1;
                 }
             }
             return 0;
-        } else { 
+        } else {
             if (!tfe_enabled) {
-				/* RGJ Commented out forAppleWin */
-                //if (c64export_query(&export_res) < 0)
-                //    return -1;
-
                 tfe_enabled = 1;
                 if (tfe_activate() < 0) {
                     return -1;
                 }
-				/* RGJ Commented out forAppleWin */
-                //if (c64export_add(&export_res) < 0)
-                //    return -1;
-
             }
 
             return 0;
@@ -1397,13 +1847,8 @@ int set_tfe_enabled(void *v, void *param)
 }
 
 
-static 
-int set_tfe_interface(void *v, void *param)
+int set_tfe_interface(const char *name)
 {
-    const char *name = (const char *)v;
-
-    printf("Set tfe Interface: We will use interface: %s\n", name);
-
     if (tfe_interface != NULL && name != NULL
         && strcmp(name, tfe_interface) == 0)
         return 0;
@@ -1430,34 +1875,68 @@ int set_tfe_interface(void *v, void *param)
 }
 
 
+/*static const resource_string_t resources_string[] = {
+    { "ETHERNET_INTERFACE", 
+      ARCHDEP_ETHERNET_DEFAULT_DEVICE, RES_EVENT_NO, NULL,
+      &tfe_interface, set_tfe_interface, NULL },
+    { NULL }
+};
+
+static const resource_int_t resources_int[] = {
+    { "ETHERNET_DISABLED", 0, RES_EVENT_NO, NULL,
+      &tfe_cannot_use, set_tfe_disabled, NULL },
+    { "ETHERNET_ACTIVE", 0, RES_EVENT_STRICT, (resource_value_t)0,
+      &tfe_enabled, set_tfe_enabled, NULL },
+    { "ETHERNET_AS_RR", 0, RES_EVENT_NO, NULL,
+      &tfe_as_rr_net, set_tfe_rr_net, NULL },
+    { NULL }
+};*/
+
+/*int tfe_resources_init(void)
+{
+    if (resources_register_string(resources_string) < 0)
+        return -1;
+
+    return resources_register_int(resources_int);
+}*/
 
 /* ------------------------------------------------------------------------- */
 /*    commandline support functions                                          */
 
-//#ifdef HAS_TRANSLATION
-//static const cmdline_option_t cmdline_options[] =
-//{
-//    { "-tfe", SET_RESOURCE, 0, NULL, NULL, "ETHERNET_ACTIVE", (resource_value_t)1,
-//      0, IDCLS_ENABLE_TFE },
-//    { "+tfe", SET_RESOURCE, 0, NULL, NULL, "ETHERNET_ACTIVE", (resource_value_t)0,
-//      0, IDCLS_DISABLE_TFE },
-//    { NULL }
-//};
-//#else
-//static const cmdline_option_t cmdline_options[] =
-//{
-//    { "-tfe", SET_RESOURCE, 0, NULL, NULL, "ETHERNET_ACTIVE", (resource_value_t)1,
-//      NULL, N_("Enable the TFE (\"the final ethernet\") unit") },
-//    { "+tfe", SET_RESOURCE, 0, NULL, NULL, "ETHERNET_ACTIVE", (resource_value_t)0,
-//      NULL, N_("Disable the TFE (\"the final ethernet\") unit") },
-//    { NULL }
-//};
-//#endif
+/*static const cmdline_option_t cmdline_options[] =
+{
+    { "-tfe", SET_RESOURCE, 0,
+      NULL, NULL, "ETHERNET_ACTIVE", (resource_value_t)1,
+      USE_PARAM_STRING, USE_DESCRIPTION_ID,
+      IDCLS_UNUSED, IDCLS_ENABLE_TFE,
+      NULL, NULL },
+    { "+tfe", SET_RESOURCE, 0,
+      NULL, NULL, "ETHERNET_ACTIVE", (resource_value_t)0,
+      USE_PARAM_STRING, USE_DESCRIPTION_ID,
+      IDCLS_UNUSED, IDCLS_DISABLE_TFE,
+      NULL, NULL },
+    { "-tfeif", SET_RESOURCE, 1,
+      NULL, NULL, "ETHERNET_INTERFACE", NULL,
+      USE_PARAM_ID, USE_DESCRIPTION_ID,
+      IDCLS_P_NAME, IDCLS_TFE_INTERFACE,
+      NULL, NULL },
+    { "-tferrnet", SET_RESOURCE, 0,
+      NULL, NULL, "ETHERNET_AS_RR", (resource_value_t)1,
+      USE_PARAM_STRING, USE_DESCRIPTION_ID,
+      IDCLS_UNUSED, IDCLS_ENABLE_TFE_AS_RRNET,
+      NULL, NULL },
+    { "+tferrnet", SET_RESOURCE, 0,
+      NULL, NULL, "ETHERNET_AS_RR", (resource_value_t)0,
+      USE_PARAM_STRING, USE_DESCRIPTION_ID,
+      IDCLS_UNUSED, IDCLS_DISABLE_TFE_AS_RRNET,
+      NULL, NULL },
+    { NULL }
+};
 
-//int tfe_cmdline_options_init(void)
-//{
-//    return cmdline_register_options(cmdline_options);
-//}
+int tfe_cmdline_options_init(void)
+{
+    return cmdline_register_options(cmdline_options);
+}*/
 
 
 /* ------------------------------------------------------------------------- */
@@ -1471,14 +1950,14 @@ static char snap_module_name[] = "TFE1764";
 
 int tfe_read_snapshot_module(struct snapshot_s *s)
 {
-	/* @SRT TODO: not yet implemented */
-	return -1;
+    /* @SRT TODO: not yet implemented */
+    return -1;
 }
 
 int tfe_write_snapshot_module(struct snapshot_s *s)
 {
-	/* @SRT TODO: not yet implemented */
-	return -1;
+    /* @SRT TODO: not yet implemented */
+    return -1;
 }
 
 #endif /* #if 0 */
@@ -1505,44 +1984,4 @@ int tfe_enumadapter_close(void)
     return tfe_arch_enumadapter_close();
 }
 
-
-BYTE __stdcall TfeIo (WORD programcounter, BYTE address, BYTE write, BYTE value, ULONG nCycles)
-{
-	BYTE ret = 0;
-
-	if (write) {
-	    if (tfe_enabled)
-		    tfe_store((WORD)(address & 0x0f), value);
-		}
-	else {
-		if (tfe_enabled)
-        ret = tfe_read((WORD)(address & 0x0f));
-	}
-
-return ret;
-
-}
-
-void get_disabled_state(int * param)
-{
-
-*param = tfe_cannot_use;
-
-}
-
-int update_tfe_interface(void *v, void *param)
-{
-	return set_tfe_interface(v,param);
-}
-
-void * get_tfe_interface(void)
-{
-	void *v;
-	v = tfe_interface;
-	return v;
-}
-
-void get_tfe_enabled(int * param)
-{
-	*param = tfe_enabled;
-}
+//#endif /* #ifdef HAVE_TFE */
