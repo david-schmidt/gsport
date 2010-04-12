@@ -25,7 +25,6 @@ const char rcsid_scc_windriver_c[] = "@(#)$KmKId: scc_windriver.c,v 1.4 2004-11-
 
 #include "defc.h"
 #include "scc.h"
-#include "printer.h"
 
 extern Scc scc_stat[2];
 extern word32 g_c025_val;
@@ -33,11 +32,8 @@ extern word32 g_c025_val;
 #ifdef _WIN32
 int
 scc_serial_win_init(int port)
-{	int state;
-	Scc *scc_ptr;
-	scc_ptr = &(scc_stat[port]);
-	printf("Called port init.\n");
-	/*COMMTIMEOUTS commtimeouts;
+{
+	COMMTIMEOUTS commtimeouts;
 	char	str_buf[8];
 	Scc	*scc_ptr;
 	HANDLE	host_handle;
@@ -46,12 +42,13 @@ scc_serial_win_init(int port)
 
 	scc_ptr = &(scc_stat[port]);
 
-	scc_ptr->state = 0;	*/	/* mark as failed */
-/*
+	scc_ptr->state = 0;		/* mark as failed */
+
 	sprintf(&str_buf[0], "COM%d", port+1);
+
 	host_handle = CreateFile(&str_buf[0], GENERIC_READ | GENERIC_WRITE,
 			0, NULL, OPEN_EXISTING, 0, NULL);
-	printf("scc port is mapped to: %s\n", &str_buf);
+
 	scc_ptr->host_handle = host_handle;
 	scc_ptr->host_handle2 = malloc(sizeof(DCB));
 
@@ -75,7 +72,7 @@ scc_serial_win_init(int port)
 	if(ret == 0) {
 		printf("setcommtimeout ret: %d\n", ret);
 	}
-*/  //printer_init(360,85,110,'bmp',0);
+
 	state = 2;	/* raw serial */
 	scc_ptr->state = state;
 
@@ -166,7 +163,7 @@ scc_serial_win_change_params(int port)
 
 void
 scc_serial_win_fill_readbuf(int port, int space_left, double dcycs)
-{/*
+{
 	byte	tmp_buf[256];
 	Scc	*scc_ptr;
 	HANDLE	host_handle;
@@ -180,9 +177,9 @@ scc_serial_win_fill_readbuf(int port, int space_left, double dcycs)
 	if(host_handle == 0) {
 		return;
 	}
-*/
+
 	/* Try reading some bytes */
-/*	space_left = MIN(256, space_left);
+	space_left = MIN(256, space_left);
 	ret = ReadFile(host_handle, tmp_buf, space_left, &bytes_read, NULL);
 
 	if(ret == 0) {
@@ -194,7 +191,7 @@ scc_serial_win_fill_readbuf(int port, int space_left, double dcycs)
 			scc_add_to_readbuf(port, tmp_buf[i], dcycs);
 		}
 	}
-	*/
+	
 }
 
 void
@@ -213,10 +210,10 @@ scc_serial_win_empty_writebuf(int port)
 	scc_ptr = &(scc_stat[port]);
 
 	//printf("win_empty_writebuf, host_handle: %d\n", scc_ptr->host_handle);
-	/*host_handle = scc_ptr->host_handle;
+	host_handle = scc_ptr->host_handle;
 	if(host_handle == 0) {
 		return;
-	}*/
+	}
 
 	/* Try writing some bytes */
 	done = 0;
@@ -240,22 +237,18 @@ scc_serial_win_empty_writebuf(int port)
 			break;
 		}
 		bytes_written = 1;
-		/*ret = WriteFile(host_handle, &(scc_ptr->out_buf[rdptr]), len,
-				&bytes_written, NULL);*/
-		printer_loop(scc_ptr->out_buf[rdptr]);
-		/*ret = 
+		ret = WriteFile(host_handle, &(scc_ptr->out_buf[rdptr]), len,
+				&bytes_written, NULL);
 		printf("WriteFile ret: %d, bytes_written:%d, len:%d\n", ret,
-			(int)bytes_written, len);*/
-		/*printf("WriteFile bytes_written:%d, len:%d\n",
-			(int)bytes_written, len);*/
-		err_code = (word32)-1;
-/*		if(ret == 0) {
-			err_code = 0; //(word32)GetLastError();
-			printf("WriteFile ret:0, err_code: %08x\n", err_code);
-		}*/
+			(int)bytes_written, len);
 
-//		if(ret == 0 || (bytes_written == 0)) {
-		if (bytes_written == 0) {
+		err_code = (word32)-1;
+		if(ret == 0) {
+			err_code = (word32)GetLastError();
+			printf("WriteFile ret:0, err_code: %08x\n", err_code);
+		}
+
+		if(ret == 0 || (bytes_written == 0)) {
 			done = 1;
 			break;
 		} else {
