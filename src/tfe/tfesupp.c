@@ -34,18 +34,19 @@
  */
 
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+
+
+#include "defc.h"
+#include "tfe/tfesupp.h"
+
 #include <ctype.h>
 #include <windows.h>
 #include <windowsx.h>
-#include <tchar.h>
+//#include <tchar.h>
 #include <commctrl.h>
 #include <commdlg.h>
 
-#include "tfesupp.h"
 
 
 // Lib Stuff

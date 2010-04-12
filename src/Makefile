@@ -5,7 +5,7 @@ OBJECTS1 = adb.o clock.o config.o dis.o engine_c.o scc.o iwm.o \
 	sound.o sound_driver.o video.o scc_socket_driver.o scc_windriver.o \
 	scc_macdriver.o
 
-OBJECTS2 = tfe/tfe.o tfe/tfesupp.o tfe/arch/win32/tfearch.o
+OBJECTS2 = tfe/tfe.o tfe/tfearch.o tfe/tfesupp.o tfe/uilib.o
 
 include vars
 
@@ -93,7 +93,7 @@ engine_s.o: 8inst_s.h 16inst_s.h 8size_s.h 16size_s.h size_s.h
 	$(AS) -c $(OPTS) -I. $*.s
 
 .c.o:
-	$(CC) $(CCOPTS) $(XOPTS) -c $(OPTS) -I. $*.c
+	$(CC) $(CCOPTS) $(XOPTS) -c $(OPTS) -I. -o $*.o $*.c
 
 .cpp.O:
 	$(CC) $(CCOPTS) $(XOPTS) -c $(OPTS) -I. $*.c
@@ -131,8 +131,11 @@ sim65816.o: sim65816.c defc.h defcomm.h iwm.h protos.h
 smartport.o: smartport.c defc.h defcomm.h iwm.h protos.h
 sound.o: sound.c defc.h defcomm.h iwm.h protos.h sound.h
 sound_driver.o: sound_driver.c defc.h defcomm.h iwm.h protos.h sound.h
-tfe.o: tfe/tfe.c
 video.o: video.c defc.h defcomm.h iwm.h protos.h superhires.h kegsfont.h
+tfe.o: tfe/tfe.c tfe/tfe.h tfe/tfe_protos.h
+tfearch.o: tfe/tfearch.c tfe/tfearch.h tfe/tfe_protos.h
+tfesupp.o: tfe/tfesupp.c tfe/tfesupp.h tfe/tfe_protos.h
+uilib.o: tfe/uilib.c tfe/uilib.h tfe/tfe_protos.h
 macdriver.o: macdriver.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
 macsnd_driver.o: macsnd_driver.c defc.h defcomm.h iwm.h protos.h sound.h
 windriver.o: windriver.c defc.h defcomm.h iwm.h protos.h protos_windriver.h winresource.h kegs32.o

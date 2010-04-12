@@ -19,7 +19,7 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-/*tfc.c*/
+/*tfe.c*/
 int tfe_enabled;
 
 void tfe_init(void);

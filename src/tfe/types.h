@@ -30,20 +30,16 @@
 #ifndef _TYPES_H
 #define _TYPES_H
 
-/*#ifndef BYTE
+//#include "vice.h"
+
 #define BYTE unsigned char
-#endif
 
-#ifndef WORD
 #define WORD unsigned short
-#endif*/
 
-#ifndef DWORD
-   //#ifdef DWORD_IS_LONG
-   #define DWORD unsigned long
-   //#else
-   //#define DWORD unsigned int
-   //#endif
+#ifdef DWORD_IS_LONG
+#define DWORD unsigned long
+#else
+#define DWORD unsigned int
 #endif
 
 /* RGJ added for AppleWin */
@@ -58,7 +54,7 @@ typedef signed int SDWORD;
 typedef DWORD CLOCK;
 /* Maximum value of a CLOCK.  */
 #define CLOCK_MAX (~((CLOCK)0))
-/*
+
 #if defined(__GNUC__) && defined(__i386__) && !defined(NO_REGPARM)
 #define REGPARM1 __attribute__((regparm(1)))
 #define REGPARM2 __attribute__((regparm(2)))
@@ -68,6 +64,6 @@ typedef DWORD CLOCK;
 #define REGPARM2
 #define REGPARM3
 #endif
-*/
+
 #endif
 
