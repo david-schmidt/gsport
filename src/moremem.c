@@ -279,7 +279,7 @@ fixup_intcx()
 	int	start_k;
 	word32	mask;
 	int	j, k;
-	int test1;
+
 	rom10000 = &(g_rom_fc_ff_ptr[0x30000]);
 
 	no_io_shadow = (g_c035_shadow_reg & 0x40);
@@ -1464,6 +1464,7 @@ io_read(word32 loc, double *cyc_ptr)
 		case 0x94: case 0x95: case 0x96: case 0x97:
 		case 0x98: case 0x99: case 0x9a: case 0x9b:
 		case 0x9c: case 0x9d: case 0x9e: case 0x9f:
+#ifdef HAVE_PARALLEL
 		if (g_parallel)
 		{
 			return parallel_read((word16)loc & 0xf);
@@ -1472,7 +1473,9 @@ io_read(word32 loc, double *cyc_ptr)
 		{
 			UNIMPL_READ;
 		}
-
+#else
+			UNIMPL_READ;
+#endif
 
 		/* 0xc0a0 - 0xc0af */
 		case 0xa0: case 0xa1: case 0xa2: case 0xa3:
@@ -1496,6 +1499,7 @@ io_read(word32 loc, double *cyc_ptr)
 		//case 0xb8:
 		//	return 0;
 		//	break;
+#ifdef HAVE_TFE
 		/*Uthernet read access on slot 3*/
 		case 0xb0:
 		case 0xb1:
@@ -1518,6 +1522,7 @@ io_read(word32 loc, double *cyc_ptr)
 			}
 			else
 			{return 0;}
+#endif
 
 		/* 0xc0c0 - 0xc0cf */
 		case 0xc0: case 0xc1: case 0xc2: case 0xc3:
@@ -2156,6 +2161,7 @@ io_write(word32 loc, int val, double *cyc_ptr)
 		case 0x94: case 0x95: case 0x96: case 0x97:
 		case 0x98: case 0x99: case 0x9a: case 0x9b:
 		case 0x9c: case 0x9d: case 0x9e: case 0x9f:
+#ifdef HAVE_PARALLEL
 		if (g_parallel)
 		{
 		return parallel_write((word16)loc & 0xf, (byte)val);
@@ -2164,6 +2170,9 @@ io_write(word32 loc, int val, double *cyc_ptr)
 		{
 		UNIMPL_WRITE;
 		}
+#else
+		UNIMPL_WRITE;
+#endif
 
 		/* 0xc0a0 - 0xc0af */
 		case 0xa0: case 0xa1: case 0xa3:
@@ -2186,6 +2195,7 @@ io_write(word32 loc, int val, double *cyc_ptr)
 		//case 0xb8: case 0xb9: case 0xba: case 0xbb:
 		//case 0xbc: case 0xbd: case 0xbe: case 0xbf:
 		//	UNIMPL_WRITE;
+#ifdef HAVE_TFE
 		/*Uthernet write access on slot 3*/
 		case 0xb0:
 		case 0xb1:
@@ -2211,6 +2221,7 @@ io_write(word32 loc, int val, double *cyc_ptr)
 			{
 			UNIMPL_WRITE;
 			}
+#endif
 
 		/* 0xc0c0 - 0xc0cf */
 		case 0xc0: case 0xc1: case 0xc2: case 0xc3:

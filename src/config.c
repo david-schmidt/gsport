@@ -519,6 +519,7 @@ cfg_text_screen_dump()
 	fclose(ofile);
 }
 
+#ifdef HAVE_TFE
 void 
 cfg_get_tfe_name()
 {   
@@ -549,6 +550,7 @@ cfg_get_tfe_name()
 	}
 	return;
 }
+#endif
 
 void
 config_vbl_update(int doit_3_persec)
@@ -2020,7 +2022,9 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 	char	*curstr, *defstr;
 	char	*str;
 	char	*outstr;
+#ifdef HAVE_TFE
 	char	*strval;
+#endif
 	int	*iptr;
 	int	val;
 	int	num_opts;
@@ -3147,6 +3151,8 @@ config_control_panel()
 		if(g_cfg_slotdrive >= 0) {
 			cfg_file_draw();
 		}
+
+#ifdef HAVE_TFE
 		/*HACK eh, at least I think it is. Display the available ethernet interfaces
 		when in the ethernet control panel. This is the only way one can customize a menu pane.
 		Kent did it with the directory browser, so why not.*/
@@ -3154,6 +3160,7 @@ config_control_panel()
 		{
 			cfg_get_tfe_name();
 		}
+#endif
 
 		key = -1;
 		while(g_config_control_panel) {

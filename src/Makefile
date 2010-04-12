@@ -42,6 +42,7 @@ gsportmac: $(OBJECTS) compile_time.o
 # Linux for X builds:
 gsportx: $(OBJECTS) compile_time.o
 	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11
+	echo $(OBJECTS)
 	mv gsportx ..
 	cp -f ../config.template ../config.txt 
 
@@ -92,6 +93,9 @@ engine_s.o: 8inst_s.h 16inst_s.h 8size_s.h 16size_s.h size_s.h
 .c.o:
 	$(CC) $(CCOPTS) $(XOPTS) -c $(OPTS) -I. $*.c
 
+.cpp.O:
+	$(CC) $(CCOPTS) $(XOPTS) -c $(OPTS) -I. $*.c
+
 partls: partls.c
 	cc $(CCOPTS) $(XOPTS) $(OPTS) -o partls partls.c
 
@@ -119,10 +123,13 @@ iwm.o: iwm.c defc.h defcomm.h iwm.h protos.h iwm_35_525.h
 joystick_driver.o: joystick_driver.c defc.h defcomm.h iwm.h protos.h
 moremem.o: moremem.c defc.h defcomm.h iwm.h protos.h
 paddles.o: paddles.c defc.h defcomm.h iwm.h protos.h
+parallel.o: parallel.c defc.h
+printer.o: printer.cpp
 sim65816.o: sim65816.c defc.h defcomm.h iwm.h protos.h
 smartport.o: smartport.c defc.h defcomm.h iwm.h protos.h
 sound.o: sound.c defc.h defcomm.h iwm.h protos.h sound.h
 sound_driver.o: sound_driver.c defc.h defcomm.h iwm.h protos.h sound.h
+tfe.o: tfe/tfe.c
 video.o: video.c defc.h defcomm.h iwm.h protos.h superhires.h kegsfont.h
 macdriver.o: macdriver.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
 macsnd_driver.o: macsnd_driver.c defc.h defcomm.h iwm.h protos.h sound.h

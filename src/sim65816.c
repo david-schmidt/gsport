@@ -26,7 +26,9 @@ const char rcsid_sim65816_c[] = "@(#)$KmKId: sim65816.c,v 1.367 2004-11-22 02:39
 #define INCLUDE_RCSID_C
 #include "defc.h"
 #undef INCLUDE_RCSID_C
-#include "printer.h"
+#ifdef HAVE_PARALLEL
+  #include "printer.h"
+#endif
 #define PC_LOG_LEN	(8*1024)
 
 
@@ -622,7 +624,9 @@ void
 my_exit(int ret)
 {
 	end_screen();
+#ifdef HAVE_PARALLEL
 	printer_close();
+#endif
 	printf("exiting\n");
 	exit(ret);
 }
@@ -921,8 +925,11 @@ kegsmain(int argc, char **argv)
 
 	iwm_init();
 	config_init();
+#ifdef HAVE_PARALLEL
 	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage);
+#endif
 	//If ethernet is enabled in config.kegs, lets initialize it
+#ifdef HAVE_TFE
 	if (g_ethernet == 1)
 	{
 	int i = 0;
@@ -948,6 +955,7 @@ kegsmain(int argc, char **argv)
 	lib_free(ppdes);
 	tfe_init();
 	}
+#endif
 
 	load_roms_init_memory();
 

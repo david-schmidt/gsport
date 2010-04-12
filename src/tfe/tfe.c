@@ -36,7 +36,7 @@
 #include <pcap.h>
 #endif
 
-#include "..\defc.h"
+#include "../defc.h"
 #include "tfesupp.h"
 
 
