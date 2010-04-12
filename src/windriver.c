@@ -24,23 +24,44 @@ const char rcsid_windriver_c[] = "@(#)$KmKId: windriver.c,v 1.11 2004-11-24 16:4
 /* Based on code from Chea Chee Keong from KEGS32, which is available at */
 /*  http://www.geocities.com/akilgard/kegs32 */
 
-#define WIN32_LEAN_AND_MEAN	/* Tell windows we want less header gunk */
+#define WIN32_LEAN_AND_MEAN	/* Tell windows we want less header junk */
 #define STRICT			/* Tell Windows we want compile type checks */
+
+#pragma comment(linker, \
+    "\"/manifestdependency:type='Win32' "\
+    "name='Microsoft.Windows.Common-Controls' "\
+    "version='6.0.0.0' "\
+    "processorArchitecture='*' "\
+    "publicKeyToken='6595b64144ccf1df' "\
+    "language='*'\"")
 
 #include <windows.h>
 #include <windowsx.h>
 #include <mmsystem.h>
 #include <winsock.h>
 #include <commctrl.h>
-
+#include <Commdlg.h>
+#include <tchar.h>
+#include <shellapi.h>
+#include "winresource.h"
 #include "defc.h"
 #include "protos_windriver.h"
+#include "printer.h"
+
+
+#if defined _MSC_VER && defined _WIN64
+#define gwlproc GWLP_WNDPROC
+#endif
+#if defined _MSC_VER && defined _WIN32 && !defined _WIN64 
+#define gwlproc GWL_WNDPROC
+#endif
 
 extern int Verbose;
 
 extern int g_warp_pointer;
 extern int g_screen_depth;
 extern int g_force_depth;
+
 int g_screen_mdepth = 0;
 
 extern int g_quit_sim_now;
@@ -81,6 +102,21 @@ HWND	g_hwnd_main;
 BITMAPINFO *g_bmapinfo_ptr = 0;
 volatile BITMAPINFOHEADER *g_bmaphdr_ptr = 0;
 
+// KEGS32 specific customisations
+HWND    g_win_toolbar=NULL;
+HWND    g_win_status=NULL;
+RECT    g_win_status_height={0};
+RECT    g_win_toolbar_height={0};
+int     g_win_status_debug = 0;
+RECT	g_main_window_saved_rect;
+HMENU	g_main_window_menu_saved;
+int	g_win_fullscreen_state = 0;
+WNDPROC oldEditWndProc;
+extern int g_joystick_type;
+extern int g_config_kegs_update_needed;
+extern int g_limit_speed;
+extern int g_doc_vol;
+
 int g_num_a2_keycodes = 0;
 
 extern char *g_status_ptrs[MAX_STATUS_LINES];
@@ -94,7 +130,7 @@ int g_win_button_states = 0;
 int g_a2_key_to_wsym[][3] = {
 	{ 0x35,	VK_ESCAPE,	0 },
 	{ 0x7a,	VK_F1,	0 },
-	{ 0x7b,	VK_F2,	0 },
+	{ 0x78,	VK_F2,	0 },
 	{ 0x63,	VK_F3,	0 },
 	{ 0x76,	VK_F4,	0 },
 	{ 0x60,	VK_F5,	0 },
@@ -219,6 +255,226 @@ win_nonblock_read_stdin(int fd, char *bufptr, int len)
 }
 
 void
+init_window(HWND hwnd,BOOL initFlag) {
+        RECT rect;
+        RECT wrect;
+        int  adjx,adjy;
+		int win_height;
+        GetClientRect(hwnd,&rect);
+        GetWindowRect(hwnd,&wrect);
+        adjx=(wrect.right-wrect.left)-(rect.right-rect.left);
+        adjy=(wrect.bottom-wrect.top)-(rect.bottom-rect.top);
+
+		win_height=X_A2_WINDOW_HEIGHT+(g_win_toolbar_height.bottom-g_win_toolbar_height.top)+(g_win_status_height.bottom-g_win_status_height.top);
+
+        if (g_win_status_debug) {
+                win_height+=(MAX_STATUS_LINES*16);
+        } 
+
+        if (initFlag) {
+                SetWindowPos(hwnd,NULL,
+                             g_main_window_saved_rect.left,
+			     g_main_window_saved_rect.top,
+                             X_A2_WINDOW_WIDTH+adjx,
+                             win_height+adjy,
+                             SWP_NOACTIVATE | SWP_NOZORDER);
+        } else {
+                SetWindowPos(hwnd,HWND_NOTOPMOST,
+                             g_main_window_saved_rect.left,
+			     g_main_window_saved_rect.top,
+                             X_A2_WINDOW_WIDTH+adjx,
+                             win_height+adjy,
+                             SWP_SHOWWINDOW);
+        }
+        SendMessage(g_win_status,WM_SIZE,0,0);
+        SendMessage(g_win_toolbar,WM_SIZE,0,0);
+}
+
+void win_center_dialog (HWND hDlg) {
+    RECT rc, rcDlg,rcOwner;
+    HWND hwndOwner;
+
+    if ((hwndOwner = GetParent(hDlg)) == NULL) {
+        hwndOwner = GetDesktopWindow();
+    }
+
+    GetWindowRect(hwndOwner,&rcOwner);
+    GetWindowRect(hDlg,&rcDlg);
+    CopyRect(&rc,&rcOwner);
+    OffsetRect(&rcDlg,-rcDlg.left,-rcDlg.top);
+    OffsetRect(&rc,-rc.left,-rc.top);
+    OffsetRect(&rc,-rcDlg.right,-rcDlg.bottom);
+
+    SetWindowPos(hDlg,g_hwnd_main,rcOwner.left+(rc.right/2),
+                 rcOwner.top+(rc.bottom/2), 0,0,
+                 SWP_SHOWWINDOW | SWP_NOSIZE );
+}
+
+void
+read_disk_entry(HWND hDlg)
+{
+	char buf[2048];
+	int slot,drive;
+	HWND hwnd;
+	for (slot=5;slot<=7;slot++) {
+		for(drive=0;drive<=1;drive++) {
+			Disk* dsk = cfg_get_dsk_from_slot_drive(slot,drive);
+			buf[0]=0;
+			if (dsk->name_ptr && dsk->fd > 0) {
+               			hwnd = GetDlgItem(hDlg,10000+slot*10+(drive+1));
+				strcpy(buf,dsk->name_ptr);
+                       		SetWindowText(hwnd,buf);
+			}
+		}
+	}
+}
+
+void
+write_disk_entry(HWND hDlg)
+{
+	char buf[2048];
+	int slot,drive;
+	HWND hwnd;
+	for (slot=5;slot<=7;slot++) {
+		for(drive=0;drive<=1;drive++) {
+               		hwnd = GetDlgItem(hDlg,10000+slot*10+(drive+1));
+			buf[0]=0;
+                	GetWindowText(hwnd,buf,2048);
+			if (lstrlen(buf)>0) {
+				insert_disk(slot, drive, buf, 0, 0, 0, -1);
+			} else {
+				eject_disk_by_num(slot,drive);
+			}
+		}
+	}
+}
+
+// Message handler for handling edit control
+// For dropping files
+LRESULT CALLBACK win_dialog_edit(HWND hwnd, UINT message, WPARAM wParam, 
+                                 LPARAM lParam) {
+    switch (message) {
+    case WM_DROPFILES:
+        {    
+            TCHAR buffer[2048]={0};
+            HDROP hdrop = (HDROP) wParam;
+            memset(buffer,0,2048*sizeof(TCHAR));
+            DragQueryFile(hdrop,0,buffer,2048);
+            SetWindowText(hwnd,buffer);
+            DragFinish(hdrop);
+            return 0;
+        }
+    default:
+        return CallWindowProc(oldEditWndProc,hwnd,message,wParam,lParam);
+    }
+}
+
+// Message handler for disk config.
+LRESULT CALLBACK win_dialog_disk(HWND hDlg, UINT message, WPARAM wParam, 
+                                 LPARAM lParam)
+{
+    typedef LONG(CALLBACK *SETWL)(HWND,int,LONG);
+
+    SETWL SetWL=NULL;
+
+    switch (message) {
+    case WM_INITDIALOG:
+          win_center_dialog(hDlg);
+
+          // Subclass the edit-control
+          SetWL=SetWindowLong;
+          oldEditWndProc=(WNDPROC) SetWL(GetDlgItem(hDlg,IDC_EDIT_S5D1),
+                                         gwlproc,(LONG)win_dialog_edit);
+          SetWL(GetDlgItem(hDlg,IDC_EDIT_S5D2),gwlproc,
+               (LONG)win_dialog_edit);
+          SetWL(GetDlgItem(hDlg,IDC_EDIT_S6D1),gwlproc,
+               (LONG)win_dialog_edit);
+          SetWL(GetDlgItem(hDlg,IDC_EDIT_S6D2),gwlproc,
+               (LONG)win_dialog_edit);
+          SetWL(GetDlgItem(hDlg,IDC_EDIT_S7D1),gwlproc,
+               (LONG)win_dialog_edit);
+          SetWL(GetDlgItem(hDlg,IDC_EDIT_S7D2),gwlproc,
+               (LONG)win_dialog_edit);
+
+          // Clean entry field (init)
+          SetWindowText(GetDlgItem(hDlg,IDC_EDIT_S5D1),_T(""));
+          SetWindowText(GetDlgItem(hDlg,IDC_EDIT_S5D2),_T(""));
+          SetWindowText(GetDlgItem(hDlg,IDC_EDIT_S6D1),_T(""));
+          SetWindowText(GetDlgItem(hDlg,IDC_EDIT_S6D2),_T(""));
+          SetWindowText(GetDlgItem(hDlg,IDC_EDIT_S7D1),_T(""));
+          SetWindowText(GetDlgItem(hDlg,IDC_EDIT_S7D2),_T(""));
+          read_disk_entry(hDlg);
+          return TRUE;
+    case WM_COMMAND:
+       switch (LOWORD(wParam)) {
+       case IDOK:
+           write_disk_entry(hDlg);
+           EndDialog(hDlg, LOWORD(wParam));
+           return TRUE;
+       case IDCANCEL:
+           EndDialog(hDlg, LOWORD(wParam));
+           return FALSE;
+       case IDC_BTN_S5D1:
+       case IDC_BTN_S5D2:
+       case IDC_BTN_S6D1:
+       case IDC_BTN_S6D2:
+       case IDC_BTN_S7D1:
+       case IDC_BTN_S7D2:
+           {
+               
+               TCHAR filename[2048]={0};
+             
+	       OPENFILENAME opfn;
+	       ZeroMemory(&opfn,sizeof(opfn));
+	       opfn.lStructSize=sizeof(opfn);
+	       opfn.hwndOwner=hDlg;
+	       opfn.lpstrFilter=_T("2mg format (*.2mg)\0*.2mg\0"
+				   "Prodos order format (*.po)\0*.po\0"
+				   "Dos order format (*.dsk)\0*.dsk\0"
+				   "All Files (*.*)\0*.*\0"
+				   "\0\0");
+	       opfn.lpstrFile=filename;
+	       opfn.nMaxFile=2048;
+	       opfn.Flags=OFN_EXPLORER | OFN_FILEMUSTEXIST | 
+			  OFN_HIDEREADONLY | OFN_NOCHANGEDIR ;
+	       if (GetOpenFileName(&opfn)) {
+		   SetWindowText(GetDlgItem(hDlg,LOWORD(wParam-1000)),
+				 filename);
+	       }    
+           }
+           break;
+       }
+       break;
+    }
+    return FALSE;
+}
+
+
+
+// Message handler for about box.
+LRESULT CALLBACK win_dialog_about_dialog(HWND hDlg, 
+                                         UINT message, WPARAM wParam, 
+                                         LPARAM lParam)
+{
+    switch (message) {
+    case WM_INITDIALOG:
+          win_center_dialog(hDlg);
+          return TRUE;
+    case WM_COMMAND:
+       switch (LOWORD(wParam)) {
+       case IDOK:
+           EndDialog(hDlg, LOWORD(wParam));
+           return TRUE;
+       case IDCANCEL:
+           EndDialog(hDlg, LOWORD(wParam));
+           return FALSE;
+
+       }
+    }
+    return FALSE;
+}
+
+void
 x_dialog_create_kegs_conf(const char *str)
 {
 }
@@ -278,6 +534,101 @@ win_event_mouse(WPARAM wParam, LPARAM lParam)
 }
 
 void
+win_event_command(HWND hwnd, int id, HWND g_wnd_ctl, UINT code_notify)
+{
+        switch (id) {
+        case ID_HELP_ABOUT:
+                DialogBoxParam(GetModuleHandle(NULL), 
+                               (LPCTSTR)IDD_ABOUT_DIALOG,
+                               hwnd, 
+                               (DLGPROC)win_dialog_about_dialog,0);
+                break;
+        case ID_HELP_KEY:
+                DialogBoxParam(GetModuleHandle(NULL), 
+                               (LPCTSTR)IDD_KEGS32_KEY,
+                               hwnd, 
+                               (DLGPROC)win_dialog_about_dialog,0);
+                break;
+        case ID_FILE_EXIT:
+                PostQuitMessage(0);
+                break;
+
+        case ID_FILE_SENDRESET:
+                // Simulate key pressing to send reset
+                adb_physical_key_update(0x36, 0);
+                adb_physical_key_update(0x7f, 0);
+                adb_physical_key_update(0x7f, 1);
+                adb_physical_key_update(0x36, 1);
+                break;
+        case ID_FILE_SENDREBOOT:
+                // Simulate key pressing to send reset
+                adb_physical_key_update(0x36, 0);
+                adb_physical_key_update(0x37, 0);
+				adb_physical_key_update(0x7f, 0);
+                adb_physical_key_update(0x7f, 1);
+                adb_physical_key_update(0x36, 1);
+                adb_physical_key_update(0x37, 1);
+				adb_physical_key_update(0x37, 0);
+                break;
+		case ID_FILE_FLUSHPRINTER:
+				printer_feed();
+				break;
+        case ID_FILE_DEBUGSTAT:
+                g_win_status_debug = ! g_win_status_debug;
+		GetWindowRect(g_hwnd_main,&g_main_window_saved_rect);
+                init_window(g_hwnd_main,FALSE);
+                if (g_win_status_debug) {
+                        CheckMenuItem(GetMenu(g_hwnd_main),
+                                      ID_FILE_DEBUGSTAT,MF_CHECKED);
+                } else {
+                        CheckMenuItem(GetMenu(g_hwnd_main),
+                                      ID_FILE_DEBUGSTAT,MF_UNCHECKED);
+                } 
+                break;
+   	case ID_FILE_JOYSTICK:
+		if (g_joystick_type == 4) { 
+			g_joystick_type=2;
+
+		} else {
+			g_joystick_type=4;
+		} 
+		if (g_joystick_type==4) {
+         		CheckMenuItem(GetMenu(g_hwnd_main),ID_FILE_JOYSTICK,
+            	                      MF_UNCHECKED);
+       		} else {
+		        CheckMenuItem(GetMenu(g_hwnd_main),ID_FILE_JOYSTICK,
+                         	      MF_CHECKED);
+       		}
+		g_config_kegs_update_needed=1;
+       		break;
+   	case ID_FILE_DISK:
+          	DialogBoxParam(GetModuleHandle(NULL), 
+          	               (LPCTSTR)IDD_DLG_DISKCONF,
+          	               g_hwnd_main, 
+          	               (DLGPROC)win_dialog_disk,0);
+    		break;
+   	case ID_SPEED_1MHZ:
+      		g_limit_speed = 1;
+		g_config_kegs_update_needed=1;
+      		break;
+   	case ID_SPEED_2MHZ:
+      		g_limit_speed = 2;
+		g_config_kegs_update_needed=1;
+      		break;
+   	case ID_SPEED_8MHZ:
+      		g_limit_speed = 3;
+		g_config_kegs_update_needed=1;
+      		break;
+   	case ID_SPEED_FMHZ:
+      		g_limit_speed = 0;
+		g_config_kegs_update_needed=1;
+      		break;
+        default:
+                break;
+        }       
+}
+
+void
 win_event_key(HWND hwnd, UINT raw_vk, BOOL down, int repeat, UINT flags)
 {
 	word32	vk;
@@ -292,6 +643,7 @@ win_event_key(HWND hwnd, UINT raw_vk, BOOL down, int repeat, UINT flags)
 	}
 
 	vk = raw_vk + (flags & 0x100);
+
 #if 0
 	printf("Key event, vk=%04x, down:%d, repeat: %d, flags: %08x\n",
 			vk, down, repeat, flags);
@@ -371,6 +723,7 @@ win_event_handler(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lParam)
 		HANDLE_MSG(hwnd, WM_SYSKEYUP, win_event_key);
 		HANDLE_MSG(hwnd, WM_SYSKEYDOWN, win_event_key);
 		HANDLE_MSG(hwnd, WM_DESTROY, win_event_quit);
+                HANDLE_MSG(hwnd, WM_COMMAND, win_event_command);
 	}
 
 #if 0
@@ -399,11 +752,12 @@ win_event_handler(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lParam)
 
 
 int
-main(int argc, char **argv)
+_tmain(int argc, char **argv)
 {
 	WNDCLASS wndclass;
 	RECT	rect;
 	int	height;
+        int iStatusWidths[] = {60, 100,200,300, -1};
 
 	InitCommonControls();
 
@@ -412,11 +766,12 @@ main(int argc, char **argv)
 	wndclass.cbClsExtra = 0;
 	wndclass.cbWndExtra = 0;
 	wndclass.hInstance = GetModuleHandle(NULL);
-	wndclass.hIcon = LoadIcon((HINSTANCE)NULL, IDI_APPLICATION);
+        wndclass.hIcon = LoadIcon((HINSTANCE) GetModuleHandle(NULL), 
+                        MAKEINTRESOURCE(IDC_KEGS32)); 
 	wndclass.hCursor = LoadCursor((HINSTANCE) NULL, IDC_ARROW);
-	wndclass.hbrBackground = GetStockObject(WHITE_BRUSH);
-	wndclass.lpszMenuName = NULL;
-	wndclass.lpszClassName = "gsportwin";
+	wndclass.hbrBackground = GetStockObject(BLACK_BRUSH);
+        wndclass.lpszMenuName =  MAKEINTRESOURCE(IDC_KEGS32);
+	wndclass.lpszClassName = _T("Kegs32");
 
 	// Register the window
 	if(!RegisterClass(&wndclass)) {
@@ -427,11 +782,61 @@ main(int argc, char **argv)
 	height = X_A2_WINDOW_HEIGHT + (MAX_STATUS_LINES * 16) + 32;
 	g_main_height = height;
 
-	g_hwnd_main = CreateWindow("gsportwin", "GSportWin - Apple //gs Emulator",
+	g_hwnd_main = CreateWindow(_T("KEGS32"), 
+        _T("KEGS32 - Apple //gs Emulator"),
 		WS_TILED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		X_A2_WINDOW_WIDTH, height,
 		NULL, NULL, GetModuleHandle(NULL), NULL);
+
+        if (!g_hwnd_main) {
+            printf("Window create failed\n");
+            exit(1);
+        }
+
+        // Create Toolbar   
+        g_win_toolbar = CreateWindowEx(0, TOOLBARCLASSNAME, NULL,
+                  WS_CHILD | WS_VISIBLE |  CCS_ADJUSTABLE | TBSTYLE_TOOLTIPS,
+                  0, 0, 0, 0,
+                  g_hwnd_main,(HMENU)IDC_KEGS32, GetModuleHandle(NULL), NULL);
+        SendMessage(g_win_toolbar,TB_BUTTONSTRUCTSIZE,(WPARAM)sizeof(TBBUTTON),0);
+        {
+            TBADDBITMAP tbab;
+            TBBUTTON tbb[6];
+            int i,j;
+            int idCmd[]={ID_FILE_DISK,-1,
+                     ID_SPEED_1MHZ,ID_SPEED_2MHZ,ID_SPEED_8MHZ,ID_SPEED_FMHZ};
+
+            ZeroMemory(tbb, sizeof(tbb));
+
+            for (i=0,j=0;i<sizeof(tbb)/sizeof(TBBUTTON);i++) {
+                if (idCmd[i] <0) {
+                        tbb[i].fsStyle = TBSTYLE_SEP;
+                } else {
+                       tbb[i].iBitmap = j;
+                       tbb[i].idCommand = idCmd[i];
+                       tbb[i].fsState = TBSTATE_ENABLED;
+                       tbb[i].fsStyle = TBSTYLE_BUTTON;
+                       j++;
+                }
+            }
+
+            tbab.hInst = GetModuleHandle(NULL);
+            tbab.nID = IDC_KEGS32;
+            SendMessage(g_win_toolbar, TB_ADDBITMAP,j, (LPARAM)&tbab);
+            SendMessage(g_win_toolbar, TB_ADDBUTTONS,i, (LPARAM)&tbb);
+            GetWindowRect(g_win_toolbar,&g_win_toolbar_height);
+        }
+
+        // Create Status
+        g_win_status  = CreateWindowEx(0, STATUSCLASSNAME, NULL,
+                          WS_CHILD | WS_VISIBLE , 0, 0, 0, 0,
+                          g_hwnd_main, 
+                          (HMENU)ID_STATUSBAR, GetModuleHandle(NULL), NULL);
+        SendMessage(g_win_status, SB_SETPARTS, 5, (LPARAM)iStatusWidths);
+        GetWindowRect(g_win_status,&g_win_status_height);
+        SendMessage(g_win_toolbar,TB_AUTOSIZE,0,0);
+        SendMessage(g_win_status,WM_SIZE,0,0);
 
 	printf("g_hwnd_main = %p, height = %d\n", g_hwnd_main, height);
 	GetWindowRect(g_hwnd_main, &rect);
@@ -441,7 +846,7 @@ main(int argc, char **argv)
 	g_main_dc = GetDC(g_hwnd_main);
 
 	SetTextColor(g_main_dc, 0);
-	SetBkColor(g_main_dc, 0xffffff);
+	SetBkColor(g_main_dc, 0x0000000);
 
 	g_main_cdc = CreateCompatibleDC(g_main_dc);
 
@@ -461,7 +866,7 @@ check_input_events()
 
 	while(PeekMessage(&msg, g_hwnd_main, 0, 0, PM_NOREMOVE)) {
 		if(GetMessage(&msg, g_hwnd_main, 0, 0) > 0) {
-			TranslateMessage(&msg);
+    			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		} else {
 			printf("GetMessage returned <= 0\n");
@@ -545,7 +950,6 @@ x_get_kimage(Kimage *kimage_ptr)
 	return;
 }
 
-
 void
 dev_video_init()
 {
@@ -599,6 +1003,8 @@ dev_video_init()
 
 	g_installed_full_superhires_colormap = 1;
 
+	GetWindowRect(g_hwnd_main,&g_main_window_saved_rect);
+        init_window(g_hwnd_main,TRUE);
 	ShowWindow(g_hwnd_main, SW_SHOWDEFAULT);
 	UpdateWindow(g_hwnd_main);
 
@@ -616,22 +1022,97 @@ x_redraw_status_lines()
 	int	len;
 	int	height;
 	int	margin;
+	int 	center_x=0;
+	int 	center_y=0;
+	int toolbar_height;
+	RECT 	wrect;
+    	TCHAR 	buffer[255]; 
 
 	height = 16;
 	margin = 0;
 
-	oldtextcolor = SetTextColor(g_main_dc, 0);
-	oldbkcolor = SetBkColor(g_main_dc, 0xffffff);
-	for(line = 0; line < MAX_STATUS_LINES; line++) {
-		buf = g_status_ptrs[line];
-		if(buf != 0) {
-			len = strlen(buf);
-			TextOut(g_main_dc, 10, X_A2_WINDOW_HEIGHT +
-				height*line + margin, buf, len);
+	toolbar_height = 
+		(g_win_toolbar_height.bottom-g_win_toolbar_height.top);
+
+	if (g_win_fullscreen_state) {
+   		GetWindowRect(g_hwnd_main,&wrect);
+		center_x=(wrect.right-wrect.left)-X_A2_WINDOW_WIDTH;
+		center_x=center_x/2;
+		center_y=(wrect.bottom-wrect.top)-X_A2_WINDOW_HEIGHT;
+		if (g_win_status_debug) {
+			center_y-=(MAX_STATUS_LINES*16);
 		}
+		center_y=center_y/2;
+		toolbar_height=0;
 	}
-	SetTextColor(g_main_dc, oldtextcolor);
-	SetBkColor(g_main_dc, oldbkcolor);
+
+        if (g_win_status_debug) {
+        	oldtextcolor = SetTextColor(g_main_dc, 0xffffff);
+        	oldbkcolor = SetBkColor(g_main_dc, 0x0);
+        	for(line = 0; line < MAX_STATUS_LINES; line++) {
+        		buf = g_status_ptrs[line];
+        		if(buf != 0) {
+        			len = strlen(buf);
+        			TextOut(g_main_dc, 2+center_x, 
+					X_A2_WINDOW_HEIGHT +
+        				height*line + margin +
+					toolbar_height+center_y,
+		                        buf, len);
+        		}
+        	}
+	        SetTextColor(g_main_dc, oldtextcolor);
+	        SetBkColor(g_main_dc, oldbkcolor);
+        }
+
+        if (g_win_status !=NULL) {
+                SendMessage(g_win_status, SB_SETTEXT,0,(LPARAM)_T("GSport "));
+		_stprintf(buffer,_T("Vol:%d"),g_doc_vol);
+	        SendMessage(g_win_status, SB_SETTEXT,1,(LPARAM)buffer);
+		buf=g_status_ptrs[0];
+        	if (buf != NULL) {
+        		buf=strstr(g_status_ptrs[0],"sim MHz:");
+			len=strchr(buf+9,' ')-buf;
+			buffer[len]=0;
+            		if (sizeof(TCHAR) <2) {
+                		strncpy((char *)buffer,buf,len);
+            		} else {
+            		    	mbstowcs((wchar_t *)buffer,buf,len);
+            		}
+            		SendMessageA(g_win_status, SB_SETTEXT,2,(LPARAM) buffer);
+        	} else {
+            		SendMessageA(g_win_status,SB_SETTEXT,2,(LPARAM)_T(
+				"sim MHz:???"));
+        	}
+        	buf=g_status_ptrs[0];
+        	if (buf != NULL) {
+        		buf=strstr(g_status_ptrs[0],"Eff MHz:");
+			len=strchr(buf+9,',')-buf;
+			buffer[len]=0;
+            		if (sizeof(TCHAR) <2) {
+                		strncpy((char *)buffer,buf,len);
+            		} else {
+            		    	mbstowcs((wchar_t *)buffer,buf,len);
+            		}
+            		SendMessageA(g_win_status, SB_SETTEXT,3,(LPARAM) buffer);
+        	} else {
+            		SendMessageA(g_win_status,SB_SETTEXT,3,(LPARAM)_T(
+				"Eff MHz:???"));
+	       	}
+        	buf=g_status_ptrs[5];
+        	if (buf != NULL) {
+        		buf=strstr(g_status_ptrs[5],"fast");
+			len=buf-&(g_status_ptrs[5][0]);
+			buffer[len]=0;
+            		if (sizeof(TCHAR) <2) {
+            		    strncpy((char *)buffer,g_status_ptrs[5],len);
+            		} else {
+                	    mbstowcs((wchar_t *)buffer,g_status_ptrs[5],len);
+            		}
+            		SendMessageA(g_win_status, SB_SETTEXT,4,(LPARAM) buffer);
+        	} else {
+           
+        	}
+        }
 }
 
 
@@ -639,18 +1120,43 @@ void
 x_push_kimage(Kimage *kimage_ptr, int destx, int desty, int srcx, int srcy,
 	int width, int height)
 {
+
 	void	*bitm_old;
 	POINT	point;
+    	RECT 	wrect;	
+	int toolbar_height= 0;
+	int center_x=0;
+	int center_y=0;
 
 	point.x = 0;
 	point.y = 0;
 	ClientToScreen(g_hwnd_main, &point);
 	bitm_old = SelectObject(g_main_cdc, kimage_ptr->dev_handle);
 
-	BitBlt(g_main_dc, destx, desty, width, height,
+
+
+	if (!g_win_fullscreen_state) {
+        	toolbar_height=
+			(g_win_toolbar_height.bottom-g_win_toolbar_height.top);
+	} else {
+    		GetWindowRect(g_hwnd_main,&wrect);
+		center_x=(wrect.right-wrect.left)-X_A2_WINDOW_WIDTH;
+		center_x=center_x/2;
+		center_y=(wrect.bottom-wrect.top)-X_A2_WINDOW_HEIGHT;
+		if (g_win_status_debug) {
+			center_y-=(MAX_STATUS_LINES*16);
+		}
+		center_y=center_y/2;
+	}
+		
+	BitBlt( g_main_dc, 
+		destx+center_x, 
+		desty+toolbar_height+center_y,
+        	width, height,
 		g_main_cdc, srcx, srcy, SRCCOPY);
 
 	SelectObject(g_main_cdc, bitm_old);
+
 }
 
 void
@@ -681,5 +1187,59 @@ x_hide_pointer(int do_hide)
 void
 x_full_screen(int do_full)
 {
+    	DEVMODE dmScreenSettings;
+    	int style;
+
+	if (do_full && !g_win_fullscreen_state) {
+		dmScreenSettings.dmSize=sizeof(dmScreenSettings);
+		dmScreenSettings.dmPelsWidth	= 800;
+		dmScreenSettings.dmPelsHeight	= 600;
+		dmScreenSettings.dmBitsPerPel	= 24;	
+		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|
+ 	                                  DM_PELSHEIGHT;
+			
+           	if (ChangeDisplaySettings(&dmScreenSettings, 2) 
+			!=DISP_CHANGE_SUCCESSFUL) {
+			// If 24-bit palette does not work, try 32-bit            
+			dmScreenSettings.dmBitsPerPel	= 32;	
+           		if (ChangeDisplaySettings(&dmScreenSettings, 2)) {
+				printf (
+				"-- Unable to switch to fullscreen mode\n");
+	                    	printf (
+				"-- No 24-bit or 32-bit mode for fullscreen\n");
+                    		dmScreenSettings.dmBitsPerPel=-1;
+			}
+		}
+
+		if (dmScreenSettings.dmBitsPerPel >0) {
+			g_win_fullscreen_state=!g_win_fullscreen_state;
+            		GetWindowRect(g_hwnd_main,&g_main_window_saved_rect);
+                	ChangeDisplaySettings(&dmScreenSettings, 4); 
+			style=GetWindowLong(g_hwnd_main,GWL_STYLE);
+		        style &= ~WS_CAPTION;
+			SetWindowLong(g_hwnd_main,GWL_STYLE,style);
+            		g_main_window_menu_saved=GetMenu(g_hwnd_main);
+			SetMenu(g_hwnd_main,NULL);
+            		ShowWindow(g_win_status,FALSE);
+            		ShowWindow(g_win_toolbar,FALSE);
+            		SetWindowPos(g_hwnd_main,HWND_TOPMOST,0,0,
+            	             GetSystemMetrics(SM_CXSCREEN),
+            	             GetSystemMetrics(SM_CYSCREEN),
+            	             SWP_SHOWWINDOW);
+
+            	}
+	} else {
+		if (g_win_fullscreen_state) {
+			ChangeDisplaySettings(NULL,0);
+            		style=GetWindowLong(g_hwnd_main,GWL_STYLE);
+            		style |= WS_CAPTION;
+            		SetWindowLong(g_hwnd_main,GWL_STYLE,style);
+            		SetMenu(g_hwnd_main,g_main_window_menu_saved);
+            		ShowWindow(g_win_status,TRUE);
+            		ShowWindow(g_win_toolbar,TRUE);
+			init_window(g_hwnd_main,FALSE);
+			g_win_fullscreen_state=!g_win_fullscreen_state;
+		}
+	}
 	return;
 }

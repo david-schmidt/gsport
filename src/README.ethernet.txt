@@ -1,0 +1,74 @@
+Ethernet support HOW-TO
+-----------------------
+
+Acknowledgment:
+--------------- 
+
+Uthernet (TFE) support in KEGS was made possible by implementing the GPL source written by Spiro Trikaliotis for the Vice emulator - http://www.viceteam.org/ This version of KEGS contains the latest code from VICE 2.1.
+
+Details:
+
+Right now Uthernet emulation only works under Windows. Future support for PCap under OS X and Linux is planned. 
+In order to use Uthernet emulation, you must install WinPCap ( http://www.WinPcap.org/install/default.htm ) and 
+have a wired ethernet connecton on the host computer.
+
+
+KEGS Setup:
+-----------
+
+After KEGS starts, press F4 to enter the text based menu and select the "Ethernet Card Configuration" option.
+
+By default, Uthernet emulation is turned off, enable it by setting "Uthernet Card in Slot 3"to "On".
+
+Next, select the host interface you wish to use to communicate with the outside world. A list of available
+interfaces is provided on screen. For most the default of interface "0" is correct.
+
+Return back to the main menu and save you configuration for good measure. Due to limitations, you must exit
+and restart KEGS for the changes you made to take effect. Next is configuring the Apple IIgs side of things.
+
+GS/OS Setup:
+------------
+
+In order to use TCP/IP connectivity under GS/OS, you have to install the latest version of Marinetti and the
+Uthernet Link Layer.
+
+First download and install the latest version of Marinetti 3.0 available at:
+http://www.apple2.org/marinetti/Marinetti3.0b1.SHK
+
+Then install the latest TCPIP INIT available at
+http://www.apple2.org/marinetti/TCPIP30b3.SHK
+
+Just extract and copy the file to the "System.Setup" folder in your GS/OS system folder, overwriting the existing file
+
+Last, install the latest Uthernet Link Layer (1.0.1b5) available at:
+http://www.wannop.info/speccie/uthernetll.bxy
+
+Just extract and copy the file to the "TCPIP" folder in your GS/OS system folder.
+
+After copying over all the files, reboot the emulated IIgs. Once at the desktop, bring up the graphical control
+panel available in the Apple menu and double click the "TCP/IP" icon.
+
+Click on "Setup Connection..." Select the "Uthernet" link layer from the drop down and then click "Configure..."
+
+Set "Lan Slot:" to "3", check off the DHCP option and then click "Save". Click "OK" to leave the setup dialog.
+
+You should be able to click "Connect to network" and successfully connect to your TCP/IP netowork.
+
+From this point on, you are free to run any TCP/IP aware GS/OS applications.
+
+The following applications have been tested and seem to work fine:
+------------------------------------------------------------------
+
+Spectrum Automated File Exchange 2.1.9 (FTP client, use passive mode)
+Telnet application included with Marinetti
+
+The following applications have been tested and DO NOT work:
+------------------------------------------------------------
+
+Casper web server: It will not serve web pages. This is likely a limitation of WinPCap.
+
+A note about 8-bit applications:
+--------------------------------
+
+Uthernet enabled versions of Contiki seem to work fine with KEGS. Other 8-bit software should work fine but
+are untested at this time.

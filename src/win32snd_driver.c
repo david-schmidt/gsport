@@ -1,23 +1,12 @@
-/*
- GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
- 
- Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
-
- This program is free software; you can redistribute it and/or modify it 
- under the terms of the GNU General Public License as published by the 
- Free Software Foundation; either version 2 of the License, or (at your 
- option) any later version.
-
- This program is distributed in the hope that it will be useful, but 
- WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
- for more details.
-
- You should have received a copy of the GNU General Public License along 
- with this program; if not, write to the Free Software Foundation, Inc., 
- 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
+/************************************************************************/
+/*			KEGS: Apple //gs Emulator			*/
+/*			Copyright 2002 by Kent Dickey			*/
+/*									*/
+/*		This code is covered by the GNU GPL			*/
+/*									*/
+/*	The KEGS web page is kegs.sourceforge.net			*/
+/*	You may contact the author at: kadickey@alumni.princeton.edu	*/
+/************************************************************************/
 
 const char rcsid_win32snd_driver_c[] = "@(#)$KmKId: win32snd_driver.c,v 1.5 2002-11-19 03:09:59-05 kadickey Exp $";
 
@@ -28,7 +17,7 @@ const char rcsid_win32snd_driver_c[] = "@(#)$KmKId: win32snd_driver.c,v 1.5 2002
 # include <windows.h>
 # include <mmsystem.h>
 #endif
-#include <unistd.h>
+//#include <unistd.h>
 
 extern int Verbose;
 
@@ -69,8 +58,8 @@ win32snd_shutdown()
 #ifndef __CYGWIN__
 
 void CALLBACK
-handle_wav_snd(HWAVEOUT hwo, UINT uMsg, DWORD dwInstance, DWORD dwParam1,
-		DWORD dwParam2)
+handle_wav_snd(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1,
+		DWORD_PTR dwParam2)
 {
 	LPWAVEHDR	lpwavehdr;
 
@@ -131,7 +120,7 @@ child_sound_init_win32()
 	}
 
 	res = waveOutOpen(&g_wave_handle, WAVE_MAPPER, &wavefmt,
-		(DWORD)handle_wav_snd, 0, CALLBACK_FUNCTION | WAVE_ALLOWSYNC);
+		(DWORD_PTR)handle_wav_snd, 0, CALLBACK_FUNCTION | WAVE_ALLOWSYNC);
 
 	if(res != MMSYSERR_NOERROR) {
 		printf("Cannot register audio\n");

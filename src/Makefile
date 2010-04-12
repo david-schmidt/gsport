@@ -23,39 +23,35 @@ specials_clean:
 
 
 # Mac builds:
-gsportmac: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) -arch ppc $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
-	mkdir -p ../GSPORT.app/Contents/Resources/English.lproj/main.nib
-	mkdir -p ../GSPORT.app/Contents/MacOS
-	mv gsport ../GSPORT.app/Contents/MacOS/GSPORTMAC
-	echo "APPL????" > ../GSPORT.app/Contents/PkgInfo
-	cp -f Info.plist ../GSPORT.app/Contents/
-	cp -f info.nib ../GSPORT.app/Contents/Resources/English.lproj/main.nib
-	cp -f classes.nib ../GSPORT.app/Contents/Resources/English.lproj/main.nib
-	cp -f objects.xib ../GSPORT.app/Contents/Resources/English.lproj/main.nib
-	cp -f kegsicon.icns ../GSPORT.app/Contents/Resources/
-	cp -f 525.icns ../GSPORT.app/Contents/Resources/
-	cp -f 2mg.icns ../GSPORT.app/Contents/Resources/
-	touch '../GSPORT.app/Icon?'
-	cp -f ../config.template ../config.txt 
+kegsmac: $(OBJECTS) compile_time.o
+	$(CC) $(CCOPTS) $(LDOPTS) -arch ppc $(OBJECTS) compile_time.o $(LDFLAGS) -o kegsmac $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
+	mkdir -p ../KEGSMAC.app/Contents/Resources/English.lproj/main.nib
+	mkdir -p ../KEGSMAC.app/Contents/MacOS
+	mv kegsmac ../KEGSMAC.app/Contents/MacOS/KEGSMAC
+	echo "APPL????" > ../KEGSMAC.app/Contents/PkgInfo
+	cp -f Info.plist ../KEGSMAC.app/Contents/
+	cp -f info.nib ../KEGSMAC.app/Contents/Resources/English.lproj/main.nib
+	cp -f classes.nib ../KEGSMAC.app/Contents/Resources/English.lproj/main.nib
+	cp -f objects.xib ../KEGSMAC.app/Contents/Resources/English.lproj/main.nib
+	cp -f kegsicon.icns ../KEGSMAC.app/Contents/Resources/
+	cp -f 525.icns ../KEGSMAC.app/Contents/Resources/
+	cp -f 2mg.icns ../KEGSMAC.app/Contents/Resources/
+	touch '../KEGSMAC.app/Icon?'
 
 # Linux for X builds:
-gsportx: $(OBJECTS) compile_time.o
+xkegs: $(OBJECTS) compile_time.o
 	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11
-	mv gsportx ..
-	cp -f ../config.template ../config.txt 
+	mv xkegs ..
 
 # Cygwin for X builds:
-gsport.exe: $(OBJECTS) compile_time.o
+kegs.exe: $(OBJECTS) compile_time.o
 	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lXext -lX11 -lm
-	mv gsport.exe ..
-	cp -f ../config.template ../config.txt 
+	mv kegs.exe ..
 
 # Mingw32 (native windows) builds:
-gsportwin.exe: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32
+kegswin.exe: $(OBJECTS) compile_time.o
+	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lcomdlg32 -lws2_32
 	mv $(NAME)$(SUFFIX) ..
-	cp -f ../config.template ../config.txt 
 
 
 8inst_c.h: instable.h
@@ -98,6 +94,8 @@ partls: partls.c
 to_pro: prodos.h prodos_protos.h to_pro.c
 	cc $(CCOPTS) $(XOPTS) $(OPTS) -o to_pro to_pro.c
 
+kegs32.o:   win32.rc winresource.h
+	windres win32.rc -o kegs32.o
 
 compile_time.o: $(OBJECTS)
 
@@ -124,5 +122,5 @@ sound_driver.o: sound_driver.c defc.h defcomm.h iwm.h protos.h sound.h
 video.o: video.c defc.h defcomm.h iwm.h protos.h superhires.h kegsfont.h
 macdriver.o: macdriver.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
 macsnd_driver.o: macsnd_driver.c defc.h defcomm.h iwm.h protos.h sound.h
-windriver.o: windriver.c defc.h defcomm.h iwm.h protos.h protos_windriver.h winresource.h
+windriver.o: windriver.c defc.h defcomm.h iwm.h protos.h protos_windriver.h winresource.h kegs32.o
 win32snd_driver.o: win32snd_driver.c defc.h defcomm.h iwm.h protos.h sound.h

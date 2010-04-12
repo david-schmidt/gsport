@@ -1,9 +1,7 @@
 //{{NO_DEPENDENCIES}}
-// $Id: $
 // Microsoft Developer Studio generated include file.
-// Used by win32.rc
+// Used by kegs32.rc
 //
-#define CREATEPROCESS_MANIFEST          1
 #define IDD_ABOUT_DIALOG                101
 #define IDC_KEGS32                      102
 #define IDR_TOOLBAR                     103
@@ -30,21 +28,22 @@
 #define ID_FILE_SENDRESET               40004
 #define ID_FILE_JOYSTICK                40005
 #define ID_FILE_DEBUGSTAT               40006
+#define ID_FILE_SENDREBOOT              40007
 #define ID_FILE_FULLSCREEN              40012
 #define ID_FILE_SPEED                   40013
 #define ID_HELP_KEY                     40014
-#define ID_FILE_SENDREBOOT              40007
-#define ID_FILE_FLUSHPRINTER			40017
 #define ID_SPEED_1MHZ                   50001
 #define ID_SPEED_2MHZ                   50002
-#define ID_SPEED_8MHZ                   50003
-#define ID_SPEED_FMHZ                   50004
+#define ID_SPEED_FMHZ                   50003
+
 #define IDD_SPEEDDIALOG                 117
 #define IDC_SLOW                        1007
 #define IDC_CUSTOM                      1008
 #define IDC_EDITCUSTOM                  1009
 #define IDC_NORMAL                      1010
 #define IDC_FASTEST                     1011
+
+#define IDC_STATIC                      -1
 
 // Next default values for new objects
 // 

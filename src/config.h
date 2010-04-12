@@ -36,6 +36,7 @@ const char rcsid_config_h[] = "@(#)$KmKId: config.h,v 1.9 2004-11-12 23:10:28-05
 #define CFGTYPE_DISK		3
 #define CFGTYPE_FUNC		4
 #define CFGTYPE_FILE		5
+#define CFGTYPE_STR			6
 /* CFGTYPE limited to just 4 bits: 0-15 */
 
 /* Cfg_menu, Cfg_dirent and Cfg_listhdr are defined in defc.h */

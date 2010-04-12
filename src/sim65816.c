@@ -26,7 +26,7 @@ const char rcsid_sim65816_c[] = "@(#)$KmKId: sim65816.c,v 1.367 2004-11-22 02:39
 #define INCLUDE_RCSID_C
 #include "defc.h"
 #undef INCLUDE_RCSID_C
-
+#include "printer.h"
 #define PC_LOG_LEN	(8*1024)
 
 
@@ -109,6 +109,21 @@ int	g_raw_serial = 1;
 int	g_iw2_emul = 0;
 int	g_serial_out_masking = 0;
 int	g_serial_modem[2] = { 0, 1 };
+int g_ethernet = 0;
+int g_ethernet_interface = 0;
+int g_parallel = 0;
+int g_parallel_out_masking = 0;
+int g_printer = 0;
+int g_printer_dpi = 360;
+char* g_printer_output = "bmp";
+int g_printer_multipage = 0;
+int g_printer_timeout = 2;
+char* g_printer_font_roman = "roman.ttf";
+char* g_printer_font_sans = "sansserif.ttf";
+char* g_printer_font_courier = "courier.ttf";
+char* g_printer_font_prestige = "prestige.ttf";
+char* g_printer_font_script = "script.ttf";
+char* g_printer_font_ocra = "ocra.ttf";
 
 int	g_config_iwm_vbl_count = 0;
 const char g_kegs_version_str[] = "0.1";
@@ -391,7 +406,6 @@ get_memory_io(word32 loc, double *cyc_ptr)
 		halt_printf("get_memory_io:%08x out of range==halt!\n", loc);
 		return 0;
 	}
-
 	tmp = loc & 0xfef000;
 	if(tmp == 0xc000 || tmp == 0xe0c000) {
 		return(io_read(loc & 0xfff, cyc_ptr));
@@ -508,7 +522,6 @@ void
 set_memory_io(word32 loc, int val, double *cyc_ptr)
 {
 	word32	tmp;
-
 	tmp = loc & 0xfef000;
 	if(tmp == 0xc000 || tmp == 0xe0c000) {
 		io_write(loc, val, cyc_ptr);
@@ -609,6 +622,7 @@ void
 my_exit(int ret)
 {
 	end_screen();
+	printer_close();
 	printf("exiting\n");
 	exit(ret);
 }
@@ -861,6 +875,15 @@ kegsmain(int argc, char **argv)
 			printf("Forcing black-and-white hires modes\n");
 			g_cur_a2_stat |= ALL_STAT_COLOR_C021;
 			g_use_bw_hires = 1;
+		} else if(!strcmp("-enet", argv[i])) {
+			if((i+1) >= argc) {
+				printf("Missing argument\n");
+				exit(1);
+			}
+			tmp1 = strtol(argv[i+1], 0, 0);
+			printf("Using %d as ethernet enable val\n", tmp1);
+			g_ethernet = tmp1;
+			i++;
 		} else {
 			printf("Bad option: %s\n", argv[i]);
 			exit(3);
@@ -898,6 +921,33 @@ kegsmain(int argc, char **argv)
 
 	iwm_init();
 	config_init();
+	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage);
+	//If ethernet is enabled in config.kegs, lets initialize it
+	if (g_ethernet == 1)
+	{
+	int i = 0;
+	char *ppname = NULL;
+	char *ppdes = NULL;
+	if (tfe_enumadapter_open())
+	{
+	//Loop through the available adapters until we reach the interface number specified in config.kegs
+	while(tfe_enumadapter(&ppname,&ppdes))
+	{
+		if (i == g_ethernet_interface) break;
+		i++;
+	}
+	tfe_enumadapter_close();
+	printf("Using host ethernet interface: %s\nUthernet support is ON.\n",ppdes);
+	}
+	else
+	{
+		printf("No ethernet host adapters found. Do you have PCap installed/enabled?\nUthernet support is OFF.\n");
+	}
+	set_tfe_interface(ppname); //Connect the emulated ethernet device with the selected host adapter
+	lib_free(ppname);
+	lib_free(ppdes);
+	tfe_init();
+	}
 
 	load_roms_init_memory();
 
@@ -912,7 +962,6 @@ kegsmain(int argc, char **argv)
 	//sleep(1);
 #endif
 	sound_init();
-
 	scc_init();
 	adb_init();
 	joystick_init();

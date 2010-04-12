@@ -30,6 +30,9 @@ extern byte *g_dummy_memory1_ptr;
 extern byte *g_slow_memory_ptr;
 extern byte *g_rom_fc_ff_ptr;
 extern byte *g_rom_cards_ptr;
+extern byte *g_grappler_rom;
+extern unsigned char ioslotsel;
+extern unsigned char iostrobe;
 
 extern word32 slow_mem_changed[];
 
@@ -41,8 +44,9 @@ extern Page_info page_info_rd_wr[];
 extern int Verbose;
 extern int g_rom_version;
 extern int g_user_page2_shadow;
+extern int g_parallel;
 
-
+char c;
 /* from iwm.c */
 int	g_num_shadow_all_banks = 0;
 
@@ -275,7 +279,7 @@ fixup_intcx()
 	int	start_k;
 	word32	mask;
 	int	j, k;
-
+	int test1;
 	rom10000 = &(g_rom_fc_ff_ptr[0x30000]);
 
 	no_io_shadow = (g_c035_shadow_reg & 0x40);
@@ -311,25 +315,27 @@ fixup_intcx()
 			}
 		}
 		for(j = 0xc8; j < 0xd0; j++) {
-			/* c800 - cfff */
-			if(((g_c02d_int_crom & (1 << 3)) == 0) || INTCX) {
+			
+			 /*c800 - cfff */
+			if(((g_c02d_int_crom & (1 << 3)) == 0) || INTCX) 
+			{				
 				rom_inc = rom10000 + (j << 8);
-			} else {
-				/* c800 space not necessarily mapped */
-				/*   just map in ROM */
-				rom_inc = rom10000 + (j << 8);
+			}
+			else 	
+			{
+					rom_inc = rom10000 + (j << 8);
+
 			}
 			SET_PAGE_INFO_RD(j + off, rom_inc);
 		}
+		iostrobe = 0;
 		for(j = 0xc0; j < 0xd0; j++) {
 			SET_PAGE_INFO_WR(j + off, SET_BANK_IO);
 		}
 	}
-
 	if(!no_io_shadow) {
 		SET_PAGE_INFO_RD(0xc7, SET_BANK_IO);		/* smartport */
 	}
-
 	fixup_brks();
 }
 
@@ -1458,8 +1464,16 @@ io_read(word32 loc, double *cyc_ptr)
 		case 0x94: case 0x95: case 0x96: case 0x97:
 		case 0x98: case 0x99: case 0x9a: case 0x9b:
 		case 0x9c: case 0x9d: case 0x9e: case 0x9f:
-			/* UNIMPL_READ; */
-			return 0;
+		if (g_parallel)
+		{
+			return parallel_read((word16)loc & 0xf);
+		}
+		else
+		{
+			UNIMPL_READ;
+		}
+
+
 		/* 0xc0a0 - 0xc0af */
 		case 0xa0: case 0xa1: case 0xa2: case 0xa3:
 		case 0xa4: case 0xa5: case 0xa6: case 0xa7:
@@ -1469,19 +1483,41 @@ io_read(word32 loc, double *cyc_ptr)
 			/* UNIMPL_READ; */
 
 		/* 0xc0b0 - 0xc0bf */
-		case 0xb0:
+		//case 0xb0:
 			/* c0b0: female voice tool033 look at this */
-			return 0;
-		case 0xb1: case 0xb2: case 0xb3:
-		case 0xb4: case 0xb5: case 0xb6: case 0xb7:
-		case 0xb9: case 0xba: case 0xbb:
-		case 0xbc: case 0xbd: case 0xbe: case 0xbf:
+		//	return 0;
+		//case 0xb1: case 0xb2: case 0xb3:
+		//case 0xb4: case 0xb5: case 0xb6: case 0xb7:
+		//case 0xb9: case 0xba: case 0xbb:
+		//case 0xbc: case 0xbd: case 0xbe: case 0xbf:
 			/* UNIMPL_READ; */
-			return 0;
+		//	return 0;
 		/* c0b8: Second Sight card stuff: return 0 */
+		//case 0xb8:
+		//	return 0;
+		//	break;
+		/*Uthernet read access on slot 3*/
+		case 0xb0:
+		case 0xb1:
+		case 0xb2:
+		case 0xb3:
+		case 0xb4:
+		case 0xb5:
+		case 0xb6:
+		case 0xb7:
 		case 0xb8:
-			return 0;
-			break;
+		case 0xb9:
+		case 0xba:
+		case 0xbb:
+		case 0xbc:
+		case 0xbd:
+		case 0xbe:
+		case 0xbf:
+			if (tfe_enabled){
+			return tfe_read((word16)loc & 0xf);
+			}
+			else
+			{return 0;}
 
 		/* 0xc0c0 - 0xc0cf */
 		case 0xc0: case 0xc1: case 0xc2: case 0xc3:
@@ -1537,11 +1573,12 @@ io_read(word32 loc, double *cyc_ptr)
 		}
 		UNIMPL_READ;
 	case 0xf:
+		if((loc & 0xfff) == 0xfff) {
+			 return g_rom_fc_ff_ptr[0x3cfff];
+		}
+
 		if(INTCX || ((g_c02d_int_crom & (1 << 3)) == 0)) {
 			return(g_rom_fc_ff_ptr[0x3c000 + (loc & 0xfff)]);
-		}
-		if((loc & 0xfff) == 0xfff) {
-			return g_rom_fc_ff_ptr[0x3cfff];
 		}
 		UNIMPL_READ;
 	}
@@ -1569,6 +1606,7 @@ io_write(word32 loc, int val, double *cyc_ptr)
 	val = val & 0xff;
 	switch((loc >> 8) & 0xf) {
 	case 0: /* 0xc000 - 0xc0ff */
+		//printf ("ioaddress: %x", (loc & 0xf));
 		switch(loc & 0xff) {
 		/* 0xc000 - 0xc00f */
 		case 0x00: /* 0xc000 */
@@ -2113,11 +2151,19 @@ io_write(word32 loc, int val, double *cyc_ptr)
 			return;
 
 		/* 0xc090 - 0xc09f */
-		case 0x90: case 0x91: case 0x92: case 0x93:
+		case 0x90: 
+		case 0x91: case 0x92: case 0x93:
 		case 0x94: case 0x95: case 0x96: case 0x97:
 		case 0x98: case 0x99: case 0x9a: case 0x9b:
 		case 0x9c: case 0x9d: case 0x9e: case 0x9f:
-			UNIMPL_WRITE;
+		if (g_parallel)
+		{
+		return parallel_write((word16)loc & 0xf, (byte)val);
+		}
+		else
+		{
+		UNIMPL_WRITE;
+		}
 
 		/* 0xc0a0 - 0xc0af */
 		case 0xa0: case 0xa1: case 0xa3:
@@ -2128,17 +2174,43 @@ io_write(word32 loc, int val, double *cyc_ptr)
 		case 0xa2:	/* Burger Times writes here on error */
 		case 0xa8:
 			/* Kurzweil SMP writes to 0xc0a8, ignore it */
+			UNIMPL_WRITE;
 			return;
 
 		/* 0xc0b0 - 0xc0bf */
-		case 0xb0:
+		//case 0xb0:
 			/* Second sight stuff--ignore it */
 			return;
-		case 0xb1: case 0xb2: case 0xb3:
-		case 0xb4: case 0xb5: case 0xb6: case 0xb7:
-		case 0xb8: case 0xb9: case 0xba: case 0xbb:
-		case 0xbc: case 0xbd: case 0xbe: case 0xbf:
+		//case 0xb1: case 0xb2: case 0xb3:
+		//case 0xb4: case 0xb5: case 0xb6: case 0xb7:
+		//case 0xb8: case 0xb9: case 0xba: case 0xbb:
+		//case 0xbc: case 0xbd: case 0xbe: case 0xbf:
+		//	UNIMPL_WRITE;
+		/*Uthernet write access on slot 3*/
+		case 0xb0:
+		case 0xb1:
+		case 0xb2:
+		case 0xb3:
+		case 0xb4:
+		case 0xb5:
+		case 0xb6:
+		case 0xb7:
+		case 0xb8:
+		case 0xb9:
+		case 0xba:
+		case 0xbb:
+		case 0xbc:
+		case 0xbd:
+		case 0xbe:
+		case 0xbf:
+			if (tfe_enabled)
+			{
+			return tfe_store((word16)loc & 0xf, (byte)val);
+			}
+			else
+			{
 			UNIMPL_WRITE;
+			}
 
 		/* 0xc0c0 - 0xc0cf */
 		case 0xc0: case 0xc1: case 0xc2: case 0xc3:

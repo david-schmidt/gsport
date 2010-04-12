@@ -1,24 +1,3 @@
-/*
- GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
- 
- Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
-
- This program is free software; you can redistribute it and/or modify it 
- under the terms of the GNU General Public License as published by the 
- Free Software Foundation; either version 2 of the License, or (at your 
- option) any later version.
-
- This program is distributed in the hope that it will be useful, but 
- WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
- for more details.
-
- You should have received a copy of the GNU General Public License along 
- with this program; if not, write to the Free Software Foundation, Inc., 
- 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
-
 #include <windows.h>
 #include "winresource.h"
 
@@ -28,67 +7,45 @@
 #define IDC_STATIC (-1)
 #endif
 
-IDD_DLG_DISKCONF DIALOGEX 0, 0, 268, 182
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Disk Configuration"
-FONT 8, "MS Sans Serif"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,150,161,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,203,161,50,14
-    LTEXT           "S5D1",IDC_STATIC,19,46,19,8
-    EDITTEXT        IDC_EDIT_S5D1,43,42,156,14,ES_AUTOHSCROLL,
-                    WS_EX_ACCEPTFILES
-    PUSHBUTTON      "Browse",IDC_BTN_S5D1,203,42,50,14
-    LTEXT           "S5D2",IDC_STATIC,19,62,19,8
-    EDITTEXT        IDC_EDIT_S5D2,43,60,155,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_BTN_S5D2,203,60,50,14
-    LTEXT           "S6D1",IDC_STATIC,19,80,19,8
-    EDITTEXT        IDC_EDIT_S6D1,43,77,156,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_BTN_S6D1,203,77,50,14
-    LTEXT           "S6D2",IDC_STATIC,19,98,19,8
-    EDITTEXT        IDC_EDIT_S6D2,43,95,156,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_BTN_S6D2,203,96,50,14
-    LTEXT           "S7D1",IDC_STATIC,19,118,19,8
-    EDITTEXT        IDC_EDIT_S7D1,43,115,155,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_BTN_S7D1,203,115,50,14
-    LTEXT           "S7D2",IDC_STATIC,19,137,19,8
-    EDITTEXT        IDC_EDIT_S7D2,43,135,155,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "Browse",IDC_BTN_S7D2,203,135,50,14
-    GROUPBOX        "Disk settings",IDC_STATIC,7,7,254,148
-    LTEXT           "Configure your disk images for each drive.  Disk image formats supported\nare *.2MG,*.PO and *.DSK.  ",
-                    IDC_STATIC,19,20,234,16
-END
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDC_KEGS32 MENU DISCARDABLE 
+IDC_KEGS32 MENU DISCARDABLE
 BEGIN
     POPUP "&Emulator"
     BEGIN
-        MENUITEM "&Set Disk Configuration\tALT-F1", ID_FILE_DISK
-        MENUITEM "Send CTRL Open-Apple Reset\tCTRL-ALT-BREAK", 
-                                                ID_FILE_SENDRESET
+        MENUITEM "&Set Disk Configuration", 	ID_FILE_DISK
+        MENUITEM "Send CTRL Reset\tCTRL-BREAK", ID_FILE_SENDRESET
+        MENUITEM "Reboot\tCTRL-ALT-BREAK", 	ID_FILE_SENDREBOOT
+        MENUITEM SEPARATOR
         MENUITEM "Toggle &Joystick",            ID_FILE_JOYSTICK
         MENUITEM "Toggle Debug Statistics",     ID_FILE_DEBUGSTAT
         MENUITEM SEPARATOR
-        MENUITEM "E&xit\tALT-F4",               ID_FILE_EXIT
+        MENUITEM "E&xit",                       ID_FILE_EXIT
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "Key Commands",                ID_HELP_KEY
+        MENUITEM SEPARATOR
         MENUITEM "&About",                      ID_HELP_ABOUT
     END
 END
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// RT_MANIFEST
+//
+
+// CREATEPROCESS_MANIFEST  RT_MANIFEST             "kegs.manifest"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
-IDR_TOOLBAR             BITMAP  DISCARDABLE     "wintoolbar.bmp"
+IDC_KEGS32             BITMAP  DISCARDABLE     "wintoolbar.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -122,9 +79,102 @@ CAPTION "About"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,78,61,50,14
-    LTEXT           "KEGS32: GS Emulator.\nBased on KEGS by Kent Dickey\nWindows Port by Chea Chee Keong\n\nThis software is free for non-commercial use.",
+    LTEXT           "KEGS32: GS Emulator.\nBased on KEGS by Kent Dickey\nWindows Port by Chea Chee Keong\n\nThis software is licensed under GNU GPL.",
                     IDC_STATIC,38,7,162,45,NOT WS_GROUP
     ICON            "KEGS32_ICON",IDC_STATIC,7,7,21,20,0
 END
+
+IDD_DLG_DISKCONF DIALOGEX 0, 0, 268, 182
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Disk Configuration"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,150,161,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,203,161,50,14
+    LTEXT           "S5D1",IDC_STATIC,19,46,19,8
+    EDITTEXT        IDC_EDIT_S5D1,43,42,156,14,ES_AUTOHSCROLL,
+                    WS_EX_ACCEPTFILES
+    PUSHBUTTON      "Browse",IDC_BTN_S5D1,203,42,50,14
+    LTEXT           "S5D2",IDC_STATIC,19,62,19,8
+    EDITTEXT        IDC_EDIT_S5D2,43,60,155,14,ES_AUTOHSCROLL,
+                    WS_EX_ACCEPTFILES
+    PUSHBUTTON      "Browse",IDC_BTN_S5D2,203,60,50,14
+    LTEXT           "S6D1",IDC_STATIC,19,80,19,8
+    EDITTEXT        IDC_EDIT_S6D1,43,77,156,14,ES_AUTOHSCROLL,
+                    WS_EX_ACCEPTFILES
+    PUSHBUTTON      "Browse",IDC_BTN_S6D1,203,77,50,14
+    LTEXT           "S6D2",IDC_STATIC,19,98,19,8
+    EDITTEXT        IDC_EDIT_S6D2,43,95,156,14,ES_AUTOHSCROLL,
+                    WS_EX_ACCEPTFILES
+    PUSHBUTTON      "Browse",IDC_BTN_S6D2,203,96,50,14
+    LTEXT           "S7D1",IDC_STATIC,19,118,19,8
+    EDITTEXT        IDC_EDIT_S7D1,43,115,155,14,ES_AUTOHSCROLL,
+                    WS_EX_ACCEPTFILES
+    PUSHBUTTON      "Browse",IDC_BTN_S7D1,203,115,50,14
+    LTEXT           "S7D2",IDC_STATIC,19,137,19,8
+    EDITTEXT        IDC_EDIT_S7D2,43,135,155,14,ES_AUTOHSCROLL,
+                    WS_EX_ACCEPTFILES
+    PUSHBUTTON      "Browse",IDC_BTN_S7D2,203,135,50,14
+    GROUPBOX        "Disk settings",IDC_STATIC,7,7,254,148
+    LTEXT           "Configure your disk images for each drive.  Disk image formats supported\nare *.2MG,*.PO and *.DSK.  ",
+                    IDC_STATIC,19,20,234,16
+END
+
+IDD_SPEEDDIALOG DIALOG  0, 0, 240, 129
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Speed Control"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "1 MHz",IDC_SLOW,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,45,41,51,13
+    CONTROL         "2.5 MHz",IDC_NORMAL,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,45,55,43,13
+    CONTROL         "As fast as possible",IDC_FASTEST,"Button",
+                    BS_AUTORADIOBUTTON | WS_TABSTOP,45,69,74,13
+    CONTROL         "Custom (MHz)",IDC_CUSTOM,"Button",BS_AUTORADIOBUTTON | 
+                    WS_TABSTOP,45,83,69,13
+    EDITTEXT        IDC_EDITCUSTOM,117,83,79,13,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,133,107,50,15
+    PUSHBUTTON      "Cancel",IDCANCEL,183,107,50,15
+    GROUPBOX        "Speed Control",IDC_STATIC,7,7,226,96,WS_GROUP
+    LTEXT           "Adjust the speed of your emulator by selecting the appropriate speed control",
+                    IDC_STATIC,46,19,181,19,NOT WS_GROUP
+    ICON            IDC_KEGS32,IDC_STATIC,14,19,21,20
+END
+
+IDD_KEGS32_KEY DIALOG  0, 0, 186, 172
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Help About Key Commands"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,65,151,50,14
+    LTEXT           "KEGS32 Key Commands",IDC_STATIC,7,7,82,10
+    LTEXT           "Alt/F1\t\tOpen-Apple\nF2\t\tClose-Apple\nF7\t\tToggle Fast Disk Emulation\nF8\t\tToggle Mouse Pointer\n\t\tDisplay\n",
+                    IDC_STATIC,21,25,151,42
+    LTEXT           "F11\t\tToggle Fullscreen Display\nF12\t\tReset\nCtrl-Alt-Break\tReboot Emulator\nCtrl-Alt-Esc\tControl-Panel\nCtrl-Break\tReset Emulator",
+                    IDC_STATIC,21,66,141,50
+    CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | WS_DISABLED | 
+                    WS_BORDER,7,17,172,1
+    LTEXT           "For more information, please consult the readme.kegs file",
+                    IDC_STATIC,21,124,144,19
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    ID_FILE_DISK            "Disk Configuration"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_SPEED_1MHZ           "Set Speed to 1 Mhz"
+    ID_SPEED_2MHZ           "Set Speed to 2.5 Mhz"
+    ID_SPEED_FMHZ           "Set Speed to as fast as possible"
+END
+
 
 

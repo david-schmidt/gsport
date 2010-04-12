@@ -1,0 +1,10 @@
+
+TARGET = kegswin.exe
+OBJECTS = $(OBJECTS1) win32snd_driver.o windriver.o kegs32.o
+CCOPTS = -O2 -DKEGS_LITTLE_ENDIAN
+SUFFIX = ".exe"
+NAME = kegswin
+
+XOPTS = -Wall -fomit-frame-pointer -march=pentium 
+XLIBS =
+
