@@ -41,9 +41,9 @@
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>GSPORTMAC</string>
+	<string>GSportMac</string>
 	<key>CFBundleName</key>
-	<string>GSPORTMAC</string>
+	<string>GSportMac</string>
 	<key>CFBundleIconFile</key>
 	<string>kegsicon.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -51,13 +51,13 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>
-	<string>GSPORT</string>
+	<string>GSport</string>
 	<key>CFBundleVersion</key>
 	<string>0.1</string>
 	<key>CFBundleShortVersionString</key>
-	<string>GSPORTMAC version 0.1</string>
+	<string>GSportMac version 0.1</string>
 	<key>CFBundleGetInfoString</key>
-	<string>GSPORTMAC v0.1, Copyright 2010 GSport Contributors, http://gsport.sourceforge.net</string>
+	<string>GSportMac v0.1, Copyright 2010 GSport Contributors, http://gsport.sourceforge.net</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright 2010 GSport Contributors</string>
 </dict>

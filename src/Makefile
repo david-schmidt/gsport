@@ -27,18 +27,18 @@ specials_clean:
 # Mac builds:
 gsportmac: $(OBJECTS) compile_time.o
 	$(CC) $(CCOPTS) $(LDOPTS) -arch ppc $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
-	mkdir -p ../GSPORT.app/Contents/Resources/English.lproj/main.nib
-	mkdir -p ../GSPORT.app/Contents/MacOS
-	mv gsport ../GSPORT.app/Contents/MacOS/GSPORTMAC
-	echo "APPL????" > ../GSPORT.app/Contents/PkgInfo
-	cp -f Info.plist ../GSPORT.app/Contents/
-	cp -f info.nib ../GSPORT.app/Contents/Resources/English.lproj/main.nib
-	cp -f classes.nib ../GSPORT.app/Contents/Resources/English.lproj/main.nib
-	cp -f objects.xib ../GSPORT.app/Contents/Resources/English.lproj/main.nib
-	cp -f kegsicon.icns ../GSPORT.app/Contents/Resources/
-	cp -f 525.icns ../GSPORT.app/Contents/Resources/
-	cp -f 2mg.icns ../GSPORT.app/Contents/Resources/
-	touch '../GSPORT.app/Icon?'
+	mkdir -p ../GSport.app/Contents/Resources/English.lproj/main.nib
+	mkdir -p ../GSport.app/Contents/MacOS
+	mv gsport ../GSport.app/Contents/MacOS/GSportMac
+	echo "APPL????" > ../GSport.app/Contents/PkgInfo
+	cp -f Info.plist ../GSport.app/Contents/
+	cp -f info.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
+	cp -f classes.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
+	cp -f objects.xib ../GSport.app/Contents/Resources/English.lproj/main.nib
+	cp -f kegsicon.icns ../GSport.app/Contents/Resources/
+	cp -f 525.icns ../GSport.app/Contents/Resources/
+	cp -f 2mg.icns ../GSport.app/Contents/Resources/
+	touch '../GSport.app/Icon?'
 	cp -f ../config.template ../config.txt 
 
 # Linux for X builds:
