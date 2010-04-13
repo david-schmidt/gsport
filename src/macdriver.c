@@ -172,7 +172,8 @@ show_simple_alert(char *str1, char *str2, char *str3, int num)
 	g_fatal_log = 3;
 	if(num != 0) {
 		snprintf(buf, 250, ": %d", num);
-		g_fatal_log_strs[g_fatal_log++] = kegs_malloc_str(buf);
+		g_fatal_log_strs[g_fatal_log++] = 
+_malloc_str(buf);
 	}
 	x_show_alert(0, 0);
 }
@@ -187,9 +188,7 @@ x_dialog_create_kegs_conf(const char *str)
 	ret = x_show_alert(1, str);
 	if(ret) {
 		// Create empty file
-		path = "~/Library/KEGS";
-		snprintf(tmp_buf, 500, "mkdir -p %s", path);
-		system(tmp_buf);
+		path = "~";
 		snprintf(tmp_buf, 500, "touch %s/%s", path, str);
 		system(tmp_buf);
 	}
@@ -242,12 +241,12 @@ x_show_alert(int is_fatal, const char *str)
 	if(str) {
 		// Provide an extra option--create a file
 		cfstrref2 = CFStringCreateWithFormat(kCFAllocatorDefault, NULL,
-				CFSTR("Create ~/Library/KEGS/%s"), str);
+				CFSTR("Create ~/Library/GSport/%s"), str);
 		alert_param.otherText = cfstrref2;
 	}
 	okstrref = CFSTR("Click OK to continue");
 	if(is_fatal) {
-		okstrref = CFSTR("Clock OK to exit KEGS");
+		okstrref = CFSTR("Clock OK to exit GSport");
 	}
 	CreateStandardAlert(kAlertStopAlert, cfstrref, okstrref,
 			&alert_param, &alert);

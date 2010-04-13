@@ -79,7 +79,7 @@ CAPTION "About"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,78,61,50,14
-    LTEXT           "KEGS32: GS Emulator.\nBased on KEGS by Kent Dickey\nWindows Port by Chea Chee Keong\n\nThis software is licensed under GNU GPL.",
+    LTEXT           "GSport: GS Emulator.\nBased on KEGS by Kent Dickey\nWindows Port by Chea Chee Keong\n\nThis software is licensed under GNU GPL.",
                     IDC_STATIC,38,7,162,45,NOT WS_GROUP
     ICON            "KEGS32_ICON",IDC_STATIC,7,7,21,20,0
 END
@@ -148,14 +148,14 @@ CAPTION "Help About Key Commands"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,65,151,50,14
-    LTEXT           "KEGS32 Key Commands",IDC_STATIC,7,7,82,10
+    LTEXT           "GSport Key Commands",IDC_STATIC,7,7,82,10
     LTEXT           "Alt/F1\t\tOpen-Apple\nF2\t\tClose-Apple\nF7\t\tToggle Fast Disk Emulation\nF8\t\tToggle Mouse Pointer\n\t\tDisplay\n",
                     IDC_STATIC,21,25,151,42
     LTEXT           "F11\t\tToggle Fullscreen Display\nF12\t\tReset\nCtrl-Alt-Break\tReboot Emulator\nCtrl-Alt-Esc\tControl-Panel\nCtrl-Break\tReset Emulator",
                     IDC_STATIC,21,66,141,50
     CONTROL         "",IDC_STATIC,"Static",SS_BLACKFRAME | WS_DISABLED | 
                     WS_BORDER,7,17,172,1
-    LTEXT           "For more information, please consult the readme.kegs file",
+    LTEXT           "Please visit http://gsport.sourceforge.net",
                     IDC_STATIC,21,124,144,19
 END
 

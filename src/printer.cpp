@@ -1652,7 +1652,7 @@ SDL_FreeSurface(image);*/
 		{
 			DOCINFO docinfo;
 			docinfo.cbSize = sizeof(docinfo);
-			docinfo.lpszDocName = "KEGS Virtual Printer";
+			docinfo.lpszDocName = "GSport Virtual Printer";
 			docinfo.lpszOutput = NULL;
 			docinfo.lpszDatatype = NULL;
 			docinfo.fwType = 0;
@@ -1829,7 +1829,7 @@ SDL_FreeSurface(image);*/
 			fprintf(psfile, "%%!PS-Adobe-3.0\n");
 			fprintf(psfile, "%%%%Pages: (atend)\n");
 			fprintf(psfile, "%%%%BoundingBox: 0 0 %i %i\n", (Bit16u)(defaultPageWidth*74), (Bit16u)(defaultPageHeight*74));
-			fprintf(psfile, "%%%%Creator: KEGS Virtual Printer\n");
+			fprintf(psfile, "%%%%Creator: GSport Virtual Printer\n");
 			fprintf(psfile, "%%%%DocumentData: Clean7Bit\n");
 			fprintf(psfile, "%%%%LanguageLevel: 2\n");
 			fprintf(psfile, "%%%%EndComments\n");
