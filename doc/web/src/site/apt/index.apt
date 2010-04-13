@@ -1,0 +1,20 @@
+ -----
+ GSport Project Page
+ -----
+ David Schmidt (david__schmidt at users dot souceforge dot net)
+ -----
+
+GSport
+
+ GSport is a portable (in the programming sense) Apple IIgs emulator, based on the
+KEGS cross-platform IIgs emulator by Kent Dickey.
+
+* Goals
+
+ The main goal for GSport is to provide a free, open ecosystem for the continuation
+of cross-platform development of IIgs emulation.
+
+ Some interesting advances that initially spawned this project are Uthernet and
+printer support.  As those objectives are met, a release will be assembled and posted,
+and we will move on to the next objectives.  Do you have something that you wish
+a GS emulator did?  Submit a request {{{http://sourceforge.net/tracker/?group_id=315628&atid=1327836}here}}.
