@@ -1,7 +1,7 @@
 
 TARGET = gsportwin.exe
-OBJECTS = $(OBJECTS1) tfe.o win32snd_driver.o windriver.o
-CCOPTS = -O2 -DKEGS_LITTLE_ENDIAN -DHAVE_TFE
+OBJECTS = $(OBJECTS1) win32snd_driver.o windriver.o
+CCOPTS = -O2 -DKEGS_LITTLE_ENDIAN
 SUFFIX = ".exe"
 NAME = gsportwin
 
