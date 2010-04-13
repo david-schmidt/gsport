@@ -2485,8 +2485,10 @@ cfg_dirent_sortfn(const void *obj1, const void *obj2)
 	/* Called by qsort to sort directory listings */
 	direntptr1 = (const Cfg_dirent *)obj1;
 	direntptr2 = (const Cfg_dirent *)obj2;
-#if defined(MAC) || defined(_WIN32)
+#if defined(_WIN32)
 	ret = _stricmp(direntptr1->name, direntptr2->name);
+#elif defined(MAC) 
+	ret = strcasecmp(direntptr1->name, direntptr2->name);
 #else
 	ret = strcmp(direntptr1->name, direntptr2->name);
 #endif
