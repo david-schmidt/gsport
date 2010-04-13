@@ -136,7 +136,7 @@ printf(const char *fmt, ...)
 	va_start(ap, fmt);
 
 	if(g_debug_file_fd < 0) {
-		g_debug_file_fd = open("/tmp/kegs.out",
+		g_debug_file_fd = open("/tmp/GSport.out",
 				O_CREAT | O_WRONLY | O_TRUNC, 0x1b6);
 		fprintf(stdout, "g_debug_file_fd = %d, %d\n", g_debug_file_fd,
 				errno);
@@ -281,8 +281,8 @@ my_cmd_handler( EventHandlerCallRef handlerRef, EventRef event, void *userdata)
 		break;
 	case 'abou':
 		show_simple_alert("GSportMac v", (char *)g_kegs_version_str,
-			", Copyright 2004 Kent Dickey\n"
-			"Latest version at http://kegs.sourceforge.net/\n", 0);
+			", Copyright 2010 GSport Contributors\n"
+			"Latest version at http://gsport.sourceforge.net/\n", 0);
 		osresult = noErr;
 		break;
 	case 'KCFG':

@@ -106,7 +106,7 @@ get_num()
 void
 debugger_help()
 {
-	printf("KEGS Debugger help (courtesy Fredric Devernay\n");
+	printf("GSport Debugger help (courtesy Fredric Devernay\n");
 	printf("General command syntax: [bank]/[address][command]\n");
 	printf("e.g. 'e1/0010B' to set a breakpoint at the interrupt jump pt\n");
 	printf("Enter all addresses using lower-case\n");
@@ -150,7 +150,7 @@ debugger_help()
 	printf("[bank]/[addr1].[addr2]us[file]  Save mem area to [file]\n");
 	printf("[bank]/[addr1].[addr2]ul[file]  Load mem area from [file]\n");
 	printf("v			Show video information\n");
-	printf("q                       Exit Debugger (and KEGS)\n");
+	printf("q                       Exit Debugger (and GSport)\n");
 }
 
 void

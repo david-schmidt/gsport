@@ -575,7 +575,7 @@ dev_video_init()
 
 	g_installed_full_superhires_colormap = !g_needs_cmap;
 	
-	myTextString[0] = "KEGS";
+	myTextString[0] = "GSport";
 
 	XStringListToTextProperty(myTextString, 1, &my_winText);
 
@@ -586,8 +586,8 @@ dev_video_init()
 	my_winSizeHints.min_height = base_height;
 	my_winSizeHints.max_width = BASE_WINDOW_WIDTH;
 	my_winSizeHints.max_height = base_height;
-	my_winClassHint.res_name = "KEGS";
-	my_winClassHint.res_class = "KEGS";
+	my_winClassHint.res_name = "GSport";
+	my_winClassHint.res_class = "GSport";
 
 	XSetWMProperties(g_display, g_a2_win, &my_winText, &my_winText, 0,
 		0, &my_winSizeHints, 0, &my_winClassHint);
