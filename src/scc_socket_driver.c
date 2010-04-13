@@ -30,7 +30,7 @@ const char rcsid_scc_socket_driver_c[] = "@(#)$KmKId: scc_socket_driver.c,v 1.11
 extern Scc scc_stat[2];
 extern int g_serial_modem[];
 
-extern int h_errno;
+//extern int h_errno;
 int g_wsastartup_called = 0;
 
 /* Usage: scc_socket_init() called to init socket mode */

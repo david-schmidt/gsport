@@ -1,9 +1,11 @@
-# $Id: release_makefile_base,v 1.15 2003/11/21 20:00:42 kentd Exp kentd $
+# GSport central makefile - you need a 'vars' file linked/copied from a 'vars_xxx' template to build.
 
 OBJECTS1 = adb.o clock.o config.o dis.o engine_c.o scc.o iwm.o \
 	joystick_driver.o moremem.o paddles.o sim65816.o smartport.o \
 	sound.o sound_driver.o video.o scc_socket_driver.o scc_windriver.o \
 	scc_macdriver.o
+
+OBJECTS2 = tfe/tfe.o tfe/tfearch.o tfe/tfesupp.o tfe/uilib.o
 
 include vars
 
@@ -42,6 +44,7 @@ gsportmac: $(OBJECTS) compile_time.o
 # Linux for X builds:
 gsportx: $(OBJECTS) compile_time.o
 	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11
+	echo $(OBJECTS)
 	mv gsportx ..
 	cp -f ../config.template ../config.txt 
 
@@ -90,6 +93,9 @@ engine_s.o: 8inst_s.h 16inst_s.h 8size_s.h 16size_s.h size_s.h
 	$(AS) -c $(OPTS) -I. $*.s
 
 .c.o:
+	$(CC) $(CCOPTS) $(XOPTS) -c $(OPTS) -I. -o $*.o $*.c
+
+.cpp.O:
 	$(CC) $(CCOPTS) $(XOPTS) -c $(OPTS) -I. $*.c
 
 partls: partls.c
@@ -98,6 +104,8 @@ partls: partls.c
 to_pro: prodos.h prodos_protos.h to_pro.c
 	cc $(CCOPTS) $(XOPTS) $(OPTS) -o to_pro to_pro.c
 
+kegs32.o:   win32.rc winresource.h
+	windres win32.rc -o kegs32.o
 
 compile_time.o: $(OBJECTS)
 
@@ -117,12 +125,18 @@ iwm.o: iwm.c defc.h defcomm.h iwm.h protos.h iwm_35_525.h
 joystick_driver.o: joystick_driver.c defc.h defcomm.h iwm.h protos.h
 moremem.o: moremem.c defc.h defcomm.h iwm.h protos.h
 paddles.o: paddles.c defc.h defcomm.h iwm.h protos.h
+parallel.o: parallel.c defc.h
+printer.o: printer.cpp
 sim65816.o: sim65816.c defc.h defcomm.h iwm.h protos.h
 smartport.o: smartport.c defc.h defcomm.h iwm.h protos.h
 sound.o: sound.c defc.h defcomm.h iwm.h protos.h sound.h
 sound_driver.o: sound_driver.c defc.h defcomm.h iwm.h protos.h sound.h
 video.o: video.c defc.h defcomm.h iwm.h protos.h superhires.h kegsfont.h
+tfe.o: tfe/tfe.c tfe/tfe.h tfe/tfe_protos.h
+tfearch.o: tfe/tfearch.c tfe/tfearch.h tfe/tfe_protos.h
+tfesupp.o: tfe/tfesupp.c tfe/tfesupp.h tfe/tfe_protos.h
+uilib.o: tfe/uilib.c tfe/uilib.h tfe/tfe_protos.h
 macdriver.o: macdriver.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
 macsnd_driver.o: macsnd_driver.c defc.h defcomm.h iwm.h protos.h sound.h
-windriver.o: windriver.c defc.h defcomm.h iwm.h protos.h protos_windriver.h winresource.h
+windriver.o: windriver.c defc.h defcomm.h iwm.h protos.h protos_windriver.h winresource.h kegs32.o
 win32snd_driver.o: win32snd_driver.c defc.h defcomm.h iwm.h protos.h sound.h

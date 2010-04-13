@@ -24,6 +24,15 @@
 #include "config.h"
 #include <dirent.h>
 
+#ifdef HAVE_TFE
+#include "protos_tfe.h" 
+#endif
+
+#if defined (WIN32) || (WIN64)
+#define snprintf _snprintf
+typedef unsigned int mode_t;
+#endif
+
 extern int Verbose;
 extern word32 g_vbl_count;
 extern Iwm iwm;
@@ -59,6 +68,21 @@ extern int g_joystick_trim_amount_x;
 extern int g_joystick_trim_amount_y;
 extern int g_swap_paddles;
 extern int g_invert_paddles;
+extern int g_ethernet;
+extern int g_ethernet_interface;
+extern int g_parallel;
+extern int g_parallel_out_masking;
+extern int g_printer;
+extern int g_printer_dpi;
+extern char* g_printer_output;
+extern int g_printer_multipage;
+extern char* g_printer_font_roman;
+extern char* g_printer_font_sans;
+extern char* g_printer_font_prestige;
+extern char* g_printer_font_courier;
+extern char* g_printer_font_script;
+extern char* g_printer_font_ocra;
+extern int g_printer_timeout;
 
 extern int g_screen_index[];
 extern word32 g_full_refresh_needed;
@@ -68,7 +92,6 @@ extern int g_new_a2_stat_cur_line;
 
 extern int g_key_down;
 extern const char g_kegs_version_str[];
-
 int g_config_control_panel = 0;
 char g_config_kegs_name[1024];
 char g_cfg_cwd_str[CFG_PATH_MAX] = { 0 };
@@ -101,6 +124,7 @@ int	g_cfg_curs_mousetext = 0;
 
 int g_cfg_opts_vals[CFG_MAX_OPTS];
 char g_cfg_opts_strs[CFG_MAX_OPTS][CFG_OPT_MAXSTR];
+char g_cfg_opts_strvals[CFG_MAX_OPTS][CFG_OPT_MAXSTR];
 char g_cfg_opt_buf[CFG_OPT_MAXSTR];
 
 char *g_cfg_rom_path = "ROM";
@@ -142,7 +166,8 @@ Cfg_menu g_cfg_disk_menu[] = {
 Cfg_menu g_cfg_joystick_menu[] = {
 { "Joystick Configuration", g_cfg_joystick_menu, 0, 0, CFGTYPE_MENU },
 { "Joystick Emulation,0,Keypad Joystick,1,Mouse Joystick,2,Native Joystick 1,"
-	"3,Native Joystick 2", KNMP(g_joystick_type), CFGTYPE_INT },
+	"3,Native Joystick 2,4,Disable Joystick", 
+	KNMP(g_joystick_type), CFGTYPE_INT },
 { "Joystick Scale X,0x100,Standard,0x119,+10%,0x133,+20%,"
 	"0x150,+30%,0xb0,-30%,0xcd,-20%,0xe7,-10%",
 		KNMP(g_joystick_scale_factor_x), CFGTYPE_INT },
@@ -185,12 +210,64 @@ Cfg_menu g_cfg_serial_menu[] = {
 { 0, 0, 0, 0, 0 },
 };
 
+Cfg_menu g_cfg_parallel_menu[] = {
+{ "Parallel Card Configuration", g_cfg_parallel_menu, 0, 0, CFGTYPE_MENU },
+{ "Parallel Card in Slot 1,0,Off,1,On",
+		KNMP(g_parallel), CFGTYPE_INT },
+{ "Parallel Output,0,Send full 8-bit data,1,Mask off high bit",
+		KNMP(g_parallel_out_masking), CFGTYPE_INT },
+{ "", 0, 0, 0, 0 },
+{ "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
+{ 0, 0, 0, 0, 0 },
+};
+
+Cfg_menu g_cfg_ethernet_menu[] = {
+{ "Ethernet Card Configuration", g_cfg_ethernet_menu, 0, 0, CFGTYPE_MENU },
+{ "Uthernet Card in Slot 3,0,Off,1,On",
+		KNMP(g_ethernet), CFGTYPE_INT },
+{ "Use Interface Number,0,0,1,1,2,2,3,3,4,4",
+		KNMP(g_ethernet_interface), CFGTYPE_INT },
+{ "", 0, 0, 0, 0 },
+{ "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
+{ 0, 0, 0, 0, 0 },
+};
+
+Cfg_menu g_cfg_printer_menu[] = {
+{ "Virtual Printer Configuration", g_cfg_ethernet_menu, 0, 0, CFGTYPE_MENU },
+{ "Virtual Printer Type,0,Epson LQ",
+		KNMP(g_printer), CFGTYPE_INT },
+{ "Printer DPI,60,60x60 dpi,180,180x180 dpi,360,360x360 dpi",
+		KNMP(g_printer_dpi), CFGTYPE_INT },
+{ "Printer Output Type,bmp,Windows Bitmap,ps,Postscript (B&W),printer,Direct to host printer",
+		KNMP(g_printer_output), CFGTYPE_STR },
+{ "Multipage Files? (PS Only),0,No,1,Yes",
+		KNMP(g_printer_multipage), CFGTYPE_INT },
+{ "Printer Timeout,0,Never,2,2 sec.,15,15 sec.,30,30 sec.,60, 1 min.",
+		KNMP(g_printer_timeout), CFGTYPE_INT },
+{ "", 0, 0, 0, 0 },
+{ "Epson LQ Fonts", 0, 0, 0, 0 },
+{ "--------------", 0, 0, 0, 0 },
+{ "", 0, 0, 0, 0 },
+{ "Roman", KNMP(g_printer_font_roman), CFGTYPE_FILE },
+{ "Sans Serif", KNMP(g_printer_font_sans), CFGTYPE_FILE },
+{ "Courier", KNMP(g_printer_font_courier), CFGTYPE_FILE },
+{ "Prestige", KNMP(g_printer_font_prestige), CFGTYPE_FILE },
+{ "Script", KNMP(g_printer_font_script), CFGTYPE_FILE },
+{ "OCR A/B", KNMP(g_printer_font_ocra), CFGTYPE_FILE },
+{ "", 0, 0, 0, 0 },
+{ "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
+{ 0, 0, 0, 0, 0 },
+};
+
 Cfg_menu g_cfg_main_menu[] = {
 { "GSport Configuration", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { "Disk Configuration", g_cfg_disk_menu, 0, 0, CFGTYPE_MENU },
 { "Joystick Configuration", g_cfg_joystick_menu, 0, 0, CFGTYPE_MENU },
 { "ROM File Selection", g_cfg_rom_menu, 0, 0, CFGTYPE_MENU },
 { "Serial Port Configuration", g_cfg_serial_menu, 0, 0, CFGTYPE_MENU },
+{ "Ethernet Card Configuration", g_cfg_ethernet_menu, 0, 0, CFGTYPE_MENU },
+{ "Parallel Card Configuration", g_cfg_parallel_menu, 0, 0, CFGTYPE_MENU },
+{ "Virtual Printer Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
 { "Force X-windows display depth", KNMP(g_force_depth), CFGTYPE_INT },
 { "Auto-update configuration file,0,Manual,1,Immediately",
 		KNMP(g_config_kegs_auto_update), CFGTYPE_INT },
@@ -241,7 +318,7 @@ int g_cfg_file_pathfield = 0;
 const char *g_kegs_rom_names[] = { "ROM", "ROM", "ROM.01", "ROM.03", 0 };
 	/* First entry is special--it will be overwritten by g_cfg_rom_path */
 
-const char *g_kegs_c1rom_names[] = { 0 };
+const char *g_kegs_c1rom_names[] = { "parallel.rom" };
 const char *g_kegs_c2rom_names[] = { 0 };
 const char *g_kegs_c3rom_names[] = { 0 };
 const char *g_kegs_c4rom_names[] = { 0 };
@@ -330,6 +407,15 @@ config_init_menus(Cfg_menu *menuptr)
 				val = *((int *)voidptr);
 				defptr->intval = val;
 				menuptr->defptr = &(defptr->intval);
+				break;
+			case CFGTYPE_STR:
+				str_ptr = (char **)menuptr->ptr;
+				str = *str_ptr;
+				// We need to malloc this string since all
+				//  string values must be dynamically alloced
+				defptr->strval = str;	// this can have a copy
+				*str_ptr = kegs_malloc_str(str);
+				menuptr->defptr = &(defptr->strval);
 				break;
 			case CFGTYPE_FILE:
 				str_ptr = (char **)menuptr->ptr;
@@ -437,6 +523,39 @@ cfg_text_screen_dump()
 	fclose(ofile);
 }
 
+#ifdef HAVE_TFE
+void 
+cfg_get_tfe_name()
+{   
+	int i = 0;
+	char *ppname = NULL;
+	char *ppdes = NULL;
+	cfg_htab_vtab(0,9);
+	if (tfe_enumadapter_open())
+	{
+	cfg_printf("Interface List:\n---------------");
+	while(tfe_enumadapter(&ppname,&ppdes))
+	{
+		cfg_htab_vtab(0, 11+i);
+		cfg_printf("%2d: %s",i,ppdes);
+		i++;
+		lib_free(ppname);
+		lib_free(ppdes);
+	}
+	tfe_enumadapter_close();
+	}
+	else
+	{
+		#ifdef WIN32
+		cfg_printf("ERROR: Install/Enable WinPcap for Ethernet Support!!");	
+		#else
+		cfg_printf("ERROR: Install/Enable LibPcap for Ethernet Support!!");	
+		#endif
+	}
+	return;
+}
+#endif
+
 void
 config_vbl_update(int doit_3_persec)
 {
@@ -522,6 +641,13 @@ config_parse_option(char *buf, int pos, int len, int line)
 		val = (int)strtol(&buf[pos], 0, 0);
 		iptr = (int *)menuptr->ptr;
 		*iptr = val;
+		break;
+	case CFGTYPE_STR:
+		strptr = (char **)menuptr->ptr;
+		if(strptr && *strptr) {
+			free(*strptr);
+		}
+		*strptr = kegs_malloc_str(&buf[pos]);
 		break;
 	case CFGTYPE_FILE:
 		strptr = (char **)menuptr->ptr;
@@ -686,6 +812,7 @@ config_load_roms()
 				continue;
 			}
 			close(fd);
+			fd = 0;
 		}
 	}
 
@@ -1060,6 +1187,14 @@ config_write_config_kegs_file()
 			if(curval != defval) {
 				fprintf(fconf, "%s = %d\n", menuptr->name_str,
 								curval);
+			}
+		}
+		if(type == CFGTYPE_STR) {
+			curstr = *((char **)menuptr->ptr);
+			defstr = *((char **)menuptr->defptr);
+			if(strcmp(curstr, defstr) != 0) {
+				fprintf(fconf, "%s = %s\n", menuptr->name_str,
+								curstr);
 			}
 		}
 		if(type == CFGTYPE_FILE) {
@@ -1891,6 +2026,9 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 	char	*curstr, *defstr;
 	char	*str;
 	char	*outstr;
+#ifdef HAVE_TFE
+	char	*strval;
+#endif
 	int	*iptr;
 	int	val;
 	int	num_opts;
@@ -1975,8 +2113,16 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 					my_exit(1);
 				}
 			} else {
+				if (type == CFGTYPE_INT)
+				{
 				val = strtoul(valbuf, 0, 0);
 				g_cfg_opts_vals[num_opts] = val;
+				}
+
+				if (type == CFGTYPE_STR)
+				{
+				strncpy(&(g_cfg_opts_strvals[num_opts][0]),&(valbuf[0]),CFG_OPT_MAXSTR);
+				}
 				outstr = &(g_cfg_opts_strs[num_opts][0]);
 				opt_get_str = 1;
 			}
@@ -2001,6 +2147,16 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 		iptr = menuptr->defptr;
 		defval = *iptr;
 		if(curval == defval) {
+			g_cfg_opt_buf[3] = 'D';	/* checkmark */
+			g_cfg_opt_buf[4] = '\t';
+		}
+	}
+	if(type == CFGTYPE_STR) {
+		str_ptr = (char **)menuptr->ptr;
+		curstr = *str_ptr;
+		str_ptr = (char **)menuptr->defptr;
+		defstr = *str_ptr;
+		if(strcmp(curstr,defstr) == 0) {
 			g_cfg_opt_buf[3] = 'D';	/* checkmark */
 			g_cfg_opt_buf[4] = '\t';
 		}
@@ -2039,6 +2195,18 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 			}
 		}
 	}
+	if(type == CFGTYPE_STR) {
+		g_cfg_opt_buf[bufpos++] = ' ';
+		g_cfg_opt_buf[bufpos++] = '=';
+		g_cfg_opt_buf[bufpos++] = ' ';
+		g_cfg_opt_buf[bufpos] = 0;
+		for(i = 0; i < num_opts; i++) {
+			if(!strcmp(curstr,g_cfg_opts_strvals[i])) {
+				opt_num = i;
+				break;
+			}
+		}
+	}
 
 	if(change != 0) {
 		if(type == CFGTYPE_INT) {
@@ -2058,6 +2226,23 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 			iptr = (int *)menuptr->ptr;
 			*iptr = curval;
 		}
+		if(type == CFGTYPE_STR) {
+			if(num_opts > 0) {
+				opt_num += change;
+				if(opt_num >= num_opts) {
+					opt_num = 0;
+				}
+				if(opt_num < 0) {
+					opt_num = num_opts - 1;
+				}
+				curstr = g_cfg_opts_strvals[opt_num];
+			} else {
+				//curstr += change;
+				/* HACK: min_val, max_val testing here */
+			}
+			str_ptr = (char **)menuptr->ptr;
+			*str_ptr = curstr;
+		}
 		g_config_kegs_update_needed = 1;
 	}
 
@@ -2073,6 +2258,10 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 		if(type == CFGTYPE_INT) {
 			str = &(g_cfg_opts_strs[0][0]);
 			snprintf(str, CFG_OPT_MAXSTR, "%d", curval);
+		} else if (type == CFGTYPE_STR) {
+			str = &(g_cfg_opts_strs[0][0]);
+			printf("curstr is: %s str is: %s\n", curstr,str);
+			snprintf(str, CFG_OPT_MAXSTR, "%s", curstr);
 		} else if (type == CFGTYPE_DISK) {
 			str = &(g_cfg_opts_strs[0][0]),
 			cfg_get_disk_name(str, CFG_OPT_MAXSTR, type_ext, 1);
@@ -2296,7 +2485,9 @@ cfg_dirent_sortfn(const void *obj1, const void *obj2)
 	/* Called by qsort to sort directory listings */
 	direntptr1 = (const Cfg_dirent *)obj1;
 	direntptr2 = (const Cfg_dirent *)obj2;
-#if defined(MAC) || defined(_WIN32)
+#if defined(_WIN32)
+	ret = _stricmp(direntptr1->name, direntptr2->name);
+#elif defined(MAC) 
 	ret = strcasecmp(direntptr1->name, direntptr2->name);
 #else
 	ret = strcmp(direntptr1->name, direntptr2->name);
@@ -2966,6 +3157,16 @@ config_control_panel()
 		if(g_cfg_slotdrive >= 0) {
 			cfg_file_draw();
 		}
+
+#ifdef HAVE_TFE
+		/*HACK eh, at least I think it is. Display the available ethernet interfaces
+		when in the ethernet control panel. This is the only way one can customize a menu pane.
+		Kent did it with the directory browser, so why not.*/
+		if(menuptr == g_cfg_ethernet_menu)
+		{
+			cfg_get_tfe_name();
+		}
+#endif
 
 		key = -1;
 		while(g_config_control_panel) {

@@ -28,7 +28,7 @@ const char rcsid_win32snd_driver_c[] = "@(#)$KmKId: win32snd_driver.c,v 1.5 2002
 # include <windows.h>
 # include <mmsystem.h>
 #endif
-#include <unistd.h>
+//#include <unistd.h>
 
 extern int Verbose;
 
@@ -69,8 +69,8 @@ win32snd_shutdown()
 #ifndef __CYGWIN__
 
 void CALLBACK
-handle_wav_snd(HWAVEOUT hwo, UINT uMsg, DWORD dwInstance, DWORD dwParam1,
-		DWORD dwParam2)
+handle_wav_snd(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1,
+		DWORD_PTR dwParam2)
 {
 	LPWAVEHDR	lpwavehdr;
 
@@ -131,7 +131,7 @@ child_sound_init_win32()
 	}
 
 	res = waveOutOpen(&g_wave_handle, WAVE_MAPPER, &wavefmt,
-		(DWORD)handle_wav_snd, 0, CALLBACK_FUNCTION | WAVE_ALLOWSYNC);
+		(DWORD_PTR)handle_wav_snd, 0, CALLBACK_FUNCTION | WAVE_ALLOWSYNC);
 
 	if(res != MMSYSERR_NOERROR) {
 		printf("Cannot register audio\n");

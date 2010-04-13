@@ -159,6 +159,7 @@ void config_init(void);
 void cfg_exit(void);
 void cfg_toggle_config_panel(void);
 void cfg_text_screen_dump(void);
+void cfg_get_tfe_name(void);
 void config_vbl_update(int doit_3_persec);
 void config_parse_option(char *buf, int pos, int len, int line);
 void config_parse_bram(char *buf, int pos, int len);
@@ -539,3 +540,7 @@ void video_update_status_line(int line, const char *string);
 void video_show_debug_info(void);
 word32 float_bus(double dcycs);
 
+/*parallel.c*/
+byte parallel_read(word16 paddr);
+void parallel_write(word16 paddr, byte pvar);
+void printer_update();

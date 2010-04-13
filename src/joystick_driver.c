@@ -179,6 +179,11 @@ joystick_init()
 		}
 	}
 
+	if (g_joystick_native_type1<0 && g_joystick_native_type2 <0) {
+		printf ("No joystick is attached\n");
+		return;
+	}
+
 	for(i = 0; i < 4; i++) {
 		g_paddle_val[i] = 32767;
 	}

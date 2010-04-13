@@ -53,6 +53,9 @@ extern byte *g_memory_ptr;
 extern byte *g_rom_fc_ff_ptr;
 extern byte *g_rom_cards_ptr;
 extern byte *g_dummy_memory1_ptr;
+extern int	g_c068_statereg;
+unsigned char ioslotsel = 0;
+unsigned char iostrobe = 0;
 
 extern int g_num_breakpoints;
 extern word32 g_breakpts[];
@@ -152,12 +155,12 @@ extern Page_info page_info_rd_wr[];
 extern word32 slow_mem_changed[];
 
 #define GET_MEMORY8(addr,dest)					\
-	addr_latch = (addr);					\
-	CYCLES_PLUS_1;						\
+	addr_latch = (addr);\
+	CYCLES_PLUS_1;	\
 	stat = GET_PAGE_INFO_RD(((addr) >> 8) & 0xffff);	\
 	wstat = PTR2WORD(stat) & 0xff;				\
 	ptr = stat - wstat + ((addr) & 0xff);			\
-	if(wstat & (1 << (31 - BANK_IO_BIT))) {			\
+	if(wstat & (1 << (31 - BANK_IO_BIT)) || iostrobe == 1) {			\
 		fcycles_tmp1 = fcycles;				\
 		dest = get_memory8_io_stub((addr), stat,	\
 				&fcycles_tmp1, fplus_x_m1);	\
@@ -374,13 +377,13 @@ get_memory8_io_stub(word32 addr, byte *stat, double *fcycs_ptr,
 	double	fcycles;
 	word32	wstat;
 	byte	*ptr;
-
 	wstat = PTR2WORD(stat) & 0xff;
+
 	if(wstat & BANK_BREAK) {
 		check_breakpoints(addr);
 	}
 	fcycles = *fcycs_ptr;
-	if(wstat & BANK_IO2_TMP) {
+	if(wstat & BANK_IO2_TMP || iostrobe == 1) {
 		FCYCLES_ROUND;
 		*fcycs_ptr = fcycles;
 		return get_memory_io((addr), fcycs_ptr);
@@ -403,7 +406,6 @@ get_memory16_pieces_stub(word32 addr, byte *stat, double *fcycs_ptr,
 	word32	addr_latch;
 	word32	ret;
 	word32	tmp1;
-
 	fcycles = *fcycs_ptr;
 	fplus_1 = fplus_ptr->plus_1;
 	fplus_x_m1 = fplus_ptr->plus_x_minus_1;
@@ -431,7 +433,6 @@ get_memory24_pieces_stub(word32 addr, byte *stat, double *fcycs_ptr,
 	word32	ret;
 	word32	tmp1;
 	word32	tmp2;
-
 	fcycles = *fcycs_ptr;
 	fplus_1 = fplus_ptr->plus_1;
 	fplus_x_m1 = fplus_ptr->plus_x_minus_1;
@@ -506,7 +507,6 @@ set_memory16_pieces_stub(word32 addr, word32 val, double *fcycs_ptr,
 	double	fcycles, fcycles_tmp1;
 	word32	addrp1;
 	word32	wstat;
-
 	fcycles = *fcycs_ptr;
 	SET_MEMORY8(addr, val);
 	addrp1 = addr + 1;
@@ -598,7 +598,6 @@ set_memory_c(word32 addr, word32 val, int cycs)
 	double	fplus_1;
 	double	fplus_x_m1;
 	word32	wstat;
-
 	fcycles = g_cur_dcycs - g_last_vbl_dcycs;
 	fplus_1 = 0;
 	fplus_x_m1 = 0;
@@ -886,7 +885,7 @@ get_remaining_operands(word32 addr, word32 opcode, word32 psr, Fplus *fplus_ptr)
 				FINISH(RET_C70D, 0);			\
 			}						\
 		}							\
-		if(wstat & (1 << (31 - BANK_IO2_BIT))) {		\
+		if(wstat & (1 << (31 - BANK_IO2_BIT)) || iostrobe == 1) {		\
 			FCYCLES_ROUND;					\
 			fcycles_tmp1 = fcycles;				\
 			opcode = get_memory_io((addr), &fcycles_tmp1);	\
