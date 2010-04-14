@@ -13,6 +13,7 @@
 
     <menu name="GSport">
       <item name="Main" href="index.html"/>
+      <item name="Operating" href="operating.html"/>
       <item name="Developing" href="developing.html"/>
       <item name="Emulated Ethernet" href="ethernet.html"/>
       <item name="History" href="history.html"/>
