@@ -435,7 +435,7 @@ mode (F7).  GSport may not be able to keep up with some programs running
 at 2.8MHz due to video and sound overheads on lower-end machines.  If
 that happens, it effectively runs slower by extending the emulated
 "second", like in the 1MHz mode.  You can tell this is happening
-when Eff MHz in the status area falls below 2.5MHz.  If GSport is running
+when Eff MHz in the status area falls below 2.8MHz.  If GSport is running
 faster than 2.8MHz, it takes small pauses to slow down, just like in
 1MHz.  Many Apple IIgs demos must be run at 2.8MHz.  The built-in
 selftests (cmd-option-ctrl-Reset) must run at 2.8MHz.  Many Apple IIgs
@@ -464,128 +464,9 @@ data every 1.4 seconds--the sound breaks up!
 (trying to approximate the slowdown causes by memory refresh on a real
 Apple IIgs).  It's just easier to say 1MHz and 2.8MHz.
 
-
-* GSport SAMPLE_DISK
-
- I'm providing a sample disk of freely available utilities/programs to
-demonstrate a little of what GSport can do.  I'm also including my simple
-changes to a benchmark called "SPEEDTEST" to make it run under ProDOS and
-time itself automatically.  The SAMPLE_DISK is not bootable since I'm
-not sure if I can distribute PRODOS (the OS).
-
-
-   SPEEDTEST:
-   ---------
-
- In the folder "SPEEDTEST", there are two BASIC programs.  OLD.SPEEDTEST
-is the old, unmodified DOS 3.3 emulator benchmark by Clayten Hamacher.
-It does not run properly under ProDOS 8.  My modified version is
-SPEED.PRO, meaning converted to ProDOS.  I made few modifications, other
-than to make the benchmarks time themselves.
-
- To run, just say "RUN SPEED.PRO".  To run benchmarks, press "B".  If
-you say "A)ll tests", make sure you have a 5.25" disk image in s6d1!
-(A blank 140K image will work fine).
-
- This modified SPEED.PRO can run on ANY Apple IIgs emulator (or on the real
-thing).
-
-   GSOS7, GSOS5, BYE.SYSTEM:
-   ------------------------
-
- These are handy utilities I use on my s7d1 boot disk.  Get a GS/OS 6.x
-bootable disk image.  (See GSOS.INFO file for how to get GS/OS).
-Remove "PRODOS" from that disk's root directory, and copy GSOS7 to
-the root directory.  Then copy SYSTEM/P8 to PRODOS.  Then move
-BASIC.System into SYSTEM/.  Then copy BYE.SYSTEM to the root directory,
-then move BASIC.SYSTEM back to the root directory.
-
- What all this means is that now the root directory of your system disk
-is:  GSOS7, (other stuff), PRODOS, BYE.SYSTEM, and BASIC.SYSTEM.
-When you boot, ProDOS will boot (this is PRODOS 8) and will search
-for the first *.SYSTEM file, and run it.  BYE.SYSTEM just does a BYE
-command, which puts you in the PRODOS 8 textual launcher.
-If you now select GSOS7 (the first entry, already highlighted, just
-hit return), it will boot GSOS on slot 7.  (Use GSOS5 to boot slot5).
-Or, just move down and select BASIC.SYSTEM to go to BASIC.  A very simple
-program launcher!?
-
- Note that I didn't write GSOS5 or GSOS7--I just made a one byte hack
-to the default GS/OS launcher.  No real wizardry is going on here.
-
-
-   SHRINKIT3.4, GSHK1.1:
-   --------------------
-
- Useful for unpacking .SHK files you can download off of the net.
-Always use GSHK (GS/OS version of ShrinkIt) for GS programs since
-they may have resource forks.  It's also faster.  GSHK must be run from GS/OS.
-
-   LISTV2.0:
-   --------
-
- ProDOS 8 text file lister, useful for viewing text files.
-
-   Wolfenstein3D:
-   ------
-
- Wolfenstein 3D for the Apple IIgs.  No kidding!  Must be run from GS/OS.
-
-   SOUND22:
-   -------
-
- Cool little ProDOS 8 program (SOUND.EDITOR) that plays hi-fidelity
-(relatively) through the old Apple II speaker.  This is included as a
-demonstration of how accurate GSport sound emulation is.
-
-   Sound.Smith.95:
-   --------------
-
- GS/OS application that plays SoundSmith songs, which are spreadsheet music,
-like MODs.  I included some sample songs--FILE.11, FILE.16, FILE.17, and
-SPACE.HARRIER.  Enjoy!
-
-   SOLITAIRE:
-   ---------
-
- Klondike.  I like the interface on this game.
-
-   CAT.DOCTOR:
-   ----------
-
- From Prosel8 (which is now public domain), this utility is very handy for
-sorting directories (among other things).  Useful for arranging GSOS7,
-and BYE.SYSTEM mentioned above.
-
-   BGSOUND:
-   -------
-
- This CDA lets you play Soundsmith songs in the background while other
-applications are running.  Very handy for playing Solitaire with some music.
-
-   DOCVu.CDA:
-   ---------
-
- This CDA shows the current DOC contents in real-time.  It has neat visual
-effects while playing Soundsmith songs.
-
-   Zippy.gs
-   --------
-
- Very useful ProDOS 8 program by Andy McFadden for setting ZipGS parameters.
-In GSport, you'll want to use this to change the Zip speed to less than
-100% to make the "Unlimited" speed become limited to 7.5MHz, which is
-useful for some games.
-
-
 * GSport:  What Works
 
- Basically, just about every Apple II program works.  See the file
-README.a2.compatibility for directions on how to make certain games/programs
-work.
-
- GSport is EXTREMELY compatible.  But, I haven't tested everything.  Let
-me know if you find a program which is not working correctly.
+ Basically, just about every Apple II program works.
 
  Some old Apple II 5.25" games require the old C600 ROM image, and don't work
 with the default Apple IIgs ROM.  This is not GSport's fault--these games
@@ -605,8 +486,8 @@ the above lets it work fine. This seems to be a bug in the demo.
 * GSport bugs
 
  On a ROM03, GSport makes a patch to the ROM image (inside emulation, not
-to the Unix file) to fix a bug in the ROM code.  Both ROM01 and ROM03
-are patched to enable use of more than 8MB of memory.  I then patch the ROM
+to the ROM file) to fix a bug in the ROM code.  Both ROM01 and ROM03
+are patched to enable use of more than 8MB of memory.  It then patches the ROM
 self-tests to make the ROM checksum pass.  But other programs, like
 the Apple IIgs Diagnostic Disk, will detect a ROM checksum mismatch.
 Don't worry about it.
@@ -625,7 +506,7 @@ speaker using $C030) and fairly accurate Ensoniq sound.
 5 seconds, it turns off the sound calculation routines for a small
 speedup.  It describes that it has done this by saying "Pausing sound"
 in the debug window.  However, when sound restarts, it sometimes
-"breaks-up" a little.  I will work on fixes for this.
+"breaks-up" a little.
 
  If your display is not using shared memory, audio defaults to off unless
 you override it with "-audio 1".
@@ -664,8 +545,7 @@ start).  GSport now has a socket port open, 6502 for slot 2, which you
 can connect to using any telnet program.  In a Terminal window, then
 type "telnet 127.0.0.1 6502" and you will connect to GSport.  The Virtual
 Modem then starts printing "RING" every 2 seconds until you answer with
-"ATA".  You are now connected.  I have not tried BBS programs, but have
-made connections with ProTERM.
+"ATA".  You are now connected.
 
  On Windows XP SP2, when GSport tries to open this incoming socket, you'll
 need to enable it and click Unblock to the dialog that Windows pops up.
@@ -696,9 +576,8 @@ to the emulated IIgs.  You may want to go to the F4 Config Panel and set
 
 * GSport status area
 
-
- The status area is updated once each second.  It displays info I am
-(or was at some time) interested in seeing.
+ The status area is updated once each second.  It displays internal
+emulation information.
 
 ---
 Line 1: (Emulation speed info)
@@ -711,7 +590,7 @@ Eff MHz:  Above, but with overhead accounted for.  Eff MHz is the
 sec:	The number of real seconds that have passed during on of GSport's
 		emulated seconds. Should be 1.00 +/- .01.  Under 1
 		means GSport is running a bit fast, over 1 means GSport is
-		running slow.  When you force speed to 2.5MHz, if GSport
+		running slow.  When you force speed to 2.8MHz, if GSport
 		can't keep up, it extends sec, so you can see how slow
 		it's really going here.
 vol:	Apple IIgs main audio volume control, in hex, from 0-F.
@@ -791,10 +670,7 @@ to accurate disk emulation.
 
 * X Window (Linux) interface information
 
- Every version of Linux is different.  Supporting this is very difficult
-especially since I do not run Linux myself.
-
- If GSport fails to start, try the following options:
+ If GSport fails to start under Linux, first try the following options:
 
 ---
 GSport -audio 0 -noshm
@@ -841,8 +717,7 @@ or you can type 'xset r' in another terminal window.
  Sometimes the converse is true--key repeat is "on" when the cursor is
 in the GSport window.  Moving the cursor out of the window and then
 back in should solve it.  This is sometimes noticeable when running
-Wolfenstein 3D GS.  I haven't spent much time debugging the problem.
-I think it may be the X Server.
+Wolfenstein 3D GS.
 
  GSport uses a private color-map for its X-window in 8-bit mode.  This
 may cause colormap "flash" when your cursor enters the window.
