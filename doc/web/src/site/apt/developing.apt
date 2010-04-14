@@ -10,20 +10,18 @@ Developing GSport
 
 * General build instructions
 
- You need to build with a make utility.
+ You need to build with a <<<make>>> utility.
 There's a default Makefile, which should work for nearly any environment.
-The Makefile includes a file called "vars" which defines the platform-
-dependent variables.  You need to make vars point to the appropriate
+The Makefile includes a file called <<<vars>>> which defines the platform-
+dependent variables.  You need to make <<<vars>>> point to (or be) the appropriate
 file for your machine.
-
- This makes my maintenance of the diverse platforms a bit easier.
 
 * Win32
 
  There is a different port of KEGS by Chea Chee Keong (akilgard) called
-KEGS32.  You can get it from {{http://www.geocities.com/akilgard/kegs32}}.
-This port is leveraged from KEGS32, but mostly a rewrite (perhaps for
-the worse).
+KEGS32.  It was originally available from {{{http://web.archive.org/web/20071107082448/http://www.geocities.com/akilgard/kegs32/}http://www.geocities.com/akilgard/kegs32}},
+but geocities has since closed.
+The Win32 code in GSport is leveraged from KEGS32.
 
  GSport can be compiled with {{{http://www.mingw.org/}Mingw}}
 and {{{http://www.cygwin.com/}Cygwin}} as well as via standard Microsoft compiler suites.
@@ -44,39 +42,43 @@ ROM, ROM.01, or ROM.03) in the same directory.
 You can also middle-click (if you have a 3-button mouse) or
 Shift-F6 to get the debugger in the terminal window, and then type "q".
 
-
 * Mac OS X
 
- GSport is easy to compile.  Just cd to the src directory and type "make".
-GSport requires perl to be in your path (or just edit the vars file to give
-the full path to wherever you installed perl).  Perl version 4 or 5 is
-fine.
+ Use the <<<vars_mac>>> file:
 
- After the "make" has finished, it will create the application GSportMac.
+-------------------------------------
+rm vars; ln -s vars_mac vars
+make
+-------------------------------------
+
+ After the <<<make>>> has finished, it will create the application <<<GSportMac>>>.
 
 * X86 Linux
 
- Use the vars_x86linux file with:
+ Use the <<<vars_x86linux>>> file:
 
 -------------------------------------
 rm vars; ln -s vars_x86linux vars
 make
 -------------------------------------
 
- The resulting executable is called "gsportx".
+ The resulting executable is called <<<gsportx>>>.
 
  The build scripts assume perl is in your path. If it is somewhere else,
 you need to edit the "PERL = perl" line in the vars file and make it point
 to the correct place.
 
- For audio, GSport needs access to /dev/dsp.  If the permissions do not allow
-GSport to access /dev/dsp, it can fail with a cryptic error message.  As root,
-just do: "chmod 666 /dev/dsp".
+ For audio, GSport needs access to <<</dev/dsp>>>.  If the permissions do not allow
+GSport to access <<</dev/dsp>>>, it can fail with a cryptic error message.  As root,
+just do: <<<chmod 666 /dev/dsp>>> .
 
+ If you do not have the <<</dev/dsp>>> device, GSport will not start unless you
+tell it to disable audio with the following command-line argument:
+<<<./gsportx -audio 0>>>
 
 * PowerPC Linux
 
- Use the vars_linuxppc vars file by:
+ Use the <<<vars_linuxppc>>> file:
 
 -------------
 rm vars; ln -s vars_linuxppc vars
@@ -88,12 +90,12 @@ you need to edit the "PERL = perl" line in the vars file and make it point
 to the correct place.
 
  Audio is currently disabled by default, but you can try turning it on
-by runnning "gsportx -audio 1".  It sounds horrible to me, but sounds do
+by runnning the command: <<<gsportx -audio 1>>>.  It sounds horrible, but sounds do
 come out.
 
 * Solaris SPARC
 
- Use the vars_solaris vars file by:
+ Use the <<<vars_solaris>>> file:
 
 -------------------------------------
 rm vars; ln -s vars_solaris vars
@@ -105,11 +107,11 @@ you need to edit the "PERL = perl" line in the vars file and make it point
 to the correct place.
 
  Audio is currently disabled by default, but you can try turning it on
-by runnning "gsportx -audio 1".
+by runnning the command: <<<gsportx -audio 1>>>
 
 * Solaris x86
 
- Use the vars_x86solaris vars file by:
+ Use the <<<vars_x86solaris>>> file:
 
 -------------------------------------
 rm vars; ln -s vars_x86solaris vars
@@ -121,12 +123,12 @@ you need to edit the "PERL = perl" line in the vars file and make it point
 to the correct place.
 
  Audio is currently disabled by default, but you can try turning it on
-by runnning "gsportx -audio 1".
+by runnning the command: <<<gsportx -audio 1>>>
 
 * Other platforms - "C"
 
  If you are porting to an X-windows and Unix-based machine, it should be
-easy.  Start with vars_x86linux if you are a little-endian machine, or
-vars_linuxppc if you are big endian.  Don't define -DKEGS_LITTLE_ENDIAN
+easy.  Start with <<<vars_x86linux>>> if you are a little-endian machine, or
+<<<vars_linuxppc>>> if you are big endian.  Don't define <<<-DKEGS_LITTLE_ENDIAN>>>
 unless your processor is little-endian (x86, Alpha).  Mac, Sun, MIPS,
 HP, Motorola, and IBM are big-endian.
