@@ -2157,6 +2157,13 @@ update_60hz(double dcycs, double dtime_now)
 	sound_update(dcycs);
 	clock_update();
 	scc_update(dcycs);
+	#ifdef HAVE_PARALLEL
+	//Check and see if virtual printer timeout has been reached.
+	if (g_printer_timeout)
+	{
+	printer_update();
+	}
+	#endif
 	paddle_update_buttons();
 }
 
