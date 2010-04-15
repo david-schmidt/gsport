@@ -172,8 +172,7 @@ show_simple_alert(char *str1, char *str2, char *str3, int num)
 	g_fatal_log = 3;
 	if(num != 0) {
 		snprintf(buf, 250, ": %d", num);
-		g_fatal_log_strs[g_fatal_log++] = 
-_malloc_str(buf);
+		g_fatal_log_strs[g_fatal_log++] = kegs_malloc_str(buf);
 	}
 	x_show_alert(0, 0);
 }
