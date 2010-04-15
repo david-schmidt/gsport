@@ -45,7 +45,7 @@
 	<key>CFBundleName</key>
 	<string>GSportMac</string>
 	<key>CFBundleIconFile</key>
-	<string>kegsicon.icns</string>
+	<string>gsporticon.icns</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
