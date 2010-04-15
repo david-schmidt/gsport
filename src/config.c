@@ -28,7 +28,7 @@
 #include "protos_tfe.h" 
 #endif
 
-#if defined (WIN32) || (WIN64)
+#if defined _MSC_VER
 #define snprintf _snprintf
 typedef unsigned int mode_t;
 #endif
@@ -2026,9 +2026,6 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 	char	*curstr, *defstr;
 	char	*str;
 	char	*outstr;
-#ifdef HAVE_TFE
-	char	*strval;
-#endif
 	int	*iptr;
 	int	val;
 	int	num_opts;

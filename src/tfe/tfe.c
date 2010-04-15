@@ -38,6 +38,7 @@
 
 #include "..\defc.h"
 #include "tfesupp.h"
+#include "types.h"
 
 
 /**/
