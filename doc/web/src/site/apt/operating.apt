@@ -16,7 +16,7 @@ order to legally use a ROM file that you may find on the internet.
 
  The distribution comes with the full source code for all platforms in
 the src/ directory, the Windows executable as gsportwin.exe, and the Mac OS X
-executable as GSportMac.app.
+executable as GSport.app.
 
  See the GSport project page on Sourceforge.net for more information about compiling for other platforms.
 
@@ -34,7 +34,7 @@ on a Mac--GSport will offer to make it for you if it cannot find one.
  Start GSport by Double-clicking the GSportMac icon on a Mac, or by running
 the executable (<<<gsportwin>>> on Windows, and <<<gsportx>>> on Linux).  GSportMac can
 be run by the Terminal window on a Mac as well (which enables access to
-more debug information) by typing: "./GSportMac.app/Contents/MacOS/GSportMac".
+more debug information) by typing: "./GSport.app/Contents/MacOS/GSportMac".
 
  Assuming all goes well, GSport will then boot up but probably not find any
 disk images.  See below for how to tell GSport what disk images to use.

@@ -240,7 +240,7 @@ x_show_alert(int is_fatal, const char *str)
 	if(str) {
 		// Provide an extra option--create a file
 		cfstrref2 = CFStringCreateWithFormat(kCFAllocatorDefault, NULL,
-				CFSTR("Create ~/Library/GSport/%s"), str);
+				CFSTR("Create ~/%s"), str);
 		alert_param.otherText = cfstrref2;
 	}
 	okstrref = CFSTR("Click OK to continue");

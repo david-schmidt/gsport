@@ -1381,7 +1381,7 @@ double	g_dtime_this_vbl_array[60];
 double	g_dtime_exp_array[60];
 double	g_dtime_pmhz_array[60];
 double	g_dtime_eff_pmhz_array[60];
-int	g_limit_speed = 0;
+int	g_limit_speed = 2;
 double	sim_time[60];
 double	g_sim_sum = 0.0;
 
