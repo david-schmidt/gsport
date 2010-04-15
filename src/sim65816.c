@@ -38,10 +38,10 @@ const char rcsid_sim65816_c[] = "@(#)$KmKId: sim65816.c,v 1.367 2004-11-22 02:39
 char g_argv0_path[256] = "./";
 
 const char *g_kegs_default_paths[] = { "", "./", "${HOME}/",
-	"${HOME}/Library/KEGS/",
+	"${HOME}/Library/GSport/",
 	"${0}/Contents/Resources/", "/usr/local/lib/",
-	"/usr/local/kegs/", "/usr/local/lib/kegs/", "/usr/share/kegs/",
-	"/var/lib/", "/usr/lib/kegs/", "${0}/", 0 };
+	"/usr/local/gsport/", "/usr/local/lib/gsport/", "/usr/share/gsport/",
+	"/var/lib/", "/usr/lib/gsport/", "${0}/", 0 };
 
 #define MAX_EVENTS	64
 

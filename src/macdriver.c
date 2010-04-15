@@ -246,7 +246,7 @@ x_show_alert(int is_fatal, const char *str)
 	}
 	okstrref = CFSTR("Click OK to continue");
 	if(is_fatal) {
-		okstrref = CFSTR("Clock OK to exit GSport");
+		okstrref = CFSTR("Click OK to exit GSport");
 	}
 	CreateStandardAlert(kAlertStopAlert, cfstrref, okstrref,
 			&alert_param, &alert);

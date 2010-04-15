@@ -35,7 +35,7 @@ gsportmac: $(OBJECTS) compile_time.o
 	cp -f info.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
 	cp -f classes.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
 	cp -f objects.xib ../GSport.app/Contents/Resources/English.lproj/main.nib
-	cp -f kegsicon.icns ../GSport.app/Contents/Resources/
+	cp -f gsporticon.icns ../GSport.app/Contents/Resources/
 	cp -f 525.icns ../GSport.app/Contents/Resources/
 	cp -f 2mg.icns ../GSport.app/Contents/Resources/
 	touch '../GSport.app/Icon?'
