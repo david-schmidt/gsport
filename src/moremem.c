@@ -1270,7 +1270,7 @@ io_read(word32 loc, double *cyc_ptr)
 			switch(g_em_emubyte_cnt) {
 			case 1:
 				g_em_emubyte_cnt = 2;
-				return 'K';
+				return 'G';
 			case 2:
 				g_em_emubyte_cnt = 0;
 				tmp = g_kegs_version_str[0] - '0';
