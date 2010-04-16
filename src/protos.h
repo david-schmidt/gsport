@@ -160,6 +160,8 @@ void cfg_exit(void);
 void cfg_toggle_config_panel(void);
 void cfg_text_screen_dump(void);
 void cfg_get_tfe_name(void);
+void cfg_inspect_maybe_insert_file(char *filename);
+int cfg_guess_image_size(char *filename);
 void config_vbl_update(int doit_3_persec);
 void config_parse_option(char *buf, int pos, int len, int line);
 void config_parse_bram(char *buf, int pos, int len);

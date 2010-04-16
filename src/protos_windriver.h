@@ -30,6 +30,7 @@ void win_event_key(HWND hwnd, UINT raw_vk, BOOL down, int repeat, UINT flags);
 void win_event_quit(HWND hwnd);
 void win_event_redraw(void);
 LRESULT CALLBACK win_event_handler(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lParam);
+void inspect_file(LPTSTR lpstrFile);
 int main(int argc, char **argv);
 void check_input_events(void);
 void x_update_color(int col_num, int red, int green, int blue, word32 rgb);

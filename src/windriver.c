@@ -32,8 +32,10 @@ const char rcsid_windriver_c[] = "@(#)$KmKId: windriver.c,v 1.11 2004-11-24 16:4
 #include <mmsystem.h>
 #include <winsock.h>
 #include <commctrl.h>
+#include <shellapi.h>
 
 #include "defc.h"
+#include "protos.h"
 #include "protos_windriver.h"
 
 extern int Verbose;
@@ -351,6 +353,11 @@ win_event_redraw()
 LRESULT CALLBACK
 win_event_handler(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lParam)
 {
+int i;
+int numDraggedFiles;
+int szFilename;
+LPTSTR lpszFile;
+
 	switch(umsg) {
 	case WM_MOUSEMOVE:
 	case WM_LBUTTONDOWN:
@@ -363,6 +370,17 @@ win_event_handler(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lParam)
 		return 0;
 	case WM_PAINT:
 		win_event_redraw();
+		break;
+	case WM_DROPFILES:
+		numDraggedFiles = DragQueryFile((HDROP)wParam, 0xFFFFFFFF, NULL, 0);
+		for (i = 0; i < numDraggedFiles; i++) {
+			szFilename = DragQueryFile((HDROP)wParam, i, NULL, 0);
+			lpszFile = malloc(szFilename + 1);
+			szFilename = DragQueryFile((HDROP)wParam, i, lpszFile, szFilename + 1);
+			cfg_inspect_maybe_insert_file(lpszFile);
+			free(lpszFile);
+		}
+		DragFinish((HDROP)wParam);
 		break;
 	}
 	switch(umsg) {
@@ -427,7 +445,7 @@ main(int argc, char **argv)
 	height = X_A2_WINDOW_HEIGHT + (MAX_STATUS_LINES * 16) + 32;
 	g_main_height = height;
 
-	g_hwnd_main = CreateWindow("gsportwin", "GSportWin - Apple //gs Emulator",
+	g_hwnd_main = CreateWindowEx(WS_EX_ACCEPTFILES, "gsportwin", "GSportWin - Apple //gs Emulator",
 		WS_TILED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		X_A2_WINDOW_WIDTH, height,
