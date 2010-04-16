@@ -2728,6 +2728,7 @@ Guess the image size.  Return values:
 			else /* Let's pretend it's an HDV image */
 				rc = 3;
 		}
+		close(fd);
 	}
 	return rc;
 }
