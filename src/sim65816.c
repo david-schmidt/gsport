@@ -785,6 +785,7 @@ kegsmain(int argc, char **argv)
 	int	diff;
 	int	tmp1;
 	int	i;
+	char	*final_arg = 0;
 
 	/* parse args */
 	for(i = 1; i < argc; i++) {
@@ -892,8 +893,12 @@ kegsmain(int argc, char **argv)
 			g_ethernet = tmp1;
 			i++;
 		} else {
-			printf("Bad option: %s\n", argv[i]);
-			exit(3);
+			if ((i == (argc - 1)) && (strncmp("-", argv[i], 1) != 0)) {
+				final_arg = argv[i];
+			} else {
+				printf("Bad option: %s\n", argv[i]);
+				exit(3);
+			}
 		}
 	}
 
@@ -928,6 +933,9 @@ kegsmain(int argc, char **argv)
 
 	iwm_init();
 	config_init();
+	// If the final argument was not a switch, then treat it like a disk image filename to insert
+	if (final_arg)
+		cfg_inspect_maybe_insert_file(final_arg);
 #ifdef HAVE_PARALLEL
 	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage);
 #endif
