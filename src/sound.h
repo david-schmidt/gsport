@@ -23,7 +23,7 @@
 const char rcsid_sound_h[] = "@(#)$KmKId: sound.h,v 1.17 2003-11-21 15:15:57-05 kentd Exp $";
 #endif
 
-#if !defined(_WIN32) && !defined(__CYGWIN__)
+#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined (__OS2__)
 # include <sys/ipc.h>
 # include <sys/shm.h>
 #endif

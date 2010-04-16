@@ -37,13 +37,8 @@
 #ifndef lib_pcap_h
 #define lib_pcap_h
 
-#ifdef WIN32
-/* RGJ Changed it to "pcap-stdinc.h" for AppleWin */
-#include "pcap-stdinc.h"
-#else /* WIN32 */
 #include <sys/types.h>
 #include <sys/time.h>
-#endif /* WIN32 */
 
 /* RGJ Changed it to "bpf.h" for AppleWin */
 #include "bpf.h"

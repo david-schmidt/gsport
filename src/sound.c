@@ -275,7 +275,7 @@ sound_init_general()
 
 	size = SOUND_SHM_SAMP_SIZE * SAMPLE_CHAN_SIZE;
 
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(MAC)
+#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(MAC) && !defined(__OS2__)
 	shmid = shmget(IPC_PRIVATE, size, IPC_CREAT | 0777);
 	if(shmid < 0) {
 		printf("sound_init: shmget ret: %d, errno: %d\n", shmid,
@@ -306,7 +306,7 @@ sound_init_general()
 
 	fflush(stdout);
 
-#if !defined(MAC) && !defined(_WIN32) && !defined(__CYGWIN__)
+#if !defined(MAC) && !defined(_WIN32) && !defined(__CYGWIN__) && !defined(__OS2__)
 	/* prepare pipe so parent can signal child each other */
 	/*  pipe[0] = read side, pipe[1] = write end */
 	ret = pipe(&g_pipe_fd[0]);
@@ -358,9 +358,10 @@ sound_init_general()
 #else
 # ifdef MAC
 	macsnd_init(shmaddr);
-# else
+# elif defined (_WIN32)
 /* windows */
 	win32snd_init(shmaddr);
+# elif defined (__OS2__)
 # endif
 #endif /* _WIN32 */
 

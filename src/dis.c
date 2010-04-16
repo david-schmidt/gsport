@@ -676,7 +676,7 @@ read_line(char *buf, int len)
 {
 	int	space_left;
 	int	ret;
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined (__OS2__)
 	int	flags, flags_save;
 
 	/* Unix */
@@ -697,6 +697,8 @@ read_line(char *buf, int len)
 	while(space_left > 0) {
 #ifdef _WIN32
 		ret = win_nonblock_read_stdin(0, buf, 1);
+#elif defined(__OS2__)
+
 #else
 		/* Unix */
 		ret = read(0, buf, 1);
@@ -722,7 +724,7 @@ read_line(char *buf, int len)
 		}
 		buf = &buf[ret];
 	}
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined (__OS2__)
 	(void)fcntl(0, F_SETFL, flags_save);
 #endif
 

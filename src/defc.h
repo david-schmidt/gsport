@@ -71,7 +71,7 @@ void U_STACK_TRACE();
 # include <libc.h>
 #endif
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined (__OS2__)
 # include <unistd.h>
 # include <sys/ioctl.h>
 # include <sys/wait.h>

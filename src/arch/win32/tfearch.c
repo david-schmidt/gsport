@@ -28,6 +28,11 @@
 
 /* #define WPCAP */
 
+#define WIN32_LEAN_AND_MEAN	/* Tell windows we want less header gunk */
+#define STRICT			/* Tell Windows we want compile type checks */
+#include <windows.h>
+
+
 #include "pcap.h"
 
 #include <assert.h>

@@ -2,10 +2,7 @@
 
 OBJECTS1 = adb.o clock.o config.o dis.o engine_c.o scc.o iwm.o \
 	joystick_driver.o moremem.o paddles.o sim65816.o smartport.o \
-	sound.o sound_driver.o video.o scc_socket_driver.o scc_windriver.o \
-	scc_macdriver.o
-
-OBJECTS2 = tfe/tfe.o tfe/tfearch.o tfe/tfesupp.o tfe/uilib.o
+	sound.o sound_driver.o video.o scc_socket_driver.o
 
 include vars
 
@@ -17,6 +14,9 @@ XLIBS = -L/usr/X11R6/lib
 PERL = perl
 
 all: $(TARGET)
+
+clean:
+	rm $(OBJECTS)
 
 specials: 8inst_s 16inst_s 8size 16size 8inst_c 16inst_c size_c size_s
 
@@ -133,7 +133,7 @@ sound.o: sound.c defc.h defcomm.h iwm.h protos.h sound.h
 sound_driver.o: sound_driver.c defc.h defcomm.h iwm.h protos.h sound.h
 video.o: video.c defc.h defcomm.h iwm.h protos.h superhires.h kegsfont.h
 tfe.o: tfe/tfe.c tfe/tfe.h tfe/tfe_protos.h
-tfearch.o: tfe/tfearch.c tfe/tfearch.h tfe/tfe_protos.h
+tfearch.o:arch/win32/tfearch.c tfe/tfearch.h tfe/tfe_protos.h
 tfesupp.o: tfe/tfesupp.c tfe/tfesupp.h tfe/tfe_protos.h
 uilib.o: tfe/uilib.c tfe/uilib.h tfe/tfe_protos.h
 macdriver.o: macdriver.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h

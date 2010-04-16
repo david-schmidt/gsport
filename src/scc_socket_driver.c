@@ -199,7 +199,7 @@ scc_socket_open_outgoing(int port, double dcycs)
 	sa_in.sin_port = htons(23);
 	hostentptr = gethostbyname(&scc_ptr->modem_cmd_str[0]);
 	if(hostentptr == 0) {
-#ifdef _WIN32
+#if defined(_WIN32) || defined (__OS2__)
 		fatal_printf("Lookup host %s failed\n",
 						&scc_ptr->modem_cmd_str[0]);
 #else
@@ -244,7 +244,7 @@ scc_socket_make_nonblock(int port, double dcycs)
 	Scc	*scc_ptr;
 	SOCKET	sockfd;
 	int	ret;
-#ifdef _WIN32
+#if defined(_WIN32) || defined (__OS2__)
 	u_long	flags;
 #else
 	int	flags;
@@ -253,7 +253,7 @@ scc_socket_make_nonblock(int port, double dcycs)
 	scc_ptr = &(scc_stat[port]);
 	sockfd = scc_ptr->sockfd;
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined (__OS2__)
 	flags = 1;
 	ret = ioctlsocket(sockfd, FIONBIO, &flags);
 	if(ret != 0) {
@@ -362,7 +362,7 @@ scc_accept_socket(int port, double dcycs)
 
 		flags = 0;
 		ret = 0;
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__OS2__)
 		/* For Linux, we need to set O_NONBLOCK on the rdwrfd */
 		flags = fcntl(rdwrfd, F_GETFL, 0);
 		if(flags == -1) {
@@ -655,7 +655,7 @@ void
 scc_socket_empty_writebuf(int port, double dcycs)
 {
 #ifdef SCC_SOCKETS
-# ifndef _WIN32
+# if !defined(_WIN32) && !defined(__OS2__)
 	struct sigaction newact, oldact;
 # endif
 	Scc	*scc_ptr;
@@ -741,7 +741,7 @@ scc_socket_empty_writebuf(int port, double dcycs)
 				scc_ptr->out_char_dcycs = dcycs;
 			}
 
-# ifdef _WIN32
+#if defined(_WIN32) || defined (__OS2__)
 			ret = send(rdwrfd, &(scc_ptr->out_buf[rdptr]), len, 0);
 # else
 			/* ignore SIGPIPE around writes to the socket, so we */
