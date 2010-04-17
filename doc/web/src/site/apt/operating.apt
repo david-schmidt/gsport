@@ -690,8 +690,8 @@ active.  If GSport crashes in a unusual way (a core dump, for instance),
 you may have to manually kill the subprocess.  ("ps -ef| grep GSport;kill
 xxxxx").
 
- User geoff@gwlink.net adds some notes for mounting disks/floppies/CDs under
-Solaris:
+ Geoff Weiss adds some notes for mounting disks/floppies/CDs under
+Solaris 7 through Solaris 10:
 
   To use a CDROM, insert the CD and let Volume Management mount it.
   Edit <<<config.txt>>> and use the filesystem that shows up in the "df -k"
