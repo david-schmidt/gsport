@@ -38,6 +38,7 @@
 
 #include "..\defc.h"
 #include "tfesupp.h"
+#include "protos_tfe.h"
 #include "types.h"
 
 
@@ -996,8 +997,8 @@ static byte tfe_read_rx_buffer(int odd_address)
 static
 void tfe_sideeffects_write_pp(word16 ppaddress, int odd_address)
 {
-    const char *on_off[2] = { "on","off" };
-#define on_off_str(x) ((x) ? on_off[0] : on_off[1])
+//    const char *on_off[2] = { "on","off" };
+//#define on_off_str(x) ((x) ? on_off[0] : on_off[1])
     word16 content = GET_PP_16( ppaddress );
 
     assert((ppaddress & 1) == 0);
@@ -1160,7 +1161,7 @@ void tfe_sideeffects_write_pp(word16 ppaddress, int odd_address)
             *p &= ~(0xFF << pos); /* clear out relevant bits */
             *p |= GET_PP_8(ppaddress+odd_address) << pos;
 
-            tfe_arch_set_hashfilter(tfe_hash_mask);
+            // tfe_arch_set_hashfilter(tfe_hash_mask);
 
 #if 0
             if(odd_address && (ppaddress == TFE_PP_ADDR_LOG_ADDR_FILTER+6))
@@ -1591,7 +1592,7 @@ byte tfe_read(word16 io_address)
     assert( io_address < 0x10);
 
     /*if (tfe_as_rr_net) {
-        /* rr status register is handled by rr cartidge 
+        // rr status register is handled by rr cartidge 
         if (io_address < 0x02) {
             return 0;
         }
@@ -1685,7 +1686,7 @@ void tfe_store(word16 io_address, byte var)
     assert( io_address < 0x10);
 
     /*if (tfe_as_rr_net) {
-        /* rr control register is handled by rr cartidge
+        // rr control register is handled by rr cartidge
         if (io_address < 0x02) {
             return;
         }
@@ -1784,6 +1785,7 @@ void tfe_store(word16 io_address, byte var)
 
 /* ------------------------------------------------------------------------- */
 /*    resources support functions                                            */
+#if 0
 static int set_tfe_disabled(int val, void *param)
 {
     /* dummy function since we don't want "disabled" to be stored on disk */
@@ -1794,11 +1796,11 @@ static int set_tfe_disabled(int val, void *param)
 {
     if (!tfe_cannot_use) {
         if (!val) {
-            /* TFE should not be used as rr net 
+            // TFE should not be used as rr net 
             if (tfe_as_rr_net) {
                 tfe_as_rr_net = 0;
 
-                /* if adapter is already enabled then reset the LAN chip 
+                // if adapter is already enabled then reset the LAN chip 
                 if (tfe) {
                     tfe_reset();
                 }
@@ -1808,7 +1810,7 @@ static int set_tfe_disabled(int val, void *param)
             if (!tfe_as_rr_net) {
                 tfe_as_rr_net = 1;
             
-                /* if adapter is already enabled then reset the LAN chip
+                // if adapter is already enabled then reset the LAN chip
                 if (tfe) {
                     tfe_reset();
                 }
@@ -1846,7 +1848,7 @@ static int set_tfe_enabled(int val, void *param)
     }
     return 0;
 }
-
+#endif /* 0 */
 
 int set_tfe_interface(const char *name)
 {

@@ -24,7 +24,7 @@ const char rcsid_moremem_c[] = "@(#)$KmKId: moremem.c,v 1.251 2004-11-19 01:55:5
 #include "defc.h"
 
 #ifdef HAVE_TFE
-#include "protos_tfe.h" 
+#include "tfe/protos_tfe.h" 
 #endif
 
 extern char g_kegs_version_str[];

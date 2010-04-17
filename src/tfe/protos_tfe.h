@@ -32,8 +32,10 @@ void tfe_reset(void);
 void tfe_shutdown(void);
 byte tfe_read(word16 addr);
 void tfe_store(word16 addr, byte var);
+/* Unused in this version of TFE, and generates complaints
 int tfe_read_snapshot_module(struct snapshot_s *s);
 int tfe_write_snapshot_module(struct snapshot_s *s);
+*/
 int tfe_enumadapter_open(void);
 int tfe_enumadapter(char **ppname, char **ppdescription);
 int tfe_enumadapter_close(void);

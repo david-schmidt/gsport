@@ -25,7 +25,8 @@
 #include <dirent.h>
 
 #ifdef HAVE_TFE
-#include "protos_tfe.h" 
+#include "tfe/tfesupp.h"
+#include "tfe/protos_tfe.h" 
 #endif
 
 #if defined _MSC_VER

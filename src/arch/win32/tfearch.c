@@ -32,8 +32,8 @@
 #define STRICT			/* Tell Windows we want compile type checks */
 #include <windows.h>
 
-
 #include "pcap.h"
+#include "../../tfe/tfesupp.h" 
 
 #include <assert.h>
 #include <stdio.h>
@@ -354,6 +354,7 @@ void tfe_arch_set_mac( const BYTE mac[6] )
 #endif
 }
 
+/*
 void tfe_arch_set_hashfilter(const DWORD hash_mask[2])
 {
 #if defined(TFE_DEBUG_ARCH) || defined(TFE_DEBUG_FRAMES)
@@ -361,7 +362,7 @@ void tfe_arch_set_hashfilter(const DWORD hash_mask[2])
         hash_mask[1], hash_mask[0]);
 #endif
 }
-
+*/
 
 /*
 void tfe_arch_receive_remove_committed_frame(void)
