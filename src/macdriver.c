@@ -278,7 +278,7 @@ my_cmd_handler( EventHandlerCallRef handlerRef, EventRef event, void *userdata)
 		osresult = noErr;
 		break;
 	case 'abou':
-		show_simple_alert("GSportMac v", (char *)g_kegs_version_str,
+		show_simple_alert("GSport v", (char *)g_kegs_version_str,
 			", Copyright 2010 GSport Contributors\n"
 			"Latest version at http://gsport.sourceforge.net/\n", 0);
 		osresult = noErr;
@@ -762,7 +762,7 @@ main(int argc, char* argv[])
 	//printf("CreateNewWindow ret: %d, g_main_window: %p\n", (int)err,
 	//		g_main_window);
 
-	err = SetWindowTitleWithCFString(g_main_window, CFSTR("GSportMac"));
+	err = SetWindowTitleWithCFString(g_main_window, CFSTR("GSport"));
 
 	// We don't need the nib reference anymore.
 	DisposeNibReference(nibRef);

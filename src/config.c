@@ -2689,47 +2689,43 @@ cfg_guess_image_size(char *filename)
 {
 /*
 Guess the image size.  Return values:
--1 : invalid/unknown.  Can't guess.
-0: Less than 140k; might be ram disk image.
-1: 140k, 5.25" image.
-2: 800k, 3.5" image.
-3: Something bigger.
+ -1 : invalid/unknown.  Can't guess.
+  0 : Less than 140k; might be ram disk image.
+  1 : 140k, 5.25" image.
+  2 : 800k, 3.5" image.
+  3 : Something bigger.
 */
 	struct stat stat_buf;
-	int	fd;
 	int	rc = -1;
-	int	ret;
 	int	len;
 
-	fd = open(filename, O_RDONLY | O_BINARY);
-	if(fd < 0)
+	rc = stat(filename, &stat_buf);
+	if(rc < 0)
 	{
-		printf("Open image file %s failed:%d, errno:%d\n",
-			filename, fd, errno);
+		printf("Can't get statistics on file %s; errno: %d\n",
+			filename, errno);
 		rc = -1;
-	}
-	else
-	{
-		ret = fstat(fd, &stat_buf);
-		if(ret != 0)
-		{
-			printf("fstat returned %d on fd %d, errno: %d\n",
-				ret, fd, errno);
-			rc = -1;
+	} else {
+		len = stat_buf.st_size;
+		printf("Found file %s, size %d; guessing ",
+			filename, len);
+		if (len <  140 * 1024) {
+			/* Not enough for a 140k image */
+			printf("small ProDOS image.\n");
+			rc = 0;
+		} else if (len <  140 * 1024 + 256 + 1) {
+			/* Reasonable size for 140k image, maybe in 2mg format */
+			printf("a 5-1/4\" image.\n");
+			rc = 1;
+		} else if (len < 800 * 1024 + 256 + 1) {
+			/* Reasonable size for 800k image, maybe in 2mg format */
+			printf("a 3-1/2\" image.\n");
+			rc = 2;
+		} else {
+			/* Let's pretend it's an HDV image */
+			printf("a hard drive image.\n");
+			rc = 3;
 		}
-		else
-		{
-			len = stat_buf.st_size;
-			if (len <  140 * 1024) /* Not enough for a 140k image */
-				rc = 0;
-			else if (len <  140 * 1024 + 256 + 1) /* Reasonable size for 140k image, maybe in 2mg format */
-				rc = 1;
-			else if (len < 800 * 1024 + 256 + 1) /* Reasonable size for 800k image, maybe in 2mg format */
-				rc = 2;
-			else /* Let's pretend it's an HDV image */
-				rc = 3;
-		}
-		close(fd);
 	}
 	return rc;
 }
