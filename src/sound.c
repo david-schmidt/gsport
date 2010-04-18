@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_sound_c[] = "@(#)$KmKId: sound.c,v 1.108 2004-10-31 00:56:07-04 kentd Exp $";
-
 #include "defc.h"
 
 #define INCLUDE_RCSID_C
@@ -248,7 +246,7 @@ sound_init()
 void
 sound_init_general()
 {
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(MAC)
+#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(MAC) && !defined(__OS2__)
 	int	pid;
 	int	shmid;
 	int	tmp;
@@ -258,7 +256,7 @@ sound_init_general()
 	int	size;
 	int	ret;
 
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(MAC)
+#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(MAC) && !defined(__OS2__)
 	if(!g_use_shmem) {
 		if(g_audio_enable < 0) {
 			printf("Defaulting audio off for slow X display\n");
@@ -425,6 +423,7 @@ sound_shutdown()
 {
 #ifdef _WIN32
 	win32snd_shutdown();
+#elif defined(__OS2__)
 #else
 	if((g_audio_enable != 0) && g_pipe_fd[1] != 0) {
 		close(g_pipe_fd[1]);
@@ -611,6 +610,8 @@ send_sound(int real_samps, int size)
 #if defined(MAC) || defined(_WIN32)
 	ret = 0;
 	child_sound_playit(tmp);
+#elif defined(__OS2__)
+
 #else
 	/* Although this looks like a big/little-endian issue, since the */
 	/*  child is also reading an int, it just works with no byte swap */

@@ -877,12 +877,9 @@ get_remaining_operands(word32 addr, word32 opcode, word32 psr, Fplus *fplus_ptr)
 			check_breakpoints(addr);			\
 		}							\
 		if((addr & 0xfffff0) == 0x00c700) {			\
-			/* Removing this as it causes non-standard	\
-			   booting behavior...				\
 			if(addr == 0xc700) {				\
 				FINISH(RET_C700, 0);			\
 			} else						\
-			*/						\
 			if(addr == 0xc70a) {				\
 				FINISH(RET_C70A, 0);			\
 			} else if(addr == 0xc70d) {			\

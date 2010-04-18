@@ -707,7 +707,7 @@ config_load_roms()
 	int	more_than_8mb;
 	int	changed_rom;
 	int	len;
-	int	fd;
+	FILE *file;
 	int	ret;
 	int	i;
 
@@ -724,18 +724,18 @@ config_load_roms()
 		g_config_control_panel = 1;
 		return;
 	}
-	fd = open(&g_cfg_tmp_path[0], O_RDONLY | O_BINARY);
-	if(fd < 0) {
-		fatal_printf("Open ROM file %s failed:%d, errno:%d\n",
-				&g_cfg_tmp_path[0], fd, errno);
+	file = fopen(&g_cfg_tmp_path[0], "rb");
+	if(!file) {
+		fatal_printf("Open ROM file %s failed; errno:%d\n",
+				&g_cfg_tmp_path[0], errno);
 		g_config_control_panel = 1;
 		return;
 	}
 
-	ret = fstat(fd, &stat_buf);
+	ret = stat(&g_cfg_tmp_path[0], &stat_buf);
 	if(ret != 0) {
-		fatal_printf("fstat returned %d on fd %d, errno: %d\n",
-			ret, fd, errno);
+		fatal_printf("stat returned %d; errno: %d\n",
+			ret, errno);
 		g_config_control_panel = 1;
 		return;
 	}
@@ -746,11 +746,11 @@ config_load_roms()
 		g_mem_size_base = 256*1024;
 		memset(&g_rom_fc_ff_ptr[0], 0, 2*65536);
 				/* Clear banks fc and fd to 0 */
-		ret = read(fd, &g_rom_fc_ff_ptr[2*65536], len);
+		ret = fread(&g_rom_fc_ff_ptr[2*65536], 1, len, file);
 	} else if(len == 256*1024) {
 		g_rom_version = 3;
 		g_mem_size_base = 1024*1024;
-		ret = read(fd, &g_rom_fc_ff_ptr[0], len);
+		ret = fread(&g_rom_fc_ff_ptr[0], 1, len, file);
 	} else {
 		fatal_printf("The ROM size should be 128K or 256K, this file "
 						"is %d bytes\n", len);
@@ -764,7 +764,7 @@ config_load_roms()
 		g_config_control_panel = 1;
 		return;
 	}
-	close(fd);
+	fclose(file);
 
 	memset(&g_rom_cards_ptr[0], 0, 256*16);
 
@@ -795,16 +795,15 @@ config_load_roms()
 								names_ptr);
 
 		if(g_cfg_tmp_path[0] != 0) {
-			fd = open(&(g_cfg_tmp_path[0]), O_RDONLY | O_BINARY);
-			if(fd < 0) {
-				fatal_printf("Open card ROM file %s failed: %d "
-					"err:%d\n", &g_cfg_tmp_path[0], fd,
-					errno);
+			file = fopen(&(g_cfg_tmp_path[0]), "rb");
+			if(!file) {
+				fatal_printf("Open card ROM file %s failed; errno:%d\n",
+					&g_cfg_tmp_path[0], errno);
 				continue;
 			}
 
 			len = 256;
-			ret = read(fd, &g_rom_cards_ptr[i*0x100], len);
+			ret = fread(&g_rom_cards_ptr[i*0x100], 1, len, file);
 
 			if(ret != len) {
 				fatal_printf("While reading card ROM %s, file "
@@ -812,8 +811,7 @@ config_load_roms()
 					"read %d bytes\n", errno, len, ret);
 				continue;
 			}
-			close(fd);
-			fd = 0;
+			fclose(file);
 		}
 	}
 
@@ -1105,7 +1103,7 @@ config_generate_config_kegs_name(char *outstr, int maxlen, Disk *dsk,
 
 	str = outstr;
 
-	if(with_extras && dsk->fd < 0) {
+	if(with_extras && (!dsk->file)) {
 		snprintf(str, maxlen - (str - outstr), "#");
 		str = &outstr[strlen(outstr)];
 	}
@@ -1265,7 +1263,7 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 	dsk->just_ejected = 0;
 	dsk->force_size = force_size;
 
-	if(dsk->fd >= 0) {
+	if(!dsk->file) {
 		eject_disk(dsk);
 	}
 
@@ -1304,11 +1302,11 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 
 	if(ejected) {
 		/* just get out of here */
-		dsk->fd = -1;
+		dsk->file = 0;
 		return;
 	}
 
-	dsk->fd = -1;
+	dsk->file = 0;
 	can_write = 1;
 
 	if((name_len > 3) && (strcmp(&name_ptr[name_len - 3], ".gz") == 0)) {
@@ -1334,9 +1332,8 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 		ret = system(system_str);
 		if(ret == 0) {
 			/* successfully ran */
-			dsk->fd = open(uncomp_ptr, O_RDONLY | O_BINARY, 0x1b6);
-			iwm_printf("Opening .gz file %s is fd: %d\n",
-							uncomp_ptr, dsk->fd);
+			dsk->file = fopen(uncomp_ptr, "rb");
+			iwm_printf("Opening .gz file %s\n",	uncomp_ptr);
 
 			/* and, unlink the temporary file */
 			(void)unlink(uncomp_ptr);
@@ -1348,20 +1345,18 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 		name_len -= 3;
 	}
 
-	if(dsk->fd < 0 && can_write) {
-		dsk->fd = open(name_ptr, O_RDWR | O_BINARY, 0x1b6);
+	if((!dsk->file) && can_write) {
+		dsk->file = fopen(name_ptr, "rb+");
 	}
 
-	if(dsk->fd < 0 && can_write) {
+	if((!dsk->file) && can_write) {
 		printf("Trying to open %s read-only, errno: %d\n", name_ptr,
 								errno);
-		dsk->fd = open(name_ptr, O_RDONLY | O_BINARY, 0x1b6);
+		dsk->file = fopen(name_ptr, "rb");
 		can_write = 0;
 	}
 
-	iwm_printf("open returned: %d\n", dsk->fd);
-
-	if(dsk->fd < 0) {
+	if(!dsk->file) {
 		fatal_printf("Disk image %s does not exist!\n", name_ptr);
 		return;
 	}
@@ -1379,10 +1374,10 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 	dsk->image_start = 0;
 
 	/* See if it is in 2IMG format */
-	ret = read(dsk->fd, (char *)&buf_2img[0], 512);
+	ret = fread((char *)&buf_2img[0], 1, 512, dsk->file);
 	size = force_size;
 	if(size <= 0) {
-		size = cfg_get_fd_size(dsk->fd);
+		size = cfg_get_fd_size(name_ptr);
 	}
 
 	/* Try to guess that there is a Mac Binary header of 128 bytes */
@@ -1483,14 +1478,14 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 						g_highest_smartport_unit);
 
 		if(partition_name != 0 || part_num >= 0) {
-			ret = cfg_partition_find_by_name_or_num(dsk->fd,
+			ret = cfg_partition_find_by_name_or_num(dsk->file,
 						partition_name, part_num, dsk);
 			printf("partition %s (num %d) mounted, wr_prot: %d\n",
 				partition_name, part_num, dsk->write_prot);
 
 			if(ret < 0) {
-				close(dsk->fd);
-				dsk->fd = -1;
+				fclose(dsk->file);
+				dsk->file = 0;
 				return;
 			}
 		}
@@ -1546,7 +1541,7 @@ void
 eject_named_disk(Disk *dsk, const char *name, const char *partition_name)
 {
 
-	if(dsk->fd < 0) {
+	if(!dsk->file) {
 		return;
 	}
 
@@ -1581,7 +1576,7 @@ eject_disk(Disk *dsk)
 	int	motor_on;
 	int	i;
 
-	if(dsk->fd < 0) {
+	if(!dsk->file) {
 		return;
 	}
 
@@ -1616,7 +1611,7 @@ eject_disk(Disk *dsk)
 	dsk->trks = 0;
 
 	/* close file, clean up dsk struct */
-	close(dsk->fd);
+	fclose(dsk->file);
 
 	dsk->image_start = 0;
 	dsk->image_size = 0;
@@ -1624,22 +1619,22 @@ eject_disk(Disk *dsk)
 	dsk->disk_dirty = 0;
 	dsk->write_through_to_unix = 0;
 	dsk->write_prot = 1;
-	dsk->fd = -1;
+	dsk->file = 0;
 	dsk->just_ejected = 1;
 
 	/* Leave name_ptr valid */
 }
 
 int
-cfg_get_fd_size(int fd)
+cfg_get_fd_size(char *filename)
 {
 	struct stat stat_buf;
 	int	ret;
 
-	ret = fstat(fd, &stat_buf);
+	ret = stat(filename, &stat_buf);
 	if(ret != 0) {
-		fprintf(stderr,"fstat returned %d on fd %d, errno: %d\n",
-			ret, fd, errno);
+		fprintf(stderr,"stat %s returned errno: %d\n",
+			filename, errno);
 		stat_buf.st_size = 0;
 	}
 
@@ -1647,18 +1642,18 @@ cfg_get_fd_size(int fd)
 }
 
 int
-cfg_partition_read_block(int fd, void *buf, int blk, int blk_size)
+cfg_partition_read_block(FILE *file, void *buf, int blk, int blk_size)
 {
 	int	ret;
 
-	ret = lseek(fd, blk * blk_size, SEEK_SET);
-	if(ret != blk * blk_size) {
-		printf("lseek: %08x, wanted: %08x, errno: %d\n", ret,
+	ret = fseek(file, blk * blk_size, SEEK_SET);
+	if(ret != 0) {
+		printf("fseek: wanted: %08x, errno: %d\n",
 			blk * blk_size, errno);
 		return 0;
 	}
 
-	ret = read(fd, (char *)buf, blk_size);
+	ret = fread((char *)buf, 1, blk_size, file);
 	if(ret != blk_size) {
 		printf("ret: %08x, wanted %08x, errno: %d\n", ret, blk_size,
 			errno);
@@ -1668,7 +1663,7 @@ cfg_partition_read_block(int fd, void *buf, int blk, int blk_size)
 }
 
 int
-cfg_partition_find_by_name_or_num(int fd, const char *partnamestr, int part_num,
+cfg_partition_find_by_name_or_num(FILE *file, const char *partnamestr, int part_num,
 		Disk *dsk)
 {
 	Cfg_dirent *direntptr;
@@ -1676,7 +1671,7 @@ cfg_partition_find_by_name_or_num(int fd, const char *partnamestr, int part_num,
 	int	num_parts;
 	int	i;
 
-	num_parts = cfg_partition_make_list(fd);
+	num_parts = cfg_partition_make_list(dsk->name_ptr, file);
 
 	if(num_parts <= 0) {
 		return -1;
@@ -1711,7 +1706,7 @@ cfg_partition_find_by_name_or_num(int fd, const char *partnamestr, int part_num,
 }
 
 int
-cfg_partition_make_list(int fd)
+cfg_partition_make_list(char *filename, FILE *file)
 {
 	Driver_desc *driver_desc_ptr;
 	Part_map *part_map_ptr;
@@ -1734,7 +1729,7 @@ cfg_partition_make_list(int fd)
 
 	blk_bufptr = (word32 *)malloc(MAX_PARTITION_BLK_SIZE);
 
-	cfg_partition_read_block(fd, blk_bufptr, 0, block_size);
+	cfg_partition_read_block(file, blk_bufptr, 0, block_size);
 
 	driver_desc_ptr = (Driver_desc *)blk_bufptr;
 	sig = GET_BE_WORD16(driver_desc_ptr->sig);
@@ -1751,13 +1746,13 @@ cfg_partition_make_list(int fd)
 
 	map_blks = 1;
 	cur_blk = 0;
-	size = cfg_get_fd_size(fd);
+	size = cfg_get_fd_size(filename);
 	cfg_file_add_dirent(&g_cfg_partitionlist, "None - Whole image",
 			is_dir=0, size, 0, -1);
 
 	while(cur_blk < map_blks) {
 		cur_blk++;
-		cfg_partition_read_block(fd, blk_bufptr, cur_blk, block_size);
+		cfg_partition_read_block(file, blk_bufptr, cur_blk, block_size);
 		part_map_ptr = (Part_map *)blk_bufptr;
 		sig = GET_BE_WORD16(part_map_ptr->sig);
 		if(cur_blk <= 1) {
@@ -1809,16 +1804,16 @@ int
 cfg_maybe_insert_disk(int slot, int drive, const char *namestr)
 {
 	int	num_parts;
-	int	fd;
+	FILE *file;
 
-	fd = open(namestr, O_RDONLY | O_BINARY, 0x1b6);
-	if(fd < 0) {
+	file = fopen(namestr, "rb");
+	if(!file) {
 		fatal_printf("Cannot open disk image: %s\n", namestr);
 		return 0;
 	}
 
-	num_parts = cfg_partition_make_list(fd);
-	close(fd);
+	num_parts = cfg_partition_make_list((char*)namestr, file);
+	fclose(file);
 
 	if(num_parts > 0) {
 		printf("Choose a partition\n");

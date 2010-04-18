@@ -218,7 +218,7 @@ do_c70d(word32 arg0)
 			return;
 		} else if(unit > 0 && status_code == 0) {
 			/* status for unit x */
-			if(unit > MAX_C7_DISKS || iwm.smartport[unit-1].fd < 0){
+			if(unit > MAX_C7_DISKS || (!iwm.smartport[unit-1].file)){
 				stat_val = 0x80;
 				size = 0;
 			} else {
@@ -242,7 +242,7 @@ do_c70d(word32 arg0)
 			disk_printf("just finished unit %d, stat 0\n", unit);
 			return;
 		} else if(status_code == 3) {
-			if(unit > MAX_C7_DISKS || iwm.smartport[unit-1].fd < 0){
+			if(unit > MAX_C7_DISKS || (!iwm.smartport[unit-1].file)){
 				stat_val = 0x80;
 				size = 0;
 			} else {
@@ -535,8 +535,8 @@ do_read_c7(int unit_num, word32 buf, int blk)
 	register word32 start_time;
 	register word32 end_time;
 	word32	val;
+	FILE *file;
 	int	len;
-	int	fd;
 	int	image_start;
 	int	image_size;
 	int	ret;
@@ -548,11 +548,11 @@ do_read_c7(int unit_num, word32 buf, int blk)
 		return 0x28;
 	}
 
-	fd = iwm.smartport[unit_num].fd;
+	file = iwm.smartport[unit_num].file;
 	image_start = iwm.smartport[unit_num].image_start;
 	image_size = iwm.smartport[unit_num].image_size;
-	if(fd < 0) {
-		printf("c7_fd == %d!\n", fd);
+	if(!file) {
+		printf("c7_file is null!\n");
 #if 0
 		if(blk != 2 && blk != 0) {
 			/* don't print error if only reading directory */
@@ -563,23 +563,23 @@ do_read_c7(int unit_num, word32 buf, int blk)
 		return 0x2f;
 	}
 
-	ret = lseek(fd, image_start + blk*0x200, SEEK_SET);
-	if(ret != image_start + blk*0x200) {
-		halt_printf("lseek returned %08x, errno: %d\n", ret, errno);
+	ret = fseek(file, image_start + blk*0x200, SEEK_SET);
+	if(ret != 0) {
+		halt_printf("fseek errno: %d\n", errno);
 		smartport_error();
 		return 0x27;
 	}
 
-	if(ret >= image_start + image_size) {
+	if(image_start + blk*0x200 > image_start + image_size) {
 		halt_printf("Tried to read from pos %08x on disk, (blk:%04x)\n",
-			ret, blk);
+			image_start + blk*0x200, blk);
 		smartport_error();
 		return 0x27;
 	}
 
-	len = read(fd, &local_buf[0], 0x200);
+	len = fread(&local_buf[0], 1, 0x200, file);
 	if(len != 0x200) {
-		printf("read returned %08x, errno:%d, blk:%04x, unit: %02x\n",
+		printf("fread returned %08x, errno:%d, blk:%04x, unit: %02x\n",
 			len, errno, blk, unit_num);
 		halt_printf("name: %s\n", iwm.smartport[unit_num].name_ptr);
 		smartport_error();
@@ -616,9 +616,9 @@ do_write_c7(int unit_num, word32 buf, int blk)
 	word32	*ptr;
 	word32	val1, val2;
 	word32	val;
+	FILE *file;
 	int	len;
 	int	ret;
-	int	fd;
 	int	image_start;
 	int	image_size;
 	int	i;
@@ -630,11 +630,11 @@ do_write_c7(int unit_num, word32 buf, int blk)
 	}
 
 	dsk = &(iwm.smartport[unit_num]);
-	fd = dsk->fd;
+	file = dsk->file;
 	image_start = dsk->image_start;
 	image_size = dsk->image_size;
-	if(fd < 0) {
-		halt_printf("c7_fd == %d!\n", fd);
+	if(!file) {
+		halt_printf("c7_file is null!\n");
 		smartport_error();
 		return 0x28;
 	}
@@ -653,14 +653,14 @@ do_write_c7(int unit_num, word32 buf, int blk)
 		*ptr++ = val;
 	}
 
-	ret = lseek(fd, image_start + blk*0x200, SEEK_SET);
-	if(ret != image_start + blk*0x200) {
-		halt_printf("lseek returned %08x, errno: %d\n", ret, errno);
+	ret = fseek(file, image_start + blk*0x200, SEEK_SET);
+	if(ret != 0) {
+		halt_printf("fseek errno: %d\n", errno);
 		smartport_error();
 		return 0x27;
 	}
 
-	if(ret >= image_start + image_size) {
+	if(image_start + blk*0x200 > image_start + image_size) {
 		halt_printf("Tried to write to %08x\n", ret);
 		smartport_error();
 		return 0x27;
@@ -676,9 +676,9 @@ do_write_c7(int unit_num, word32 buf, int blk)
 		return 0x00;
 	}
 
-	len = write(fd, (byte *)&local_buf[0], 0x200);
+	len = fwrite((byte *)&local_buf[0], 1, 0x200, file);
 	if(len != 0x200) {
-		halt_printf("write ret %08x bytes, errno: %d\n", len, errno);
+		halt_printf("fwrite ret %08x bytes, errno: %d\n", len, errno);
 		smartport_error();
 		return 0x27;
 	}
@@ -694,6 +694,7 @@ do_format_c7(int unit_num)
 {
 	byte	local_buf[0x1000];
 	Disk	*dsk;
+	FILE	*file;
 	int	len;
 	int	ret;
 	int	sum;
@@ -701,7 +702,6 @@ do_format_c7(int unit_num)
 	int	max;
 	int	image_start;
 	int	image_size;
-	int	fd;
 	int	i;
 
 	if(unit_num < 0 || unit_num > MAX_C7_DISKS) {
@@ -711,11 +711,11 @@ do_format_c7(int unit_num)
 	}
 
 	dsk = &(iwm.smartport[unit_num]);
-	fd = dsk->fd;
+	file = dsk->file;
 	image_start = dsk->image_start;
 	image_size = dsk->image_size;
-	if(fd < 0) {
-		halt_printf("c7_fd == %d!\n", fd);
+	if(!file) {
+		halt_printf("c7_file is null!\n");
 		smartport_error();
 		return 0x28;
 	}
@@ -724,9 +724,9 @@ do_format_c7(int unit_num)
 		local_buf[i] = 0;
 	}
 
-	ret = lseek(fd, image_start, SEEK_SET);
-	if(ret != image_start) {
-		halt_printf("lseek returned %08x, errno: %d\n", ret, errno);
+	ret = fseek(file, image_start, SEEK_SET);
+	if(ret != 0) {
+		halt_printf("fseek errno: %d\n", errno);
 		smartport_error();
 		return 0x27;
 	}
@@ -746,7 +746,7 @@ do_format_c7(int unit_num)
 
 	while(sum < total) {
 		max = MIN(0x1000, total-sum);
-		len = write(fd, &local_buf[0], max);
+		len = fwrite(&local_buf[0], 1, max, file);
 		if(len != max) {
 			halt_printf("write ret %08x, errno:%d\n", len, errno);
 			smartport_error();

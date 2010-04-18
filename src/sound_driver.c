@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_sound_driver_c[] = "@(#)$KmKId: sound_driver.c,v 1.17 2004-09-21 10:37:15-04 kentd Exp $";
-
 #include "defc.h"
 #include "sound.h"
 

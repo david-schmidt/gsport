@@ -101,7 +101,7 @@ iwm_init_drive(Disk *dsk, int smartport, int drive, int disk_525)
 	dsk->name_ptr = 0;
 	dsk->partition_name = 0;
 	dsk->partition_num = -1;
-	dsk->fd = -1;
+	dsk->file = 0;
 	dsk->force_size = 0;
 	dsk->image_start = 0;
 	dsk->image_size = 0;
@@ -284,14 +284,14 @@ iwm_flush_disk_to_unix(Disk *dsk)
 			break;
 		}
 
-		ret = lseek(dsk->fd, unix_pos, SEEK_SET);
-		if(ret != unix_pos) {
-			halt_printf("lseek 525: %08x, errno: %d\n", ret, errno);
+		ret = fseek(dsk->file, unix_pos, SEEK_SET);
+		if(ret != 0) {
+			halt_printf("fseek 525: errno: %d\n", errno);
 		}
 
-		ret = write(dsk->fd, &(buffer[0]), unix_len);
+		ret = fwrite(&(buffer[0]), 1, unix_len, dsk->file);
 		if(ret != unix_len) {
-			printf("write: %08x, errno:%d, qtrk: %02x, disk: %s\n",
+			printf("fwrite: %08x, errno:%d, qtrk: %02x, disk: %s\n",
 				ret, errno, j, dsk->name_ptr);
 		}
 	}
@@ -356,8 +356,8 @@ iwm_show_stats()
 		iwm.drive_select, g_c031_disk35,
 		iwm.iwm_phase[0], iwm.iwm_phase[1], iwm.iwm_phase[2],
 		iwm.iwm_phase[3]);
-	printf("iwm.drive525[0].fd: %d, [1].fd: %d\n",
-		iwm.drive525[0].fd, iwm.drive525[1].fd);
+	printf("iwm.drive525[0].file: %p, [1].file: %p\n",
+		iwm.drive525[0].file, iwm.drive525[1].file);
 	printf("iwm.drive525[0].last_phase: %d, [1].last_phase: %d\n",
 		iwm.drive525[0].last_phase, iwm.drive525[1].last_phase);
 }
@@ -1730,14 +1730,14 @@ disk_unix_to_nib(Disk *dsk, int qtr_track, int unix_pos, int unix_len,
 	}
 
 	if(unix_pos >= 0) {
-		ret = lseek(dsk->fd, unix_pos, SEEK_SET);
-		if(ret != unix_pos) {
-			printf("lseek of disk %s len 0x%x ret: %d, errno: %d\n",
-				dsk->name_ptr, unix_pos, ret, errno);
+		ret = fseek(dsk->file, unix_pos, SEEK_SET);
+		if(ret != 0) {
+			printf("fseek of disk %s len 0x%x errno: %d\n",
+				dsk->name_ptr, unix_pos, errno);
 			must_clear_track = 1;
 		}
 
-		len = read(dsk->fd, track_buf, unix_len);
+		len = fread(track_buf, 1, unix_len, dsk->file);
 		if(len != unix_len) {
 			printf("read of disk %s q_trk %d ret: %d, errno: %d\n",
 				dsk->name_ptr, qtr_track, ret, errno);

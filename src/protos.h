@@ -19,10 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_C
-const char rcsid_protos_h[] = "@(#)$KmKId: protos.h,v 1.188 2004-12-06 19:08:34-05 kentd Exp $";
-#endif
-
 /* xdriver.c and macdriver.c and windriver.c */
 int x_show_alert(int is_fatal, const char *str);
 int win_nonblock_read_stdin(int fd, char *bufptr, int len);
@@ -174,12 +170,12 @@ void insert_disk(int slot, int drive, const char *name, int ejected, int force_s
 void eject_named_disk(Disk *dsk, const char *name, const char *partition_name);
 void eject_disk_by_num(int slot, int drive);
 void eject_disk(Disk *dsk);
-int cfg_get_fd_size(int fd);
-int cfg_partition_read_block(int fd, void *buf, int blk, int blk_size);
-int cfg_partition_find_by_name_or_num(int fd, const char *partnamestr, int part_num, Disk *dsk);
-int cfg_partition_make_list(int fd);
+int cfg_get_fd_size(char *filename);
+int cfg_partition_read_block(FILE *file, void *buf, int blk, int blk_size);
+int cfg_partition_find_by_name_or_num(FILE *file, const char *partnamestr, int part_num, Disk *dsk);
 int cfg_maybe_insert_disk(int slot, int drive, const char *namestr);
 int cfg_stat(char *path, struct stat *sb);
+int cfg_partition_make_list(char *filename, FILE *file);
 void cfg_htab_vtab(int x, int y);
 void cfg_home(void);
 void cfg_cleol(void);

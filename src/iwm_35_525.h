@@ -19,10 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_IWM_RCSID_C
-const char rcsdif_iwm_35_525_h[] = "@(#)$KmKId: iwm_35_525.h,v 1.14 2004-12-01 19:45:02-05 kentd Exp $";
-#endif
-
 int
 IWM_READ_ROUT (Disk *dsk, int fast_disk_emul, double dcycs)
 {
@@ -238,9 +234,9 @@ IWM_WRITE_ROUT (Disk *dsk, word32 val, int fast_disk_emul, double dcycs)
 	int	sdiff;
 	int	prev_bits;
 
-	if(dsk->fd < 0 || dsk->trks == 0) {
-		halt_printf("Tried to write to type: %d, drive: %d, fd: %d!\n",
-			IWM_DISK_525, dsk->drive, dsk->fd, dsk->trks);
+	if((!dsk->file) || dsk->trks == 0) {
+		halt_printf("Tried to write to type: %d, drive: %d!\n",
+			IWM_DISK_525, dsk->drive, dsk->trks);
 		return;
 	}
 

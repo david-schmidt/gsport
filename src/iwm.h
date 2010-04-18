@@ -19,10 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_C
-const char rcsid_iwm_h[] = "@(#)$KmKId: iwm.h,v 1.14 2004-10-20 17:29:38-04 kentd Exp $";
-#endif
-
 #define MAX_TRACKS	(2*80)
 #define MAX_C7_DISKS	32
 
@@ -50,7 +46,7 @@ struct _Disk {
 	char	*name_ptr;
 	char	*partition_name;
 	int	partition_num;
-	int	fd;
+	FILE	*file;
 	int	force_size;
 	int	image_start;
 	int	image_size;
