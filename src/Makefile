@@ -16,7 +16,9 @@ PERL = perl
 all: $(TARGET)
 
 clean:
-	rm $(OBJECTS)
+	- rm $(OBJECTS)
+	- rm 8inst_c.h
+	- rm 16inst_c.h
 
 specials: 8inst_s 16inst_s 8size 16size 8inst_c 16inst_c size_c size_s
 
@@ -48,14 +50,8 @@ gsportx: $(OBJECTS) compile_time.o
 	mv gsportx ..
 	cp -f ../config.template ../config.txt 
 
-# Cygwin for X builds:
-gsport.exe: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lXext -lX11 -lm -lshell32
-	mv gsport.exe ..
-	cp -f ../config.template ../config.txt 
-
 # Mingw32 (native windows) builds:
-gsportwin.exe: $(OBJECTS) compile_time.o
+gsport.exe: $(OBJECTS) compile_time.o
 	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32 -lshell32
 	mv $(NAME)$(SUFFIX) ..
 	cp -f ../config.template ../config.txt 
@@ -104,8 +100,8 @@ partls: partls.c
 to_pro: prodos.h prodos_protos.h to_pro.c
 	cc $(CCOPTS) $(XOPTS) $(OPTS) -o to_pro to_pro.c
 
-kegs32.o:   win32.rc winresource.h
-	windres win32.rc -o kegs32.o
+gsport32.o:   win32.rc winresource.h
+	windres win32.rc -o gsport32.o
 
 compile_time.o: $(OBJECTS)
 
@@ -131,12 +127,12 @@ sim65816.o: sim65816.c defc.h defcomm.h iwm.h protos.h
 smartport.o: smartport.c defc.h defcomm.h iwm.h protos.h
 sound.o: sound.c defc.h defcomm.h iwm.h protos.h sound.h
 sound_driver.o: sound_driver.c defc.h defcomm.h iwm.h protos.h sound.h
-video.o: video.c defc.h defcomm.h iwm.h protos.h superhires.h kegsfont.h
+video.o: video.c defc.h defcomm.h iwm.h protos.h superhires.h gsportfont.h
 tfe.o: tfe/tfe.c tfe/tfe.h tfe/tfe_protos.h
 tfearch.o:arch/win32/tfearch.c tfe/tfearch.h tfe/tfe_protos.h
 tfesupp.o: tfe/tfesupp.c tfe/tfesupp.h tfe/tfe_protos.h
 uilib.o: tfe/uilib.c tfe/uilib.h tfe/tfe_protos.h
 macdriver.o: macdriver.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
 macsnd_driver.o: macsnd_driver.c defc.h defcomm.h iwm.h protos.h sound.h
-windriver.o: windriver.c defc.h defcomm.h iwm.h protos.h protos_windriver.h winresource.h kegs32.o
+windriver.o: windriver.c defc.h defcomm.h iwm.h protos.h protos_windriver.h winresource.h gsport32.o
 win32snd_driver.o: win32snd_driver.c defc.h defcomm.h iwm.h protos.h sound.h

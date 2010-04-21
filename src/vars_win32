@@ -1,10 +1,10 @@
 
-TARGET = gsportwin.exe
+TARGET = gsport.exe
 TFEOBJ = tfe/tfe.o arch/win32/tfearch.o tfe/tfesupp.o
 OBJECTS = $(OBJECTS1) $(TFEOBJ) scc_windriver.o win32snd_driver.o windriver.o
-CCOPTS = -O2 -DKEGS_LITTLE_ENDIAN -DHAVE_TFE
+CCOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE
 SUFFIX = ".exe"
-NAME = gsportwin
+NAME = gsport
 
 XOPTS = -Wall -fomit-frame-pointer -march=pentium
 XLIBS =

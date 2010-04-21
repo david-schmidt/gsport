@@ -27,7 +27,7 @@ const char rcsid_moremem_c[] = "@(#)$KmKId: moremem.c,v 1.251 2004-11-19 01:55:5
 #include "tfe/protos_tfe.h" 
 #endif
 
-extern char g_kegs_version_str[];
+extern char g_gsport_version_str[];
 
 extern byte *g_memory_ptr;
 extern byte *g_dummy_memory1_ptr;
@@ -1273,8 +1273,8 @@ io_read(word32 loc, double *cyc_ptr)
 				return 'G';
 			case 2:
 				g_em_emubyte_cnt = 0;
-				tmp = g_kegs_version_str[0] - '0';
-				i = g_kegs_version_str[2] - '0';
+				tmp = g_gsport_version_str[0] - '0';
+				i = g_gsport_version_str[2] - '0';
 				return ((tmp & 0xf) << 4) + (i & 0xf);
 			default:
 				g_em_emubyte_cnt = 0;
@@ -2399,7 +2399,7 @@ in_vblank(double dcycs)
 
 /* horizontal video counter goes from 0x00,0x40 - 0x7f, then 0x80,0xc0-0xff */
 /* over 2*65 cycles.  The last visible screen pos is 0x7f and 0xff */
-/* This matches KEGS starting line 0 at the border for line -1 */
+/* This matches GSport starting line 0 at the border for line -1 */
 int
 read_vid_counters(int loc, double dcycs)
 {

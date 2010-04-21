@@ -52,7 +52,7 @@ void U_STACK_TRACE();
 #define DCYCS_IN_16MS		((double)((int)DCYCS_IN_16MS_RAW))
 #define DRECIP_DCYCS_IN_16MS	(1.0 / (DCYCS_IN_16MS))
 
-#ifdef KEGS_LITTLE_ENDIAN
+#ifdef GSPORT_LITTLE_ENDIAN
 # define BIGEND(a)    ((((a) >> 24) & 0xff) +			\
 			(((a) >> 8) & 0xff00) + 		\
 			(((a) << 8) & 0xff0000) + 		\

@@ -47,6 +47,6 @@ sim65816.obj: ../../sim65816.c ../../scc.c ../../defc.h ../../defcomm.h ../../iw
 smartport.obj: ../../smartport.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
 sound.obj: ../../sound.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
 sound_driver.obj: ../../sound_driver.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../sound.h
-video.obj: ../../video.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../superhires.h ../../kegsfont.h
+video.obj: ../../video.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../superhires.h ../../gsportfont.h
 os2driver.obj: ../../os2driver.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
 

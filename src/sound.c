@@ -1025,7 +1025,7 @@ sound_play(double dsamps)
 #if defined(__linux__) || defined(OSS)
 				/* Linux seems to expect little-endian */
 				/*  samples always, even on PowerPC */
-# ifdef KEGS_LITTLE_ENDIAN
+# ifdef GSPORT_LITTLE_ENDIAN
 				sndptr[pos] = (val << 16) + (val0 & 0xffff);
 # else
 				sndptr[pos] = ((val & 0xff) << 24) +
@@ -1034,7 +1034,7 @@ sound_play(double dsamps)
 						((val0 >> 8) & 0xff);
 # endif
 #else
-# ifdef KEGS_LITTLE_ENDIAN
+# ifdef GSPORT_LITTLE_ENDIAN
 				sndptr[pos] = (val << 16) + (val0 & 0xffff);
 # else
 				sndptr[pos] = (val0 << 16) + (val & 0xffff);

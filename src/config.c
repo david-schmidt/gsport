@@ -92,16 +92,16 @@ extern int g_a2_new_all_stat[];
 extern int g_new_a2_stat_cur_line;
 
 extern int g_key_down;
-extern const char g_kegs_version_str[];
+extern const char g_gsport_version_str[];
 int g_config_control_panel = 0;
-char g_config_kegs_name[1024];
+char g_config_gsport_name[1024];
 char g_cfg_cwd_str[CFG_PATH_MAX] = { 0 };
 
-int g_config_kegs_auto_update = 1;
-int g_config_kegs_update_needed = 0;
+int g_config_gsport_auto_update = 1;
+int g_config_gsport_update_needed = 0;
 
-const char *g_config_kegs_name_list[] = {
-		"config.txt", "config.kegs", "kegs_conf", ".config.kegs", 0
+const char *g_config_gsport_name_list[] = {
+		"config.txt", "config.gsport", "gsport_conf", ".config.gsport", 0
 };
 
 int	g_highest_smartport_unit = -1;
@@ -111,7 +111,7 @@ int	g_user_page2_shadow = 1;
 byte	g_save_text_screen_bytes[0x800];
 int	g_save_cur_a2_stat = 0;
 char	g_cfg_printf_buf[CFG_PRINTF_BUFSIZE];
-char	g_config_kegs_buf[CONF_BUF_LEN];
+char	g_config_gsport_buf[CONF_BUF_LEN];
 
 word32	g_cfg_vbl_count = 0;
 
@@ -271,7 +271,7 @@ Cfg_menu g_cfg_main_menu[] = {
 { "Virtual Printer Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
 { "Force X-windows display depth", KNMP(g_force_depth), CFGTYPE_INT },
 { "Auto-update configuration file,0,Manual,1,Immediately",
-		KNMP(g_config_kegs_auto_update), CFGTYPE_INT },
+		KNMP(g_config_gsport_auto_update), CFGTYPE_INT },
 { "Speed,0,Unlimited,1,1.0MHz,2,2.8MHz,3,8.0MHz (Zip)",
 		KNMP(g_limit_speed), CFGTYPE_INT },
 { "Expansion Mem Size,0,0MB,0x100000,1MB,0x200000,2MB,0x300000,3MB,"
@@ -289,7 +289,7 @@ Cfg_menu g_cfg_main_menu[] = {
 		KNMP(g_user_page2_shadow), CFGTYPE_INT },
 { "Dump text screen to file", (void *)cfg_text_screen_dump, 0, 0, CFGTYPE_FUNC},
 { "", 0, 0, 0, 0 },
-{ "Save changes to configuration file", (void *)config_write_config_kegs_file, 0, 0, 
+{ "Save changes to configuration file", (void *)config_write_config_gsport_file, 0, 0, 
 		CFGTYPE_FUNC },
 { "", 0, 0, 0, 0 },
 { "Exit Config (or press F4)", (void *)cfg_exit, 0, 0, CFGTYPE_FUNC },
@@ -316,23 +316,23 @@ Cfg_listhdr g_cfg_partitionlist = { 0 };
 
 int g_cfg_file_pathfield = 0;
 
-const char *g_kegs_rom_names[] = { "ROM", "ROM", "ROM.01", "ROM.03", 0 };
+const char *g_gsport_rom_names[] = { "ROM", "ROM", "ROM.01", "ROM.03", 0 };
 	/* First entry is special--it will be overwritten by g_cfg_rom_path */
 
-const char *g_kegs_c1rom_names[] = { "parallel.rom" };
-const char *g_kegs_c2rom_names[] = { 0 };
-const char *g_kegs_c3rom_names[] = { 0 };
-const char *g_kegs_c4rom_names[] = { 0 };
-const char *g_kegs_c5rom_names[] = { 0 };
-const char *g_kegs_c6rom_names[] = { "c600.rom", "controller.rom", "disk.rom",
+const char *g_gsport_c1rom_names[] = { "parallel.rom" };
+const char *g_gsport_c2rom_names[] = { 0 };
+const char *g_gsport_c3rom_names[] = { 0 };
+const char *g_gsport_c4rom_names[] = { 0 };
+const char *g_gsport_c5rom_names[] = { 0 };
+const char *g_gsport_c6rom_names[] = { "c600.rom", "controller.rom", "disk.rom",
 				"DISK.ROM", "diskII.prom", 0 };
-const char *g_kegs_c7rom_names[] = { 0 };
+const char *g_gsport_c7rom_names[] = { 0 };
 
-const char **g_kegs_rom_card_list[8] = {
-	0,			g_kegs_c1rom_names,
-	g_kegs_c2rom_names,	g_kegs_c3rom_names,
-	g_kegs_c4rom_names,	g_kegs_c5rom_names,
-	g_kegs_c6rom_names,	g_kegs_c7rom_names };
+const char **g_gsport_rom_card_list[8] = {
+	0,			g_gsport_c1rom_names,
+	g_gsport_c2rom_names,	g_gsport_c3rom_names,
+	g_gsport_c4rom_names,	g_gsport_c5rom_names,
+	g_gsport_c6rom_names,	g_gsport_c7rom_names };
 
 byte g_rom_c600_rom01_diffs[256] = {
 	0x00, 0x00, 0x00, 0x00, 0xc6, 0x00, 0xe2, 0x00,
@@ -415,7 +415,7 @@ config_init_menus(Cfg_menu *menuptr)
 				// We need to malloc this string since all
 				//  string values must be dynamically alloced
 				defptr->strval = str;	// this can have a copy
-				*str_ptr = kegs_malloc_str(str);
+				*str_ptr = gsport_malloc_str(str);
 				menuptr->defptr = &(defptr->strval);
 				break;
 			case CFGTYPE_FILE:
@@ -424,7 +424,7 @@ config_init_menus(Cfg_menu *menuptr)
 				// We need to malloc this string since all
 				//  string values must be dynamically alloced
 				defptr->strval = str;	// this can have a copy
-				*str_ptr = kegs_malloc_str(str);
+				*str_ptr = gsport_malloc_str(str);
 				menuptr->defptr = &(defptr->strval);
 				break;
 			default:
@@ -449,12 +449,12 @@ config_init()
 	config_init_menus(g_cfg_main_menu);
 
 	// Find the configuration file
-	g_config_kegs_name[0] = 0;
+	g_config_gsport_name[0] = 0;
 	can_create = 1;
-	setup_kegs_file(&g_config_kegs_name[0], sizeof(g_config_kegs_name), 0,
-				can_create, &g_config_kegs_name_list[0]);
+	setup_gsport_file(&g_config_gsport_name[0], sizeof(g_config_gsport_name), 0,
+				can_create, &g_config_gsport_name_list[0]);
 
-	config_parse_config_kegs_file();
+	config_parse_config_gsport_file();
 }
 
 void
@@ -486,7 +486,7 @@ cfg_text_screen_dump()
 	int	pos;
 	int	i, j;
 
-	filename = "kegs.screen.dump";
+	filename = "gsport.screen.dump";
 	printf("Writing text screen to the file %s\n", filename);
 	ofile = fopen(filename, "w");
 	if(ofile == 0) {
@@ -561,8 +561,8 @@ void
 config_vbl_update(int doit_3_persec)
 {
 	if(doit_3_persec) {
-		if(g_config_kegs_auto_update && g_config_kegs_update_needed) {
-			config_write_config_kegs_file();
+		if(g_config_gsport_auto_update && g_config_gsport_update_needed) {
+			config_write_config_gsport_file();
 		}
 	}
 	return;
@@ -648,14 +648,14 @@ config_parse_option(char *buf, int pos, int len, int line)
 		if(strptr && *strptr) {
 			free(*strptr);
 		}
-		*strptr = kegs_malloc_str(&buf[pos]);
+		*strptr = gsport_malloc_str(&buf[pos]);
 		break;
 	case CFGTYPE_FILE:
 		strptr = (char **)menuptr->ptr;
 		if(strptr && *strptr) {
 			free(*strptr);
 		}
-		*strptr = kegs_malloc_str(&buf[pos]);
+		*strptr = gsport_malloc_str(&buf[pos]);
 		break;
 	default:
 		printf("Config file variable %s is unknown type: %d\n",
@@ -713,11 +713,11 @@ config_load_roms()
 
 	g_rom_version = -1;
 
-	/* set first entry of g_kegs_rom_names[] to g_cfg_rom_path so that */
+	/* set first entry of g_gsport_rom_names[] to g_cfg_rom_path so that */
 	/*  it becomes the first place searched. */
-	g_kegs_rom_names[0] = g_cfg_rom_path;
-	setup_kegs_file(&g_cfg_tmp_path[0], CFG_PATH_MAX, -1, 0,
-							&g_kegs_rom_names[0]);
+	g_gsport_rom_names[0] = g_cfg_rom_path;
+	setup_gsport_file(&g_cfg_tmp_path[0], CFG_PATH_MAX, -1, 0,
+							&g_gsport_rom_names[0]);
 
 	if(g_cfg_tmp_path[0] == 0) {
 		// Just get out, let config interface select ROM
@@ -783,7 +783,7 @@ config_load_roms()
 	}
 
 	for(i = 1; i < 8; i++) {
-		names_ptr = g_kegs_rom_card_list[i];
+		names_ptr = g_gsport_rom_card_list[i];
 		if(names_ptr == 0) {
 			continue;
 		}
@@ -791,7 +791,7 @@ config_load_roms()
 			continue;
 		}
 
-		setup_kegs_file(&g_cfg_tmp_path[0], CFG_PATH_MAX, 1, 0,
+		setup_gsport_file(&g_cfg_tmp_path[0], CFG_PATH_MAX, 1, 0,
 								names_ptr);
 
 		if(g_cfg_tmp_path[0] != 0) {
@@ -903,7 +903,7 @@ config_load_roms()
 }
 
 void
-config_parse_config_kegs_file()
+config_parse_config_gsport_file()
 {
 	FILE	*fconf;
 	char	*buf;
@@ -927,7 +927,7 @@ config_parse_config_kegs_file()
 
 	g_highest_smartport_unit = -1;
 
-	cfg_get_base_path(&g_cfg_cwd_str[0], g_config_kegs_name, 0);
+	cfg_get_base_path(&g_cfg_cwd_str[0], g_config_gsport_name, 0);
 	if(g_cfg_cwd_str[0] != 0) {
 		ret = chdir(&g_cfg_cwd_str[0]);
 		if(ret != 0) {
@@ -938,16 +938,16 @@ config_parse_config_kegs_file()
 	/* In any case, copy the directory path to g_cfg_cwd_str */
 	(void)getcwd(&g_cfg_cwd_str[0], CFG_PATH_MAX);
 
-	fconf = fopen(g_config_kegs_name, "r");
+	fconf = fopen(g_config_gsport_name, "r");
 	if(fconf == 0) {
 		fatal_printf("cannot open configuration file at %s!  Stopping!\n",
-				g_config_kegs_name);
+				g_config_gsport_name);
 		my_exit(3);
 	}
 
 	line = 0;
 	while(1) {
-		buf = &g_config_kegs_buf[0];
+		buf = &g_config_gsport_buf[0];
 		ptr = fgets(buf, CONF_BUF_LEN, fconf);
 		if(ptr == 0) {
 			iwm_printf("Done reading disk_conf\n");
@@ -1096,7 +1096,7 @@ cfg_get_dsk_from_slot_drive(int slot, int drive)
 }
 
 void
-config_generate_config_kegs_name(char *outstr, int maxlen, Disk *dsk,
+config_generate_config_gsport_name(char *outstr, int maxlen, Disk *dsk,
 		int with_extras)
 {
 	char	*str;
@@ -1124,7 +1124,7 @@ config_generate_config_kegs_name(char *outstr, int maxlen, Disk *dsk,
 }
 
 void
-config_write_config_kegs_file()
+config_write_config_gsport_file()
 {
 	FILE	*fconf;
 	Disk	*dsk;
@@ -1136,16 +1136,16 @@ config_write_config_kegs_file()
 	int	slot, drive;
 	int	i;
 
-	printf("Writing configuration file to %s\n", g_config_kegs_name);
+	printf("Writing configuration file to %s\n", g_config_gsport_name);
 
-	fconf = fopen(g_config_kegs_name, "w+");
+	fconf = fopen(g_config_gsport_name, "w+");
 	if(fconf == 0) {
 		halt_printf("cannot open %s!  Stopping!\n");
 		return;
 	}
 
 	fprintf(fconf, "# GSport configuration file version %s\n",
-						g_kegs_version_str);
+						g_gsport_version_str);
 
 	for(i = 0; i < MAX_C7_DISKS + 4; i++) {
 		slot = 7;
@@ -1168,7 +1168,7 @@ config_write_config_kegs_file()
 			fprintf(fconf, "\n");
 			continue;
 		}
-		config_generate_config_kegs_name(&g_cfg_tmp_path[0],
+		config_generate_config_gsport_name(&g_cfg_tmp_path[0],
 							CFG_PATH_MAX, dsk, 1);
 		fprintf(fconf, "%s\n", &g_cfg_tmp_path[0]);
 	}
@@ -1213,7 +1213,7 @@ config_write_config_kegs_file()
 
 	fclose(fconf);
 
-	g_config_kegs_update_needed = 0;
+	g_config_gsport_update_needed = 0;
 }
 
 void
@@ -1241,7 +1241,7 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 	int	tmp;
 	int	i;
 
-	g_config_kegs_update_needed = 1;
+	g_config_gsport_update_needed = 1;
 
 	if((slot < 5) || (slot > 7)) {
 		fatal_printf("Invalid slot for inserting disk: %d\n", slot);
@@ -1580,7 +1580,7 @@ eject_disk(Disk *dsk)
 		return;
 	}
 
-	g_config_kegs_update_needed = 1;
+	g_config_gsport_update_needed = 1;
 
 	motor_on = iwm.motor_on;
 	if(g_c031_disk35 & 0x40) {
@@ -2010,7 +2010,7 @@ cfg_get_disk_name(char *outstr, int maxlen, int type_ext, int with_extras)
 		return;
 	}
 
-	config_generate_config_kegs_name(outstr, maxlen, dsk, with_extras);
+	config_generate_config_gsport_name(outstr, maxlen, dsk, with_extras);
 }
 
 void
@@ -2236,7 +2236,7 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 			str_ptr = (char **)menuptr->ptr;
 			*str_ptr = curstr;
 		}
-		g_config_kegs_update_needed = 1;
+		g_config_gsport_update_needed = 1;
 	}
 
 #if 0
@@ -2829,7 +2829,7 @@ cfg_file_draw()
 
 	cfg_htab_vtab(2, 1);
 	cfg_printf("Configuration file path: %-56s",
-			cfg_shorten_filename(&g_config_kegs_name[0], 56));
+			cfg_shorten_filename(&g_config_gsport_name[0], 56));
 
 	cfg_htab_vtab(2, 2);
 	cfg_printf("Current directory: %-50s",
@@ -2958,7 +2958,7 @@ cfg_file_update_ptr(char *str)
 		printf("Updated ROM file\n");
 		load_roms_init_memory();
 	}
-	g_config_kegs_update_needed = 1;
+	g_config_gsport_update_needed = 1;
 }
 
 void

@@ -26,7 +26,7 @@ const char rcsid_protos_mac_h[] = "@(#)$KmKId: protos_macdriver.h,v 1.11 2004-11
 /* macdriver.c */
 pascal OSStatus quit_event_handler(EventHandlerCallRef call_ref, EventRef event, void *ignore);
 void show_simple_alert(char *str1, char *str2, char *str3, int num);
-void x_dialog_create_kegs_conf(const char *str);
+void x_dialog_create_gsport_conf(const char *str);
 int x_show_alert(int is_fatal, const char *str);
 pascal OSStatus my_cmd_handler(EventHandlerCallRef handlerRef, EventRef event, void *userdata);
 void update_window(void);

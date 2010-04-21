@@ -1,13 +1,13 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by kegs32.rc
+// Used by gsport32.rc
 //
 #define IDD_ABOUT_DIALOG                101
-#define IDC_KEGS32                      102
+#define IDC_GSPORT32                    102
 #define IDR_TOOLBAR                     103
 #define IDD_DLG_DISKCONF                104
 #define IDR_ACCEL                       105
-#define IDD_KEGS32_KEY                  106
+#define IDD_GSPORT32_KEY                106
 #define IDD_SPEEDDIALOG                 117
 #define IDC_SLOW                        1007
 #define IDC_CUSTOM                      1008

@@ -25,7 +25,7 @@ const char rcsid_protos_x_h[] = "@(#)$KmKId: protos_xdriver.h,v 1.19 2004-11-15 
 
 /* xdriver.c */
 int main(int argc, char **argv);
-void x_dialog_create_kegs_conf(const char *str);
+void x_dialog_create_gsport_conf(const char *str);
 int x_show_alert(int is_fatal, const char *str);
 void x_update_color(int col_num, int red, int green, int blue, word32 rgb);
 void x_update_physical_colormap(void);

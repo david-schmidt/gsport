@@ -221,7 +221,7 @@ win_nonblock_read_stdin(int fd, char *bufptr, int len)
 }
 
 void
-x_dialog_create_kegs_conf(const char *str)
+x_dialog_create_gsport_conf(const char *str)
 {
 }
 
@@ -434,7 +434,7 @@ main(int argc, char **argv)
 	wndclass.hCursor = LoadCursor((HINSTANCE) NULL, IDC_ARROW);
 	wndclass.hbrBackground = GetStockObject(WHITE_BRUSH);
 	wndclass.lpszMenuName = NULL;
-	wndclass.lpszClassName = "gsportwin";
+	wndclass.lpszClassName = "gsport";
 
 	// Register the window
 	if(!RegisterClass(&wndclass)) {
@@ -445,7 +445,7 @@ main(int argc, char **argv)
 	height = X_A2_WINDOW_HEIGHT + (MAX_STATUS_LINES * 16) + 32;
 	g_main_height = height;
 
-	g_hwnd_main = CreateWindowEx(WS_EX_ACCEPTFILES, "gsportwin", "GSportWin - Apple //gs Emulator",
+	g_hwnd_main = CreateWindowEx(WS_EX_ACCEPTFILES, "gsport", "GSport - Apple //gs Emulator",
 		WS_TILED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		X_A2_WINDOW_WIDTH, height,
@@ -467,8 +467,8 @@ main(int argc, char **argv)
 	g_screen_mdepth = 32;
 
 
-	// Call kegsmain
-	return kegsmain(argc, argv);
+	// Call gsportmain
+	return gsportmain(argc, argv);
 }
 
 

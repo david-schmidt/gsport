@@ -33,7 +33,7 @@ const char rcsid_clock_c[] = "@(#)$KmKId: clock.c,v 1.31 2004-10-19 17:32:07-04 
 extern int Verbose;
 extern int g_vbl_count;
 extern int g_rom_version;
-extern int g_config_kegs_update_needed;
+extern int g_config_gsport_update_needed;
 
 #define CLK_IDLE		1
 #define CLK_TIME		2
@@ -327,7 +327,7 @@ do_clock_data()
 				clk_printf("Writing BRAM loc %02x with %02x\n",
 					g_clk_reg1, g_c033_data);
 				g_bram_ptr[g_clk_reg1] = g_c033_data;
-				g_config_kegs_update_needed = 1;
+				g_config_gsport_update_needed = 1;
 			}
 		}
 		g_clk_mode = CLK_IDLE;

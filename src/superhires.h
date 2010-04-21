@@ -84,7 +84,7 @@ SUPER_TYPE(byte *screen_data, int pixels_per_line, int y, int scan,
 			(pal << 4);
 
 		if(mode_640 && !use_a2vid_palette) {
-#ifdef KEGS_LITTLE_ENDIAN
+#ifdef GSPORT_LITTLE_ENDIAN
 			pal_word += 0x04000c08;
 #else
 			pal_word += 0x080c0004;
@@ -121,7 +121,7 @@ SUPER_TYPE(byte *screen_data, int pixels_per_line, int y, int scan,
 					pix3 = palptr[pix3+4];
 				}
 #if SUPER_PIXEL_SIZE == 8
-# ifdef KEGS_LITTLE_ENDIAN
+# ifdef GSPORT_LITTLE_ENDIAN
 				tmp = (pix3 << 24) + (pix2 << 16) +
 					(pix1 << 8) + pix0 + pal_word;
 # else
@@ -130,7 +130,7 @@ SUPER_TYPE(byte *screen_data, int pixels_per_line, int y, int scan,
 # endif
 				*img_ptr++ = tmp; *img_ptr2++ = tmp;
 #elif SUPER_PIXEL_SIZE == 16
-# ifdef KEGS_LITTLE_ENDIAN
+# ifdef GSPORT_LITTLE_ENDIAN
 				tmp = (pix1 << 16) + pix0;
 				tmp2 = (pix3 << 16) + pix2;
 # else
@@ -192,7 +192,7 @@ SUPER_TYPE(byte *screen_data, int pixels_per_line, int y, int scan,
 					printf("y:%d, x2:%d, val:%02x = %08x %08x\n", y, x2, val0, pix0, pix1);
 				}
 #if SUPER_PIXEL_SIZE == 8
-# ifdef KEGS_LITTLE_ENDIAN
+# ifdef GSPORT_LITTLE_ENDIAN
 				tmp = (pix1 << 24) + (pix1 << 16) +
 					(pix0 << 8) + pix0 + pal_word;
 # else

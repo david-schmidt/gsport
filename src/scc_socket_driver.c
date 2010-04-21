@@ -746,7 +746,7 @@ scc_socket_empty_writebuf(int port, double dcycs)
 # else
 			/* ignore SIGPIPE around writes to the socket, so we */
 			/*  can catch a closed socket and prepare to accept */
-			/*  a new connection.  Otherwise, SIGPIPE kills KEGS */
+			/*  a new connection.  Otherwise, SIGPIPE kills GSport */
 			sigemptyset(&newact.sa_mask);
 			newact.sa_handler = SIG_IGN;
 			newact.sa_flags = 0;

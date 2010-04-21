@@ -22,7 +22,7 @@
 /* xdriver.c and macdriver.c and windriver.c */
 int x_show_alert(int is_fatal, const char *str);
 int win_nonblock_read_stdin(int fd, char *bufptr, int len);
-void x_dialog_create_kegs_conf(const char *str);
+void x_dialog_create_gsport_conf(const char *str);
 void update_color_array(int col_num, int a2_color);
 void set_border_color(int val);
 void x_update_physical_colormap(void);
@@ -162,10 +162,10 @@ void config_vbl_update(int doit_3_persec);
 void config_parse_option(char *buf, int pos, int len, int line);
 void config_parse_bram(char *buf, int pos, int len);
 void config_load_roms(void);
-void config_parse_config_kegs_file(void);
+void config_parse_config_gsport_file(void);
 Disk *cfg_get_dsk_from_slot_drive(int slot, int drive);
-void config_generate_config_kegs_name(char *outstr, int maxlen, Disk *dsk, int with_extras);
-void config_write_config_kegs_file(void);
+void config_generate_config_gsport_name(char *outstr, int maxlen, Disk *dsk, int with_extras);
+void config_write_config_gsport_file(void);
 void insert_disk(int slot, int drive, const char *name, int ejected, int force_size, const char *partition_name, int part_num);
 void eject_named_disk(Disk *dsk, const char *name, const char *partition_name);
 void eject_disk_by_num(int slot, int drive);
@@ -392,10 +392,10 @@ void do_reset(void);
 void check_engine_asm_defines(void);
 byte *memalloc_align(int size, int skip_amt, void **alloc_ptr);
 void memory_ptr_init(void);
-int kegsmain(int argc, char **argv);
+int gsportmain(int argc, char **argv);
 void load_roms_init_memory(void);
-void kegs_expand_path(char *out_ptr, const char *in_ptr, int maxlen);
-void setup_kegs_file(char *outname, int maxlen, int ok_if_missing, int can_create_file, const char **name_ptr);
+void gsport_expand_path(char *out_ptr, const char *in_ptr, int maxlen);
+void setup_gsport_file(char *outname, int maxlen, int ok_if_missing, int can_create_file, const char **name_ptr);
 void initialize_events(void);
 void check_for_one_event_type(int type);
 void add_event_entry(double dcycs, int type);
@@ -429,10 +429,10 @@ void do_wai(void);
 void do_stp(void);
 void size_fail(int val, word32 v1, word32 v2);
 int fatal_printf(const char *fmt, ...);
-int kegs_vprintf(const char *fmt, va_list ap);
+int gsport_vprintf(const char *fmt, va_list ap);
 void must_write(int fd, char *bufptr, int len);
 void clear_fatal_logs(void);
-char *kegs_malloc_str(char *in_str);
+char *gsport_malloc_str(char *in_str);
 
 
 /* smartport.c */

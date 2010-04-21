@@ -38,7 +38,7 @@ const char rcsid_sim65816_c[] = "@(#)$KmKId: sim65816.c,v 1.367 2004-11-22 02:39
 
 char g_argv0_path[256] = "./";
 
-const char *g_kegs_default_paths[] = { "", "./", "${HOME}/",
+const char *g_gsport_default_paths[] = { "", "./", "${HOME}/",
 	"${HOME}/Library/GSport/",
 	"${0}/Contents/Resources/", "/usr/local/lib/",
 	"/usr/local/gsport/", "/usr/local/lib/gsport/", "/usr/share/gsport/",
@@ -132,7 +132,7 @@ char* g_printer_font_script = "script.ttf";
 char* g_printer_font_ocra = "ocra.ttf";
 
 int	g_config_iwm_vbl_count = 0;
-const char g_kegs_version_str[] = "0.1";
+const char g_gsport_version_str[] = "0.1";
 
 #define START_DCYCS	(0.0)
 
@@ -780,7 +780,7 @@ int	g_screen_depth = 8;
 
 
 int
-kegsmain(int argc, char **argv)
+gsportmain(int argc, char **argv)
 {
 	int	skip_amt;
 	int	diff;
@@ -940,7 +940,7 @@ kegsmain(int argc, char **argv)
 #ifdef HAVE_PARALLEL
 	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage);
 #endif
-	//If ethernet is enabled in config.kegs, lets initialize it
+	//If ethernet is enabled in config.gsport, lets initialize it
 #ifdef HAVE_TFE
 	if (g_ethernet == 1)
 	{
@@ -949,7 +949,7 @@ kegsmain(int argc, char **argv)
 	char *ppdes = NULL;
 	if (tfe_enumadapter_open())
 	{
-	//Loop through the available adapters until we reach the interface number specified in config.kegs
+	//Loop through the available adapters until we reach the interface number specified in config.gsport
 	while(tfe_enumadapter(&ppname,&ppdes))
 	{
 		if (i == g_ethernet_interface) break;
@@ -1022,7 +1022,7 @@ load_roms_init_memory()
 }
 
 void
-kegs_expand_path(char *out_ptr, const char *in_ptr, int maxlen)
+gsport_expand_path(char *out_ptr, const char *in_ptr, int maxlen)
 {
 	char	name_buf[256];
 	char	*tmp_ptr;
@@ -1088,7 +1088,7 @@ kegs_expand_path(char *out_ptr, const char *in_ptr, int maxlen)
 }
 
 void
-setup_kegs_file(char *outname, int maxlen, int ok_if_missing,
+setup_gsport_file(char *outname, int maxlen, int ok_if_missing,
 		int can_create_file, const char **name_ptr)
 {
 	char	local_path[256];
@@ -1099,11 +1099,11 @@ setup_kegs_file(char *outname, int maxlen, int ok_if_missing,
 
 	outname[0] = 0;
 
-	path_ptr = &g_kegs_default_paths[0];
+	path_ptr = &g_gsport_default_paths[0];
 
 	save_path_ptr = path_ptr;
 	while(*path_ptr) {
-		kegs_expand_path(&(local_path[0]), *path_ptr, 250);
+		gsport_expand_path(&(local_path[0]), *path_ptr, 250);
 		cur_name_ptr = name_ptr;
 		while(*cur_name_ptr) {
 			strcpy(outname, &(local_path[0]));
@@ -1136,12 +1136,12 @@ setup_kegs_file(char *outname, int maxlen, int ok_if_missing,
 
 	if(can_create_file) {
 		// Ask user if it's OK to create the file
-		x_dialog_create_kegs_conf(*name_ptr);
+		x_dialog_create_gsport_conf(*name_ptr);
 		can_create_file = 0;
 
 		// But clear out the fatal_printfs first
 		clear_fatal_logs();
-		setup_kegs_file(outname, maxlen, ok_if_missing,
+		setup_gsport_file(outname, maxlen, ok_if_missing,
 						can_create_file, name_ptr);
 		// It's one-level of recursion--it cannot loop since we
 		//  clear can_create_file.
@@ -2003,7 +2003,7 @@ update_60hz(double dcycs, double dtime_now)
 
 		sprintf(status_buf, "GSport v%-6s       "
 			"Press F4 for Config Menu    %s",
-			g_kegs_version_str, code_str2);
+			g_gsport_version_str, code_str2);
 		video_update_status_line(6, status_buf);
 
 		g_status_refresh_needed = 1;
@@ -2456,14 +2456,14 @@ fatal_printf(const char *fmt, ...)
 	if(g_fatal_log < 0) {
 		g_fatal_log = 0;
 	}
-	ret = kegs_vprintf(fmt, ap);
+	ret = gsport_vprintf(fmt, ap);
 	va_end(ap);
 
 	return ret;
 }
 
 int
-kegs_vprintf(const char *fmt, va_list ap)
+gsport_vprintf(const char *fmt, va_list ap)
 {
 	char	*bufptr, *buf2ptr;
 	int	len;
@@ -2516,7 +2516,7 @@ clear_fatal_logs()
 }
 
 char *
-kegs_malloc_str(char *in_str)
+gsport_malloc_str(char *in_str)
 {
 	char	*str;
 	int	len;

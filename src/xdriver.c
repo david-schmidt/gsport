@@ -256,11 +256,11 @@ int a2_key_to_xsym[][3] = {
 int
 main(int argc, char **argv)
 {
-	return kegsmain(argc, argv);
+	return gsportmain(argc, argv);
 }
 
 void
-x_dialog_create_kegs_conf(const char *str)
+x_dialog_create_gsport_conf(const char *str)
 {
 	/* do nothing -- not implemented yet */
 	return;
@@ -898,7 +898,7 @@ get_ximage(Kimage *kimage_ptr)
 	xim = XCreateImage(g_display, g_vis, depth, ZPixmap, 0,
 		(char *)ptr, width, height, 8, 0);
 
-#ifdef KEGS_LITTLE_ENDIAN
+#ifdef GSPORT_LITTLE_ENDIAN
 	xim->byte_order = LSBFirst;
 #else
 	xim->byte_order = MSBFirst;

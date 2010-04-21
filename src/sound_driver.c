@@ -396,7 +396,7 @@ child_sound_init_linux()
 		exit(1);
 	}
 
-#ifdef KEGS_LITTLE_ENDIAN
+#ifdef GSPORT_LITTLE_ENDIAN
 	fmt = AFMT_S16_LE;
 #else
 	fmt = AFMT_S16_BE;

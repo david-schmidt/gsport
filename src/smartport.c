@@ -644,7 +644,7 @@ do_write_c7(int unit_num, word32 buf, int blk)
 		val1 = get_memory16_c(buf + i, 0);
 		val2 = get_memory16_c(buf + i + 2, 0);
 		/* reorder the little-endian bytes to be big-endian */
-#ifdef KEGS_LITTLE_ENDIAN
+#ifdef GSPORT_LITTLE_ENDIAN
 		val = (val2 << 16) + val1;
 #else
 		val = (val1 << 24) + ((val1 << 8) & 0xff0000) +

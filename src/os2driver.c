@@ -63,7 +63,7 @@ win_nonblock_read_stdin(int fd, char *bufptr, int len)
 }
 
 void
-x_dialog_create_kegs_conf(const char *str)
+x_dialog_create_gsport_conf(const char *str)
 {
 }
 
@@ -80,8 +80,8 @@ main(int argc, char **argv)
 {
 	printf("In OS/2 main...\n");
 
-	// Call kegsmain
-	return kegsmain(argc, argv);
+	// Call gsportmain
+	return gsportmain(argc, argv);
 }
 
 

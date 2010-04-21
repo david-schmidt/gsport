@@ -5,11 +5,11 @@
 //
 #define CREATEPROCESS_MANIFEST          1
 #define IDD_ABOUT_DIALOG                101
-#define IDC_KEGS32                      102
+#define IDC_GSPORT32                    102
 #define IDR_TOOLBAR                     103
 #define IDD_DLG_DISKCONF                104
 #define IDR_ACCEL                       105
-#define IDD_KEGS32_KEY                  106
+#define IDD_GSPORT32_KEY                106
 #define ID_TOOLBAR                      5000
 #define ID_STATUSBAR                    5001
 #define IDC_EDIT_S5D1                   10051

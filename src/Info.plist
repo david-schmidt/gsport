@@ -26,7 +26,7 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
-				<string>kegs</string>
+				<string>gsport</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string>525.icns</string>
@@ -34,7 +34,7 @@
 			<string>GSport Configuration File</string>
 			<key>CFBundleTypeOSTypes</key>
 			<array>
-				<string>kegs</string>
+				<string>gsport</string>
 			</array>
 			<key>CFBundleTypeRole</key>
 			<string>None</string>

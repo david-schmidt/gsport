@@ -1828,7 +1828,7 @@ iwm_nibblize_track_525(Disk *dsk, Trk *trk, byte *track_buf, int qtr_track)
 
 
 	word_ptr = (word32 *)&(trk->nib_area[0]);
-#ifdef KEGS_LITTLE_ENDIAN
+#ifdef GSPORT_LITTLE_ENDIAN
 	val = 0xff08ff08;
 #else
 	val = 0x08ff08ff;
@@ -1933,7 +1933,7 @@ iwm_nibblize_track_35(Disk *dsk, Trk *trk, byte *track_buf, int qtr_track)
 	int	i;
 
 	word_ptr = (word32 *)&(trk->nib_area[0]);
-#ifdef KEGS_LITTLE_ENDIAN
+#ifdef GSPORT_LITTLE_ENDIAN
 	val = 0xff08ff08;
 #else
 	val = 0x08ff08ff;

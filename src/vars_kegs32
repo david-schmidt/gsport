@@ -1,9 +1,9 @@
 
-TARGET = gsportwin.exe
-OBJECTS = $(OBJECTS1) win32snd_driver.o windriver.o kegs32.o
-CCOPTS = -O2 -DKEGS_LITTLE_ENDIAN
+TARGET = gsport.exe
+OBJECTS = $(OBJECTS1) win32snd_driver.o windriver.o gsport32.o
+CCOPTS = -O2 -DGSPORT_LITTLE_ENDIAN
 SUFFIX = ".exe"
-NAME = gsportwin
+NAME = gsport
 
 XOPTS = -Wall -fomit-frame-pointer -march=pentium 
 XLIBS =

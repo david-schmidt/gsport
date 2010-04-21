@@ -121,7 +121,7 @@ extern int g_screen_redraw_skip_amt;
 
 extern word32 g_a2_screen_buffer_changed;
 extern char *g_status_ptrs[MAX_STATUS_LINES];
-extern const char g_kegs_version_str[];
+extern const char g_gsport_version_str[];
 
 #if 0
 extern int g_debug_file_fd;
@@ -141,7 +141,7 @@ printf(const char *fmt, ...)
 		fprintf(stdout, "g_debug_file_fd = %d, %d\n", g_debug_file_fd,
 				errno);
 	}
-	ret = kegs_vprintf(fmt, ap);
+	ret = gsport_vprintf(fmt, ap);
 
 	va_end(ap);
 
@@ -166,19 +166,19 @@ show_simple_alert(char *str1, char *str2, char *str3, int num)
 {
 	char		buf[256];
 
-	g_fatal_log_strs[0] = kegs_malloc_str(str1);
-	g_fatal_log_strs[1] = kegs_malloc_str(str2);
-	g_fatal_log_strs[2] = kegs_malloc_str(str3);
+	g_fatal_log_strs[0] = gsport_malloc_str(str1);
+	g_fatal_log_strs[1] = gsport_malloc_str(str2);
+	g_fatal_log_strs[2] = gsport_malloc_str(str3);
 	g_fatal_log = 3;
 	if(num != 0) {
 		snprintf(buf, 250, ": %d", num);
-		g_fatal_log_strs[g_fatal_log++] = kegs_malloc_str(buf);
+		g_fatal_log_strs[g_fatal_log++] = gsport_malloc_str(buf);
 	}
 	x_show_alert(0, 0);
 }
 
 void
-x_dialog_create_kegs_conf(const char *str)
+x_dialog_create_gsport_conf(const char *str)
 {
 	char	*path;
 	char	tmp_buf[512];
@@ -278,7 +278,7 @@ my_cmd_handler( EventHandlerCallRef handlerRef, EventRef event, void *userdata)
 		osresult = noErr;
 		break;
 	case 'abou':
-		show_simple_alert("GSport v", (char *)g_kegs_version_str,
+		show_simple_alert("GSport v", (char *)g_gsport_version_str,
 			", Copyright 2010 GSport Contributors\n"
 			"Latest version at http://gsport.sourceforge.net/\n", 0);
 		osresult = noErr;
@@ -390,7 +390,7 @@ dummy_event_handler(EventHandlerCallRef call_ref, EventRef in_event,
 	err = InstallApplicationEventHandler(g_quit_handler_UPP, 1, &event_spec,
 		NULL, &installed_handler);
 
-	kegsmain(g_mac_argc, g_mac_argv);
+	gsportmain(g_mac_argc, g_mac_argv);
 
 	return noErr;
 }
