@@ -51,7 +51,7 @@ rm vars; ln -s vars_mac vars
 make
 -------------------------------------
 
- After the <<<make>>> has finished, it will create the application <<<GSportMac>>>.
+ After the <<<make>>> has finished, it will create the application <<<GSport>>>.
 
 * X86 Linux
 

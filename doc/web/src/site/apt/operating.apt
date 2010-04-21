@@ -31,10 +31,10 @@ Library/GSport from your home directory, and then place <<<config.txt>>> there
 along with the ROM file.  You do not need a starting <<<config.txt>>> file
 on a Mac--GSport will offer to make it for you if it cannot find one.
 
- Start GSport by Double-clicking the GSportMac icon on a Mac, or by running
-the executable (<<<gsportwin>>> on Windows, and <<<gsportx>>> on Linux).  GSportMac can
+ Start GSport by Double-clicking the GSport icon on a Mac, or by running
+the executable (<<<gsportwin>>> on Windows, and <<<gsportx>>> on Linux).  GSport can
 be run by the Terminal window on a Mac as well (which enables access to
-more debug information) by typing: "./GSport.app/Contents/MacOS/GSportMac".
+more debug information) by typing: "./GSport.app/Contents/MacOS/GSport".
 
  Assuming all goes well, GSport will then boot up but probably not find any
 disk images.  See below for how to tell GSport what disk images to use.
