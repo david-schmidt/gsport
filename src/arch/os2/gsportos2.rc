@@ -1,4 +1,23 @@
-/**/
+/*
+ GSport - an Apple //gs Emulator
+ Copyright (C) 2010 by GSport contributors
+
+ Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
+
+ This program is free software; you can redistribute it and/or modify it 
+ under the terms of the GNU General Public License as published by the 
+ Free Software Foundation; either version 2 of the License, or (at your 
+ option) any later version.
+
+ This program is distributed in the hope that it will be useful, but 
+ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ for more details.
+
+ You should have received a copy of the GNU General Public License along 
+ with this program; if not, write to the Free Software Foundation, Inc., 
+ 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 
 #include <os2.h>
 #include "gsportos2.h"
@@ -17,26 +36,11 @@ END
 
 ACCELTABLE ID_WINDOW PRELOAD
 BEGIN
-  "a",   ID_OPTION1,              CONTROL
-  "b",   ID_OPTION2,              CONTROL
-  "c",   ID_OPTION3,              CONTROL
-  "A",   ID_OPTION1,              CONTROL
-  "B",   ID_OPTION2,              CONTROL
-  "C",   ID_OPTION3,              CONTROL
-  "a",   ID_OPTION1,              CONTROL, SHIFT
-  "b",   ID_OPTION2,              CONTROL, SHIFT
-  "c",   ID_OPTION3,              CONTROL, SHIFT
-  "A",   ID_OPTION1,              CONTROL, SHIFT
-  "B",   ID_OPTION2,              CONTROL, SHIFT
-  "C",   ID_OPTION3,              CONTROL, SHIFT
   VK_F3, ID_EXITPROG, VIRTUALKEY
 END
 
 STRINGTABLE PRELOAD
 BEGIN
  IDS_HELLO, "Hello"
- IDS_1,     "--1--    "
- IDS_2,     "--2--    "
- IDS_3,     "--3--    "
 END
 

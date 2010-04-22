@@ -2,26 +2,31 @@
 
 OBJECTS1 = dirport.obj adb.obj clock.obj dis.obj engine_c.obj scc.obj \
 	iwm.obj joystick_driver.obj moremem.obj paddles.obj \
-	sim65816.obj smartport.obj sound.obj sound_driver.obj \
-	video.obj os2driver.obj config.obj
+	sim65816.obj smartport.obj sound.obj \
+	video.obj config.obj os2driver.obj
 
 {..\..}.c.obj:
     @echo " Compile::C++ Compiler "
-    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /Q /Gm /Gd- /C %s
+    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Q /Gm /Gd- /C %s
 
 {src\}.c.obj:
     @echo " Compile::C++ Compiler "
-    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /Q /Gm /Gd- /C %s
+    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Q /Gm /Gd- /C %s
 
-gsport.exe: $(OBJECTS1) ../../os2driver.c
+.c.obj:
+    @echo " Compile::C++ Compiler "
+    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Q /Gm /Gd- /C %s
+
+gsport.exe: $(OBJECTS1)
 	@echo " Link::Linker "
 	icc.exe @<<
-	/B" /pmtype:vio /st:196608 "
-	/FePrivoxy.exe 
+	/B" /pmtype:pm /st:196608 "
+	/Fegsport.exe 
 	so32dll.lib
 	tcp32dll.lib
 	$(OBJECTS1)
 <<
+	rc gsportos2.rc gsport.exe
 	echo done
 
 clean:
@@ -47,6 +52,6 @@ sim65816.obj: ../../sim65816.c ../../scc.c ../../defc.h ../../defcomm.h ../../iw
 smartport.obj: ../../smartport.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
 sound.obj: ../../sound.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
 sound_driver.obj: ../../sound_driver.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../sound.h
-video.obj: ../../video.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../superhires.h ../../gsportfont.h
-os2driver.obj: ../../os2driver.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
+video.obj: ../../video.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../superhires.h ../../kegsfont.h
+os2driver.obj: os2driver.c gsportos2.h ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
 
