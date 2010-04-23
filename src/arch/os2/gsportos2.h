@@ -23,7 +23,7 @@
  * Function prototypes
  */
 MRESULT EXPENTRY MyWindowProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2 );
-VOID AbortHello(HWND hwndFrame, HWND hwndClient);
+VOID os2_abort(HWND hwndFrame, HWND hwndClient);
 
 #define MSGBOXID    1001
 
@@ -39,4 +39,4 @@ VOID AbortHello(HWND hwndFrame, HWND hwndClient);
 #define IDS_HELLO   262
 #define IDS_1       263
 #define IDS_2       264
-#define IDS_3       265
+#define IDS_3       265

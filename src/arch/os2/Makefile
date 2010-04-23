@@ -3,24 +3,24 @@
 OBJECTS1 = dirport.obj adb.obj clock.obj dis.obj engine_c.obj scc.obj \
 	iwm.obj joystick_driver.obj moremem.obj paddles.obj \
 	sim65816.obj smartport.obj sound.obj \
-	video.obj config.obj os2driver.obj
+	video.obj config.obj scc_socket_os2.obj os2driver.obj
 
 {..\..}.c.obj:
     @echo " Compile::C++ Compiler "
-    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Q /Gm /Gd- /C %s
+    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Ss /Q /Ti /Gm /G4 /Ft- /C %s
 
 {src\}.c.obj:
     @echo " Compile::C++ Compiler "
-    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Q /Gm /Gd- /C %s
+    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Ss /Q /Ti /Gm /G4 /Ft- /C %s
 
 .c.obj:
     @echo " Compile::C++ Compiler "
-    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Q /Gm /Gd- /C %s
+    icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Ss /Q /Ti /Gm /G4 /Ft- /C %s
 
 gsport.exe: $(OBJECTS1)
 	@echo " Link::Linker "
 	icc.exe @<<
-	/B" /pmtype:pm /st:196608 "
+	/B" /de /pmtype:pm /st:196608 "
 	/Fegsport.exe 
 	so32dll.lib
 	tcp32dll.lib
@@ -42,6 +42,7 @@ config.obj: ../../config.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos
 dis.obj: ../../dis.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../disas.h
 scc.obj: ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../scc.h
 scc_socket_driver.obj: ../../scc_socket_driver.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../scc.h
+scc_socket_os2.obj: scc_socket_os2.c
 iwm.obj: ../../iwm.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../iwm_35_525.h
 joystick_driver.obj: ../../joystick_driver.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
 moremem.obj: ../../moremem.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
@@ -52,6 +53,5 @@ sim65816.obj: ../../sim65816.c ../../scc.c ../../defc.h ../../defcomm.h ../../iw
 smartport.obj: ../../smartport.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
 sound.obj: ../../sound.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
 sound_driver.obj: ../../sound_driver.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../sound.h
-video.obj: ../../video.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../superhires.h ../../kegsfont.h
+video.obj: ../../video.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../superhires.h ../../gsportfont.h
 os2driver.obj: os2driver.c gsportos2.h ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
-

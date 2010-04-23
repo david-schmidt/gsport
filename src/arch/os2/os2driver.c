@@ -94,11 +94,11 @@ main(int argc, char **argv)
   HWND hwndClient = NULLHANDLE;         /* Client area window handle    */
   ULONG flCreate;                       /* Window creation control flags*/
 
-  if ((hab = WinInitialize(0)) == 0L) /* Initialize PM     */
-     AbortHello(hwndFrame, hwndClient); /* Terminate the application    */
+  if ((hab = WinInitialize(0)) == 0L)   /* Initialize PM     */
+     os2_abort(hwndFrame, hwndClient); /* Terminate the application    */
 
   if ((hmq = WinCreateMsgQueue( hab, 0 )) == 0L)/* Create a msg queue */
-     AbortHello(hwndFrame, hwndClient); /* Terminate the application    */
+     os2_abort(hwndFrame, hwndClient); /* Terminate the application    */
 
   if (!WinRegisterClass(                /* Register window class        */
      hab,                               /* Anchor block handle          */
@@ -107,7 +107,7 @@ main(int argc, char **argv)
      CS_SIZEREDRAW,                     /* Class style                  */
      0                                  /* No extra window words        */
      ))
-     AbortHello(hwndFrame, hwndClient); /* Terminate the application    */
+     os2_abort(hwndFrame, hwndClient); /* Terminate the application    */
 
    flCreate = FCF_STANDARD &            /* Set frame control flags to   */
              ~FCF_SHELLPOSITION;        /* standard except for shell    */
@@ -124,7 +124,7 @@ main(int argc, char **argv)
                ID_WINDOW,               /* Frame window identifier      */
                &hwndClient              /* Client window handle         */
                )) == 0L)
-     AbortHello(HWND_DESKTOP, HWND_DESKTOP); /* Terminate the application    */
+     os2_abort(HWND_DESKTOP, HWND_DESKTOP); /* Terminate the application    */
 
     WinSetWindowText(hwndFrame, "GSport");
 
@@ -133,7 +133,7 @@ main(int argc, char **argv)
                    100, 100, 200, 200,  /* and size 200, 200.           */
                    SWP_SIZE | SWP_MOVE | SWP_ACTIVATE | SWP_SHOW
                  ))
-     AbortHello(hwndFrame, hwndClient); /* Terminate the application    */
+     os2_abort(hwndFrame, hwndClient); /* Terminate the application    */
 
 
 	// Call gsportmain
@@ -330,4 +330,10 @@ void
 x_full_screen(int do_full)
 {
 	return;
+}
+
+void
+os2_abort(HWND hwndFrame, HWND hwndClient)
+{
+  exit(-1);
 }
