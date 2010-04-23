@@ -803,6 +803,7 @@ dis_do_compare()
 void
 do_debug_unix()
 {
+#ifndef __OS2__
 	char	localbuf[LINE_SIZE];
 	word32	offset, len;
 	int	fd, ret;
@@ -877,6 +878,7 @@ do_debug_unix()
 		printf("errno: %d\n", errno);
 	}
 	a1 = a1 + ret;
+#endif
 }
 
 void

@@ -32,8 +32,11 @@
 extern int Verbose;
 extern int g_use_shmem;
 extern word32 g_vbl_count;
+#ifdef __OS2__
+int g_preferred_rate;
+#else
 extern int g_preferred_rate;
-
+#endif
 extern int g_c03ef_doc_ptr;
 
 extern double g_last_vbl_dcycs;
@@ -368,6 +371,7 @@ sound_init_general()
 void
 parent_sound_get_sample_rate(int read_fd)
 {
+#ifndef __OS2__
 	word32	tmp;
 	int	ret;
 
@@ -380,6 +384,7 @@ parent_sound_get_sample_rate(int read_fd)
 	close(read_fd);
 
 	set_audio_rate(tmp);
+#endif
 }
 
 void
@@ -475,7 +480,7 @@ int	g_c030_state = 0;
 #define VAL_C030_BASE		(-16384)
 
 int	g_sound_file_num = 0;
-int	g_sound_file_fd = -1;
+FILE	*g_sound_file_fd = 0;
 int	g_send_sound_to_file = 0;
 int	g_send_file_bytes = 0;
 
@@ -483,13 +488,13 @@ void
 open_sound_file()
 {
 	char	name[256];
-	int	fd;
+	FILE	*fd;
 
 	sprintf(name, "snd.out.%d", g_sound_file_num);
 
-	fd = open(name, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0x1ff);
-	if(fd < 0) {
-		printf("open_sound_file open ret: %d, errno: %d\n", fd, errno);
+	fd = fopen(name, "wb+");
+	if(fd == 0) {
+		printf("open_sound_file open errno: %d\n", errno);
 		exit(1);
 	}
 
@@ -501,11 +506,11 @@ open_sound_file()
 void
 close_sound_file()
 {
-	if(g_sound_file_fd >= 0) {
-		close(g_sound_file_fd);
+	if(g_sound_file_fd != 0) {
+		fclose(g_sound_file_fd);
 	}
 
-	g_sound_file_fd = -1;
+	g_sound_file_fd = 0;
 }
 
 void
@@ -548,7 +553,7 @@ send_sound_to_file(word32 *addr, int shm_pos, int num_samps)
 	int	size;
 	int	ret;
 
-	if(g_sound_file_fd < 0) {
+	if(g_sound_file_fd == 0) {
 		open_sound_file();
 	}
 
@@ -557,7 +562,7 @@ send_sound_to_file(word32 *addr, int shm_pos, int num_samps)
 		size = SOUND_SHM_SAMP_SIZE - shm_pos;
 		g_send_file_bytes += (size * 4);
 
-		ret = write(g_sound_file_fd, &(addr[shm_pos]), 4*size);
+		ret = fwrite(&(addr[shm_pos]), 1, 4*size, g_sound_file_fd);
 		if(ret != 4*size) {
 			halt_printf("wrote %d not %d\n", ret, 4*size);
 		}
@@ -574,7 +579,7 @@ send_sound_to_file(word32 *addr, int shm_pos, int num_samps)
 
 	g_send_file_bytes += (num_samps * 4);
 
-	ret = write(g_sound_file_fd, &(addr[shm_pos]), 4*num_samps);
+	ret = fwrite(&(addr[shm_pos]), 1, 4*num_samps, g_sound_file_fd);
 	if(ret != 4*num_samps) {
 		halt_printf("wrote %d not %d\n", ret, 4*num_samps);
 	}

@@ -22,7 +22,11 @@
 #include "defc.h"
 #include <stdarg.h>
 #include "config.h"
+#ifndef __OS2__
 #include <dirent.h>
+#else
+#include "arch\os2\src\dirport.h"
+#endif
 
 #ifdef HAVE_TFE
 #include "tfe/tfesupp.h"
@@ -928,15 +932,16 @@ config_parse_config_gsport_file()
 	g_highest_smartport_unit = -1;
 
 	cfg_get_base_path(&g_cfg_cwd_str[0], g_config_gsport_name, 0);
+#ifndef __OS2__
 	if(g_cfg_cwd_str[0] != 0) {
 		ret = chdir(&g_cfg_cwd_str[0]);
 		if(ret != 0) {
 			printf("chdir to %s, errno:%d\n", g_cfg_cwd_str, errno);
 		}
 	}
-
 	/* In any case, copy the directory path to g_cfg_cwd_str */
 	(void)getcwd(&g_cfg_cwd_str[0], CFG_PATH_MAX);
+#endif
 
 	fconf = fopen(g_config_gsport_name, "r");
 	if(fconf == 0) {
@@ -2520,6 +2525,7 @@ cfg_str_match(const char *str1, const char *str2, int len)
 void
 cfg_file_readdir(const char *pathptr)
 {
+#ifndef __OS2__
 	struct dirent *direntptr;
 	struct stat stat_buf;
 	DIR	*dirptr;
@@ -2573,13 +2579,11 @@ cfg_file_readdir(const char *pathptr)
 			cfg_get_base_path(str, str, 0);
 		}
 	}
-
 	tmppathptr = str;
 	if(str[0] == 0) {
 		tmppathptr = ".";
 	}
 	cfg_file_add_dirent(&g_cfg_dirlist, "..", 1, 0, -1, -1);
-
 	dirptr = opendir(tmppathptr);
 	if(dirptr == 0) {
 		printf("Could not open %s as a directory\n", tmppathptr);
@@ -2634,11 +2638,9 @@ cfg_file_readdir(const char *pathptr)
 		cfg_file_add_dirent(&g_cfg_dirlist, direntptr->d_name, is_dir,
 					stat_buf.st_size, -1, -1);
 	}
-
 	/* then sort the results (Mac's HFS+ is sorted, but other FS won't be)*/
 	qsort(&(g_cfg_dirlist.direntptr[0]), g_cfg_dirlist.last,
 					sizeof(Cfg_dirent), cfg_dirent_sortfn);
-
 	g_cfg_dirlist.curent = g_cfg_dirlist.last - 1;
 	for(i = g_cfg_dirlist.last - 1; i >= 0; i--) {
 		ret = cfg_str_match(&g_cfg_file_match[0],
@@ -2648,8 +2650,8 @@ cfg_file_readdir(const char *pathptr)
 			g_cfg_dirlist.curent = i;
 		}
 	}
+#endif
 }
-
 
 void
 cfg_inspect_maybe_insert_file(char *filename)
@@ -2678,7 +2680,6 @@ Used for blind operations like dragging/dropping files.
 		printf("Unable to determine appropriate place to insert file %s.\n",filename);
 }
 
-
 int
 cfg_guess_image_size(char *filename)
 {
@@ -2693,7 +2694,6 @@ Guess the image size.  Return values:
 	struct stat stat_buf;
 	int	rc = -1;
 	int	len;
-
 	rc = stat(filename, &stat_buf);
 	if(rc < 0)
 	{
@@ -2725,7 +2725,6 @@ Guess the image size.  Return values:
 	return rc;
 }
 
-
 char *
 cfg_shorten_filename(const char *in_ptr, int maxlen)
 {
@@ -2733,9 +2732,7 @@ cfg_shorten_filename(const char *in_ptr, int maxlen)
 	int	len;
 	int	c;
 	int	i;
-
 	/* Warning: uses a static string, not reentrant! */
-
 	out_ptr = &(g_cfg_file_shortened[0]);
 	len = strlen(in_ptr);
 	maxlen = MIN(len, maxlen);
@@ -2759,17 +2756,13 @@ cfg_shorten_filename(const char *in_ptr, int maxlen)
 		out_ptr[maxlen/2] = '.';
 		out_ptr[(maxlen/2) + 1] = '.';
 	}
-
 	return out_ptr;
 }
-
 void
 cfg_fix_topent(Cfg_listhdr *listhdrptr)
 {
 	int	num_to_show;
-
 	num_to_show = listhdrptr->num_to_show;
-
 	/* Force curent and topent to make sense */
 	if(listhdrptr->curent >= listhdrptr->last) {
 		listhdrptr->curent = listhdrptr->last - 1;
@@ -2787,7 +2780,6 @@ cfg_fix_topent(Cfg_listhdr *listhdrptr)
 		listhdrptr->topent = 0;
 	}
 }
-
 void
 cfg_file_draw()
 {
@@ -2798,9 +2790,7 @@ cfg_file_draw()
 	int	yoffset;
 	int	x, y;
 	int	i;
-
 	cfg_file_readdir(&g_cfg_file_curpath[0]);
-
 	for(y = 0; y < 21; y++) {
 		cfg_htab_vtab(0, y);
 		cfg_printf("\tZ\t");
@@ -2811,7 +2801,6 @@ cfg_file_draw()
 		cfg_htab_vtab(79, y);
 		cfg_printf("\t_\t");
 	}
-
 	cfg_htab_vtab(1, 0);
 	cfg_putchar('\b');
 	for(x = 1; x < 79; x++) {
@@ -2826,31 +2815,25 @@ cfg_file_draw()
 		cfg_printf("\bSelect file to use as %-40s\b",
 			cfg_shorten_filename(g_cfg_file_def_name, 40));
 	}
-
 	cfg_htab_vtab(2, 1);
 	cfg_printf("Configuration file path: %-56s",
 			cfg_shorten_filename(&g_config_gsport_name[0], 56));
-
 	cfg_htab_vtab(2, 2);
 	cfg_printf("Current directory: %-50s",
 			cfg_shorten_filename(&g_cfg_cwd_str[0], 50));
-
 	cfg_htab_vtab(2, 3);
-
 	str = "";
 	if(g_cfg_file_pathfield) {
 		str = "\b \b";
 	}
 	cfg_printf("Path: %s%s",
 			cfg_shorten_filename(&g_cfg_file_curpath[0], 68), str);
-
 	cfg_htab_vtab(0, 4);
 	cfg_printf(" \t");
 	for(x = 1; x < 79; x++) {
 		cfg_putchar('\\');
 	}
 	cfg_printf("\t ");
-
 
 	/* Force curent and topent to make sense */
 	listhdrptr = &g_cfg_dirlist;
@@ -2864,7 +2847,6 @@ cfg_file_draw()
 			cfg_shorten_filename(&g_cfg_file_path[0], 50), str);
 		yoffset += 2;
 	}
-
 	listhdrptr->num_to_show = num_to_show;
 	cfg_fix_topent(listhdrptr);
 	for(i = 0; i < num_to_show; i++) {
@@ -2896,16 +2878,13 @@ cfg_file_draw()
 			}
 		}
 	}
-
 	cfg_htab_vtab(1, 5 + CFG_NUM_SHOWENTS);
 	cfg_putchar('\t');
 	for(x = 1; x < 79; x++) {
 		cfg_putchar('L');
 	}
 	cfg_putchar('\t');
-
 }
-
 void
 cfg_partition_selected()
 {
@@ -2914,7 +2893,6 @@ cfg_partition_selected()
 	char	*part_str2;
 	int	pos;
 	int	part_num;
-
 	pos = g_cfg_partitionlist.curent;
 	str = g_cfg_partitionlist.direntptr[pos].name;
 	part_num = -2;
@@ -2929,7 +2907,6 @@ cfg_partition_selected()
 		part_str2 = (char *)malloc(strlen(part_str)+1);
 		strcpy(part_str2, part_str);
 	}
-
 	insert_disk(g_cfg_slotdrive >> 8, g_cfg_slotdrive & 0xff,
 			&(g_cfg_file_path[0]), 0, 0, part_str2, part_num);
 	if(part_str2 != 0) {
@@ -2938,13 +2915,11 @@ cfg_partition_selected()
 	g_cfg_slotdrive = -1;
 	g_cfg_select_partition = -1;
 }
-
 void
 cfg_file_update_ptr(char *str)
 {
 	char	*newstr;
 	int	len;
-
 	len = strlen(str) + 1;
 	newstr = malloc(len);
 	memcpy(newstr, str, len);
@@ -2960,20 +2935,18 @@ cfg_file_update_ptr(char *str)
 	}
 	g_config_gsport_update_needed = 1;
 }
-
 void
 cfg_file_selected()
 {
+#ifndef __OS2__
 	struct stat stat_buf;
 	char	*str;
 	int	fmt;
 	int	ret;
-
 	if(g_cfg_select_partition > 0) {
 		cfg_partition_selected();
 		return;
 	}
-
 	if(g_cfg_file_pathfield == 0) {
 		// in file section area of window
 		str = g_cfg_dirlist.direntptr[g_cfg_dirlist.curent].name;
@@ -2983,7 +2956,6 @@ cfg_file_selected()
 						&g_cfg_file_curpath[0], 1);
 			return;
 		}
-
 		snprintf(&g_cfg_file_path[0], CFG_PATH_MAX, "%s%s",
 					&g_cfg_file_cachedreal[0], str);
 	} else {
@@ -2991,12 +2963,10 @@ cfg_file_selected()
 		strncpy(&g_cfg_file_path[0], &g_cfg_file_curpath[0],
 							CFG_PATH_MAX);
 	}
-
 	ret = cfg_stat(&g_cfg_file_path[0], &stat_buf);
 	fmt = stat_buf.st_mode & S_IFMT;
 	cfg_printf("Stat'ing %s, st_mode is: %08x\n", &g_cfg_file_path[0],
 			(int)stat_buf.st_mode);
-
 	if(ret != 0) {
 		printf("stat %s returned %d, errno: %d\n", &g_cfg_file_path[0],
 					ret, errno);
@@ -3020,15 +2990,14 @@ cfg_file_selected()
 			}
 		}
 	}
+#endif
 }
-
 
 void
 cfg_file_handle_key(int key)
 {
 	Cfg_listhdr *listhdrptr;
 	int	len;
-
 	if(g_cfg_file_pathfield) {
 		if(key >= 0x20 && key < 0x7f) {
 			len = strlen(&g_cfg_file_curpath[0]);
@@ -3039,7 +3008,6 @@ cfg_file_handle_key(int key)
 			return;
 		}
 	}
-
 	listhdrptr = &g_cfg_dirlist;
 	if(g_cfg_select_partition > 0) {
 		listhdrptr = &g_cfg_partitionlist;
@@ -3051,7 +3019,6 @@ cfg_file_handle_key(int key)
 		g_cfg_file_match[1] = 0;
 		g_cfg_dirlist.invalid = 1;	/* re-read directory */
 	}
-
 	switch(key) {
 	case 0x1b:
 		if(g_cfg_slotdrive < 0xfff) {
@@ -3099,7 +3066,6 @@ cfg_file_handle_key(int key)
 		g_cfg_dirlist.curent, g_cfg_dirlist.topent, g_cfg_dirlist.last);
 #endif
 }
-
 void
 config_control_panel()
 {
@@ -3116,21 +3082,17 @@ config_control_panel()
 	int	max_line;
 	int	key;
 	int	i, j;
-
 	// First, save important text screen state
 	g_save_cur_a2_stat = g_cur_a2_stat;
 	for(i = 0; i < 0x400; i++) {
 		g_save_text_screen_bytes[i] = g_slow_memory_ptr[0x400+i];
 		g_save_text_screen_bytes[0x400+i] =g_slow_memory_ptr[0x10400+i];
 	}
-
 	g_cur_a2_stat = ALL_STAT_TEXT | ALL_STAT_VID80 | ALL_STAT_ANNUNC3 |
 			(0xf << BIT_ALL_STAT_TEXT_COLOR) | ALL_STAT_ALTCHARSET;
 	g_a2_new_all_stat[0] = g_cur_a2_stat;
 	g_new_a2_stat_cur_line = 0;
-
 	cfg_printf("In config_control_panel\n");
-
 	for(i = 0; i < 20; i++) {
 		// Toss any queued-up keypresses
 		if(adb_read_c000() & 0x80) {
@@ -3140,13 +3102,10 @@ config_control_panel()
 	g_adb_repeat_vbl = 0;
 	g_cfg_vbl_count = 0;
 	// HACK: Force adb keyboard (and probably mouse) to "normal"...
-
 	g_full_refresh_needed = -1;
 	g_a2_screen_buffer_changed = -1;
-
 	cfg_home();
 	j = 0;
-
 	menuptr = g_cfg_main_menu;
 	if(g_rom_version < 0) {
 		/* Must select ROM file */
@@ -3156,7 +3115,6 @@ config_control_panel()
 	menu_inc = 1;
 	g_cfg_slotdrive = -1;
 	g_cfg_select_partition = -1;
-
 	while(g_config_control_panel) {
 		if(g_fatal_log > 0) {
 			x_show_alert(0, 0);
@@ -3190,7 +3148,6 @@ config_control_panel()
 			if(line > max_line) {
 				max_line = line;
 			}
-
 			cfg_printf("%s\n", g_cfg_opt_buf);
 			line++;
 		}
@@ -3200,12 +3157,10 @@ config_control_panel()
 		if((menu_line >= max_line) && !match_found) {
 			menu_line = max_line;
 		}
-
 		if(g_rom_version < 0) {
 			cfg_htab_vtab(0, 21);
 			cfg_printf("\bYOU MUST SELECT A VALID ROM FILE\b\n");
 		}
-
 		cfg_htab_vtab(0, 23);
 		cfg_printf("Move: \tJ\t \tK\t Change: \tH\t \tU\t \tM\t");
 		if(print_eject_help) {
@@ -3222,11 +3177,9 @@ config_control_panel()
 			menu_line, line, g_cfg_vbl_count, g_adb_repeat_vbl,
 			g_key_down);
 #endif
-
 		if(g_cfg_slotdrive >= 0) {
 			cfg_file_draw();
 		}
-
 #ifdef HAVE_TFE
 		/*HACK eh, at least I think it is. Display the available ethernet interfaces
 		when in the ethernet control panel. This is the only way one can customize a menu pane.
@@ -3236,7 +3189,6 @@ config_control_panel()
 			cfg_get_tfe_name();
 		}
 #endif
-
 		key = -1;
 		while(g_config_control_panel) {
 			video_update();
@@ -3254,7 +3206,6 @@ config_control_panel()
 				break;
 			}
 		}
-
 		if((key >= 0) && (g_cfg_slotdrive < 0)) {
 			// Normal menu system
 			switch(key) {
@@ -3317,12 +3268,10 @@ config_control_panel()
 			cfg_file_handle_key(key);
 		}
 	}
-
 	for(i = 0; i < 0x400; i++) {
 		set_memory_c(0xe00400+i, g_save_text_screen_bytes[i], 0);
 		set_memory_c(0xe10400+i, g_save_text_screen_bytes[0x400+i], 0);
 	}
-
 	// And quit
 	g_config_control_panel = 0;
 	g_adb_repeat_vbl = g_vbl_count + 60;
@@ -3331,4 +3280,3 @@ config_control_panel()
 	g_full_refresh_needed = -1;
 	g_a2_screen_buffer_changed = -1;
 }
-

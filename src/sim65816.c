@@ -2491,7 +2491,7 @@ void
 must_write(int fd, char *bufptr, int len)
 {
 	int	ret;
-
+#ifndef __OS2__
 	while(len > 0) {
 		ret = write(fd, bufptr, len);
 		if(ret >= 0) {
@@ -2501,6 +2501,9 @@ must_write(int fd, char *bufptr, int len)
 			return;		// just get out
 		}
 	}
+#else
+  printf("%s\n",bufptr);
+#endif
 }
 
 void
