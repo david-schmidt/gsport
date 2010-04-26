@@ -373,9 +373,9 @@ parent_sound_get_sample_rate(int read_fd)
 
 	ret = read(read_fd, &tmp, 4);
 	if(ret != 4) {
-		printf("parent dying, could not get sample rate from child\n");
+		printf("parent could not get audio sample rate from child, disabling sound.\n");
 		printf("ret: %d, fd: %d errno:%d\n", ret, read_fd, errno);
-		exit(1);
+		g_audio_enable = 0;
 	}
 	close(read_fd);
 
