@@ -3,7 +3,7 @@
 OBJECTS1 = dirport.obj adb.obj clock.obj dis.obj engine_c.obj scc.obj \
 	iwm.obj joystick_driver.obj moremem.obj paddles.obj \
 	sim65816.obj smartport.obj sound.obj \
-	video.obj config.obj scc_socket_os2.obj os2driver.obj
+	video.obj config.obj scc_socket_os2.obj os2driver.obj os2snd_driver.obj
 
 {..\..}.c.obj:
     @echo " Compile::C++ Compiler "
@@ -55,3 +55,4 @@ sound.obj: ../../sound.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ..
 sound_driver.obj: ../../sound_driver.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../sound.h
 video.obj: ../../video.c ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h ../../superhires.h ../../gsportfont.h
 os2driver.obj: os2driver.c gsportos2.h ../../scc.c ../../defc.h ../../defcomm.h ../../iwm.h ../../protos.h
+os2snd_driver.obj: os2snd_driver.c

@@ -32,11 +32,7 @@
 extern int Verbose;
 extern int g_use_shmem;
 extern word32 g_vbl_count;
-#ifdef __OS2__
-int g_preferred_rate;
-#else
 extern int g_preferred_rate;
-#endif
 extern int g_c03ef_doc_ptr;
 
 extern double g_last_vbl_dcycs;
