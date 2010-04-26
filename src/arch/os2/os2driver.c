@@ -29,11 +29,13 @@
 #include <string.h>
 #include "gsportos2.h"                  /* Resource symbolic identifiers*/
 
-HAB  hab;                               /* PM anchor block handle       */
+HAB  g_hab;                               /* PM anchor block handle       */
 PSZ  pszErrMsg;
 QMSG qmsg;                              /* Message from message queue   */
-HWND hwndFrame = NULLHANDLE;            /* Frame window handle          */
-HMQ  hmq;                               /* Message queue handle         */
+HWND g_hwnd_frame = NULLHANDLE;            /* Frame window handle          */
+HWND g_hwnd_client = NULLHANDLE;         /* Client area window handle    */
+
+HMQ  g_hmq;                               /* Message queue handle         */
 
 extern int Verbose;
 
@@ -69,10 +71,15 @@ extern int g_screen_redraw_skip_amt;
 
 extern word32 g_a2_screen_buffer_changed;
 
+BITMAPINFO2 *g_bmapinfo_ptr = 0;
+volatile BITMAPINFOHEADER2 *g_bmaphdr_ptr = 0;
+HDC g_hdc;
+HPS g_hps;
 
 int
 win_nonblock_read_stdin(int fd, char *bufptr, int len)
 {
+  return 0;
 }
 
 void
@@ -91,50 +98,58 @@ x_show_alert(int is_fatal, const char *str)
 int
 main(int argc, char **argv)
 {
-  HWND hwndClient = NULLHANDLE;         /* Client area window handle    */
-  ULONG flCreate;                       /* Window creation control flags*/
+ULONG flCreate;                       /* Window creation control flags*/
+int	height;
+SIZEL	sizel;
 
-  if ((hab = WinInitialize(0)) == 0L)   /* Initialize PM     */
-     os2_abort(hwndFrame, hwndClient); /* Terminate the application    */
+	if ((g_hab = WinInitialize(0)) == 0L)   /* Initialize PM     */
+		os2_abort(g_hwnd_frame, g_hwnd_client); /* Terminate the application    */
 
-  if ((hmq = WinCreateMsgQueue( hab, 0 )) == 0L)/* Create a msg queue */
-     os2_abort(hwndFrame, hwndClient); /* Terminate the application    */
+	if ((g_hmq = WinCreateMsgQueue( g_hab, 0 )) == 0L)/* Create a msg queue */
+		os2_abort(g_hwnd_frame, g_hwnd_client); /* Terminate the application    */
 
-  if (!WinRegisterClass(                /* Register window class        */
-     hab,                               /* Anchor block handle          */
-     (PSZ)"MyWindow",                   /* Window class name            */
-     (PFNWP)MyWindowProc,               /* Address of window procedure  */
-     CS_SIZEREDRAW,                     /* Class style                  */
-     0                                  /* No extra window words        */
-     ))
-     os2_abort(hwndFrame, hwndClient); /* Terminate the application    */
+	if (!WinRegisterClass(                /* Register window class        */
+		g_hab,                               /* Anchor block handle          */
+		(PSZ)"MyWindow",                   /* Window class name            */
+		(PFNWP)MyWindowProc,               /* Address of window procedure  */
+		CS_SIZEREDRAW,                     /* Class style                  */
+		0                                  /* No extra window words        */
+		))
+		os2_abort(g_hwnd_frame, g_hwnd_client); /* Terminate the application    */
 
-   flCreate = FCF_STANDARD &            /* Set frame control flags to   */
-             ~FCF_SHELLPOSITION;        /* standard except for shell    */
+	height = X_A2_WINDOW_HEIGHT + (MAX_STATUS_LINES*16) + 32;
+	g_main_height = height;
+
+	flCreate = FCF_STANDARD &            /* Set frame control flags to   */
+		~FCF_SHELLPOSITION;        /* standard except for shell    */
                                         /* positioning.                 */
 
-  if ((hwndFrame = WinCreateStdWindow(
-               HWND_DESKTOP,            /* Desktop window is parent     */
-               0,                       /* STD. window styles           */
-               &flCreate,               /* Frame control flag           */
-               "MyWindow",              /* Client window class name     */
-               "",                      /* No window text               */
-               0,                       /* No special class style       */
-               (HMODULE)0L,           /* Resource is in .EXE file     */
-               ID_WINDOW,               /* Frame window identifier      */
-               &hwndClient              /* Client window handle         */
-               )) == 0L)
-     os2_abort(HWND_DESKTOP, HWND_DESKTOP); /* Terminate the application    */
+	if ((g_hwnd_frame = WinCreateStdWindow(
+		HWND_DESKTOP,            /* Desktop window is parent     */
+		0,                       /* STD. window styles           */
+		&flCreate,               /* Frame control flag           */
+		"MyWindow",              /* Client window class name     */
+		"",                      /* No window text               */
+		0,                       /* No special class style       */
+		(HMODULE)0L,             /* Resource is in .EXE file     */
+		ID_WINDOW,               /* Frame window identifier      */
+		&g_hwnd_client           /* Client window handle         */
+		)) == 0L)
+	os2_abort(HWND_DESKTOP, HWND_DESKTOP); /* Terminate the application    */
 
-    WinSetWindowText(hwndFrame, "GSport");
+	WinSetWindowText(g_hwnd_frame, "GSport");
 
-  if (!WinSetWindowPos( hwndFrame,      /* Shows and activates frame    */
-                   HWND_TOP,            /* window at position 100, 100, */
-                   100, 100, 200, 200,  /* and size 200, 200.           */
-                   SWP_SIZE | SWP_MOVE | SWP_ACTIVATE | SWP_SHOW
-                 ))
-     os2_abort(hwndFrame, hwndClient); /* Terminate the application    */
+	if (!WinSetWindowPos( g_hwnd_frame,      /* Shows and activates frame    */
+		HWND_TOP,            /* window at position 100, 100, */
+		100, 100, X_A2_WINDOW_WIDTH, height,  /* and size 200, 200.           */
+		SWP_SIZE | SWP_MOVE | SWP_ACTIVATE | SWP_SHOW
+		))
+	os2_abort(g_hwnd_frame, g_hwnd_client); /* Terminate the application    */
 
+	g_hdc = WinOpenWindowDC(g_hwnd_frame);
+	sizel.cx = X_A2_WINDOW_WIDTH;
+	sizel.cy = height;
+	g_hps = GpiCreatePS(g_hab,g_hdc, &sizel, PU_ARBITRARY | GPIT_MICRO | GPIA_ASSOC);
 
 	// Call gsportmain
 	return gsportmain(argc, argv);
@@ -249,11 +264,11 @@ check_input_events()
 	}
   */
 
-  while( WinGetMsg( hab, &qmsg, 0L, 0, 0 ) )
-    WinDispatchMsg( hab, &qmsg );
-  WinDestroyWindow(hwndFrame);           /* Tidy up...                   */
-  WinDestroyMsgQueue( hmq );             /* Tidy up...                   */
-  WinTerminate( hab );                   /* Terminate the application    */
+  while( WinGetMsg( g_hab, &qmsg, 0L, 0, 0 ) )
+    WinDispatchMsg( g_hab, &qmsg );
+  WinDestroyWindow(g_hwnd_frame);           /* Tidy up...                   */
+  WinDestroyMsgQueue( g_hmq );             /* Tidy up...                   */
+  WinTerminate( g_hab );                   /* Terminate the application    */
 
 }
 
@@ -284,6 +299,56 @@ xdriver_end()
 void
 x_get_kimage(Kimage *kimage_ptr)
 {
+	byte	*ptr;
+	int	width;
+	int	height;
+	int	depth, mdepth;
+	int	size;
+
+	width = kimage_ptr->width_req;
+	height = kimage_ptr->height;
+	depth = kimage_ptr->depth;
+	mdepth = kimage_ptr->mdepth;
+
+	size = 0;
+
+	if(depth == g_screen_depth) {
+		/* Use g_bmapinfo_ptr, adjusting width, height */
+		g_bmaphdr_ptr->cx = width;
+		g_bmaphdr_ptr->cy = -height;
+
+		kimage_ptr->dev_handle = GpiCreateBitmap(
+			(HPS)g_hps, (PBITMAPINFOHEADER2)g_bmaphdr_ptr,
+			0L, (PBYTE)kimage_ptr->data_ptr,
+			(PBITMAPINFO2)g_bmapinfo_ptr);
+
+		size = (width*height*mdepth) >> 3;
+		ptr = (byte *)malloc(size);
+
+		if(ptr == 0) {
+			printf("malloc for data failed, mdepth: %d\n", mdepth);
+			exit(2);
+		}
+
+		kimage_ptr->data_ptr = ptr;
+
+	} else {
+		/* allocate buffers for video.c to draw into */
+
+		size = (width*height*mdepth) >> 3;
+		ptr = (byte *)malloc(size);
+
+		if(ptr == 0) {
+			printf("malloc for data failed, mdepth: %d\n", mdepth);
+			exit(2);
+		}
+
+		kimage_ptr->data_ptr = ptr;
+
+		kimage_ptr->dev_handle = (void *)-1;
+
+	}
+
 	return;
 }
 
@@ -292,6 +357,32 @@ void
 dev_video_init()
 {
 	printf("Preparing graphics system\n");
+
+	g_screen_depth = 24;
+	g_screen_mdepth = 32;
+
+	g_bmapinfo_ptr = (BITMAPINFO2 *)malloc(sizeof(BITMAPINFOHEADER2));
+	g_bmaphdr_ptr = (BITMAPINFOHEADER2 *)g_bmapinfo_ptr;
+	g_bmaphdr_ptr->cbFix = sizeof(BITMAPINFOHEADER2);
+	g_bmaphdr_ptr->cx = A2_WINDOW_WIDTH;
+	g_bmaphdr_ptr->cy = -A2_WINDOW_HEIGHT;
+	g_bmaphdr_ptr->cPlanes = 1;
+	g_bmaphdr_ptr->cBitCount = g_screen_mdepth;
+	g_bmaphdr_ptr->ulCompression = BCA_UNCOMP;
+	g_bmaphdr_ptr->cclrUsed = 0;
+
+	video_get_kimages();
+
+	if(g_screen_depth != 8) {
+		//	Allocate g_mainwin_kimage
+		video_get_kimage(&g_mainwin_kimage, 0, g_screen_depth,
+						g_screen_mdepth);
+	}
+
+	g_installed_full_superhires_colormap = 1;
+
+	printf("Done with dev_video_init\n");
+	fflush(stdout);
 }
 
 void
@@ -333,7 +424,7 @@ x_full_screen(int do_full)
 }
 
 void
-os2_abort(HWND hwndFrame, HWND hwndClient)
+os2_abort(HWND g_hwnd_frame, HWND g_hwnd_client)
 {
   exit(-1);
-}
+}
