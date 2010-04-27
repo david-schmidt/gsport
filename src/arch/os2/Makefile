@@ -1,5 +1,7 @@
 # GSport OS/2 makefile
 
+TARGET = gsport.exe
+
 OBJECTS1 = dirport.obj adb.obj clock.obj dis.obj engine_c.obj scc.obj \
 	iwm.obj joystick_driver.obj moremem.obj paddles.obj \
 	sim65816.obj smartport.obj sound.obj \
@@ -17,20 +19,36 @@ OBJECTS1 = dirport.obj adb.obj clock.obj dis.obj engine_c.obj scc.obj \
     @echo " Compile::C++ Compiler "
     icc.exe /DTCPV40HDRS /DBSD_SELECT /Dinline= /I..\.. /Ss /Q /Ti /Gm /G4 /Ft- /C %s
 
-gsport.exe: $(OBJECTS1)
+$(TARGET): $(OBJECTS1)
 	@echo " Link::Linker "
 	icc.exe @<<
 	/B" /de /pmtype:pm /st:196608 "
-	/Fegsport.exe 
+	/Fe$(TARGET) 
 	so32dll.lib
 	tcp32dll.lib
 	$(OBJECTS1)
 <<
-	rc gsportos2.rc gsport.exe
+	rc gsportos2.rc $(TARGET)
 	echo done
 
 clean:
 	- rm $(OBJECTS1)
+	- rm $(TARGET)
+	- rm gsportos2.res
+	- rm ../../size_s.h
+	- rm ../../size_c.h
+	- rm ../../8size_s.h
+	- rm ../../16size_s.h
+	- rm ../../8inst_s.h
+	- rm ../../8inst_c.h
+	- rm ../../16inst_s.h
+	- rm ../../16inst_c.h
+
+../../size_c.h:
+	call make_size.cmd
+
+../../8inst_c.h:
+	call make_inst.cmd
 
 # dependency stuff
 dirport.obj: src/dirport.c src/dirport.h
