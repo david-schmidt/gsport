@@ -21,11 +21,6 @@
 
 /* This file is included by video.c */
 
-#ifndef SUPERHIRES_INCLUDED
-const char rcsid_superhires_h[] = "@(#)$KmKId: superhires.h,v 1.9 2003-10-29 02:02:59-05 kentd Exp $";
-# define SUPERHIRES_INCLUDED
-#endif
-
 void
 SUPER_TYPE(byte *screen_data, int pixels_per_line, int y, int scan,
 	word32 ch_mask, int use_a2vid_palette, int mode_640)
@@ -221,4 +216,3 @@ SUPER_TYPE(byte *screen_data, int pixels_per_line, int y, int scan,
 		}
 	}
 }
-

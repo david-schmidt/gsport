@@ -20,13 +20,6 @@
 */
 
 #ifdef ASM
-# ifdef INCLUDE_RCSID_S
-	.data
-	.export rcsdif_op_routs_h,data
-rcsdif_op_routs_h
-	.stringz "@(#)$KmKId: op_routs.h,v 1.40 2004-01-10 15:49:46-05 kentd Exp $"
-	.code
-# endif
 
 	.import	get_mem_b0_16,code
 	.import	get_mem_b0_8,code

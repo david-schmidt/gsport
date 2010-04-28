@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_scc_macdriver_c[] = "@(#)$KmKId: scc_macdriver.c,v 1.5 2004-11-25 13:32:51-05 kentd Exp $";
-
 /* This file contains the Mac serial calls */
 
 #include "defc.h"

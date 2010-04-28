@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_protos_mac_h[] = "@(#)$KmKId: protos_macdriver.h,v 1.11 2004-11-14 10:24:03-05 kentd Exp $";
-
 /* END_HDR */
 
 /* macdriver.c */
@@ -52,4 +50,3 @@ void x_auto_repeat_off(int must);
 void x_hide_pointer(int do_hide);
 void x_full_screen(int do_full);
 void update_main_window_size(void);
-

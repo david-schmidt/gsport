@@ -19,14 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_C
-const char rcsdif_defcomm_h[] = "@(#)$KmKId: defcomm.h,v 1.94 2004-10-13 21:53:44-04 kentd Exp $";
-#endif
-
-#if 0
-# define CHECK_BREAKPOINTS
-#endif
-
 #define SHIFT_PER_CHANGE	3
 #define CHANGE_SHIFT		(5 + SHIFT_PER_CHANGE)
 
@@ -178,4 +170,3 @@ const char rcsdif_defcomm_h[] = "@(#)$KmKId: defcomm.h,v 1.94 2004-10-13 21:53:4
 
 
 #define A2_BORDER_COLOR_NUM	0xfe
-

@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_paddles_c[] = "@(#)$KmKId: paddles.c,v 1.14 2004-10-19 14:52:36-04 kentd Exp $";
-
 #include "defc.h"
 
 extern int g_mouse_raw_x;	/* from adb.c */

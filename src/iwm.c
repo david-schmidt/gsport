@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_iwm_c[] = "@(#)$KmKId: iwm.c,v 1.119 2004-11-21 17:44:14-05 kentd Exp $";
-
 #include "defc.h"
 
 extern int Verbose;
@@ -1002,9 +1000,7 @@ iwm_write_data(Disk *dsk, word32 val, int fast_disk_emul, double dcycs)
 #define IWM_CYC_MULT		1
 #define IWM_DISK_525		0
 
-#define INCLUDE_IWM_RCSID_C
 #include "iwm_35_525.h"
-#undef INCLUDE_IWM_RCSID_C
 
 #undef IWM_READ_ROUT
 #undef IWM_WRITE_ROUT
@@ -2344,4 +2340,3 @@ iwm_show_a_track(Trk *trk)
 	printf("bit_sum: %d, expected: %d, overflow_size: %d\n",
 		sum, len*8/2, trk->overflow_size);
 }
-

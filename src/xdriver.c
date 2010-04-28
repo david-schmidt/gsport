@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_xdriver_c[] = "@(#)$KmKId: xdriver.c,v 1.187 2004-11-15 16:24:19-05 kentd Exp $";
-
 # if !defined(__CYGWIN__) && !defined(__POWERPC__)
 /* No shared memory on Cygwin */
 # define X_SHARED_MEM

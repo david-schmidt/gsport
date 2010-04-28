@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_moremem_c[] = "@(#)$KmKId: moremem.c,v 1.251 2004-11-19 01:55:50-05 kentd Exp $";
-
 #include "defc.h"
 
 #ifdef HAVE_TFE
@@ -2433,4 +2431,3 @@ read_vid_counters(int loc, double dcycs)
 	}
 	return (mask | (lines_since_vbl & 0xff));
 }
-

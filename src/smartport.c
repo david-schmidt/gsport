@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_smartport_c[] = "@(#)$KmKId: smartport.c,v 1.31 2004-11-12 23:10:50-05 kentd Exp $";
-
 #include "defc.h"
 
 extern int Verbose;
@@ -778,4 +776,3 @@ do_c700(word32 ret)
 		engine.kpc = 0xff59;	/* Jump to monitor, fix $36-$39 */
 	}
 }
-

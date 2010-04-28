@@ -20,13 +20,6 @@
 */
 
 #ifdef ASM
-# ifdef INCLUDE_RCSID_S
-	.data
-	.export rcsdif_defs_instr_h,data
-rcsdif_defs_instr_h
-	.stringz "@(#)$KmKId: defs_instr.h,v 1.57 2004-01-10 15:49:14-05 kentd Exp $"
-	.code
-# endif
 
 # ifdef ACC8
 	.export defs_instr_start_8,data

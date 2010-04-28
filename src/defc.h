@@ -19,10 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_C
-const char rcsid_defc_h[] = "@(#)$KmKId: defc.h,v 1.100 2004-11-09 02:02:07-05 kentd Exp $";
-#endif
-
 #include "defcomm.h"
 
 #define STRUCT(a) typedef struct _ ## a a; struct _ ## a

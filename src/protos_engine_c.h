@@ -19,10 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_C
-const char rcsid_protos_engine_c_h[] = "@(#)$KmKId: protos_engine_c.h,v 1.11 2004-10-11 22:48:16-04 kentd Exp $";
-#endif
-
 /* END_HDR */
 
 /* engine_c.c */
@@ -47,4 +43,3 @@ void set_halt_act(int val);
 void clr_halt_act(void);
 word32 get_remaining_operands(word32 addr, word32 opcode, word32 psr, Fplus *fplus_ptr);
 int enter_engine(Engine_reg *engine_ptr);
-

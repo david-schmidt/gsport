@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_adb_c[] = "@(#)$KmKId: adb.c,v 1.73 2004-11-14 14:05:33-05 kentd Exp $";
-
 /* adb_mode bit 3 and bit 2 (faster repeats for arrows and space/del) not done*/
 
 #include "adb.h"

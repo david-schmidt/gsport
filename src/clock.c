@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_clock_c[] = "@(#)$KmKId: clock.c,v 1.31 2004-10-19 17:32:07-04 kentd Exp $";
-
 #include "defc.h"
 #include <time.h>
 #ifdef _WIN32

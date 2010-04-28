@@ -19,10 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_C
-const char rcsid_scc_h[] = "@(#)$KmKId: scc.h,v 1.17 2004-12-03 14:03:12-05 kentd Exp $";
-#endif
-
 #include <ctype.h>
 
 #ifdef _WIN32
@@ -114,4 +110,3 @@ STRUCT(Scc) {
 
 #define SCCMODEM_NOECHO		0x0001
 #define SCCMODEM_NOVERBOSE	0x0002
-

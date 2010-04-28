@@ -19,12 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef ASM
-# ifdef INCLUDE_RCSID_S
-	.stringz "@(#)$KmKId: instable.h,v 1.104 2004-10-05 20:12:08-04 kentd Exp $"
-# endif
-#endif
-
 inst00_SYM		/*  brk */
 #ifdef ASM
 	ldb	1(scratch1),ret0

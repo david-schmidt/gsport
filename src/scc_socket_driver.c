@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_scc_socket_driver_c[] = "@(#)$KmKId: scc_socket_driver.c,v 1.11 2004-12-06 19:42:09-05 kentd Exp $";
-
 /* This file contains the socket calls */
 
 #include "defc.h"

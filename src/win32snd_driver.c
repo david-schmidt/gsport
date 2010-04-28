@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_win32snd_driver_c[] = "@(#)$KmKId: win32snd_driver.c,v 1.5 2002-11-19 03:09:59-05 kadickey Exp $";
-
 #include "defc.h"
 #include "sound.h"
 

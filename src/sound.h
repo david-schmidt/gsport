@@ -19,10 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_C
-const char rcsid_sound_h[] = "@(#)$KmKId: sound.h,v 1.17 2003-11-21 15:15:57-05 kentd Exp $";
-#endif
-
 #if !defined(_WIN32) && !defined(__CYGWIN__) && !defined (__OS2__)
 # include <sys/ipc.h>
 # include <sys/shm.h>
@@ -68,4 +64,3 @@ int win32_send_audio(byte *ptr, int size);
 int mac_send_audio(byte *ptr, int in_size);
 void child_sound_init_mac();
 void macsnd_init(word32 *shmaddr);
-

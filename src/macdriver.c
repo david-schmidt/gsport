@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_macdriver_c[] = "@(#)$KmKId: macdriver.c,v 1.24 2004-11-14 10:23:29-05 kentd Exp $";
-
 // Quartz: CreateCGContextForPort vs QDBeginCGContext
 
 // Use CGDisplayMoveCursorToPoint(kCGDirectMainDisplay) to warp pointer

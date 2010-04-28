@@ -19,27 +19,13 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-	.data
-	.export rcsid_engine_s_s,data
-rcsid_engine_s_s
-	.stringz "@(#)$KmKId: engine_s.s,v 1.155 2003-11-25 22:06:48-05 kentd Exp $"
-
 	.code
 
 	.level	1.1
 
-#define INCLUDE_RCSID_S
 #include "defs.h"
-#undef INCLUDE_RCSID_S
 
 #define ASM
-
-
-#if 0
-# define LOG_PC
-# define ACCURATE_SLOW_MEM
-# define DEBUG_TOOLBOX
-#endif
 
 
 /*
@@ -176,9 +162,7 @@ rcsid_engine_s_s
 	.import	set_memory16_pieces,code
 	.import	set_memory24_pieces,code
 
-#define INCLUDE_RCSID_S
 #include "op_routs.h"
-#undef INCLUDE_RCSID_S
 
 	.import do_break,code
 	.import do_cop,code
@@ -1920,10 +1904,8 @@ sbc_decimal_16
 
 #define ACC8
 	.code
-#define INCLUDE_RCSID_S
 #include "defs_instr.h"
 #include "8inst_s.h" 
-#undef INCLUDE_RCSID_S
 	.code
 #undef SYM
 #undef ACC8
@@ -2467,9 +2449,7 @@ sbc_decimal_16
 
 
 	.data
-#define INCLUDE_RCSID_S
 #include "8size_s.h"
-#undef INCLUDE_RCSID_S
 
 	.export table8,data
 table8
@@ -2499,4 +2479,3 @@ slow_memory	.block	128*1024
 dummy_memory1	.block	3*1024
 rom_fc_ff	.block	256*1024
 rom_cards	.block	256*16
-

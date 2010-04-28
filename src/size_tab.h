@@ -19,10 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_S
-	.stringz "@(#)$KmKId: size_tab.h,v 1.13 2002-11-19 03:10:38-05 kadickey Exp $"
-#else
-
 	.word	inst00_SYM+1	/* brk */
 	.word	inst01_SYM+1	/* ORA (Dloc,X) */
 	.word	inst02_SYM+1	/* COP */
@@ -281,5 +277,3 @@
 	.word	instff_SYM+3	/* SBC Long,x */
 
 	.block	4*16
-
-#endif

@@ -20,14 +20,7 @@
 */
 
 #include "defc.h"
-
-#define INCLUDE_RCSID_C
 #include "sound.h"
-#undef INCLUDE_RCSID_C
-
-#if 0
-# define DO_DOC_LOG
-#endif
 
 extern int Verbose;
 extern int g_use_shmem;

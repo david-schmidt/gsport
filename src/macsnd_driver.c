@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_macsnd_driver_c[] = "@(#)$KmKId: macsnd_driver.c,v 1.4 2003-10-17 15:57:40-04 kentd Exp $";
-
 #include "defc.h"
 #include "sound.h"
 

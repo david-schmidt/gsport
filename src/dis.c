@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_dis_c[] = "@(#)$KmKId: dis.c,v 1.103 2004-11-24 16:41:41-05 kentd Exp $";
-
 #include <stdio.h>
 #include "defc.h"
 #include <stdarg.h>
@@ -1202,4 +1200,3 @@ halt2_printf(const char *fmt, ...)
 
 	set_halt(2);
 }
-

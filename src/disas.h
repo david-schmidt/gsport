@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_disas_h[] = "@(#)$KmKId: disas.h,v 1.10 2002-11-19 03:10:38-05 kadickey Exp $";
-
 enum {
 	ABS = 1,
 	ABSX,
@@ -218,4 +216,3 @@ const word32 disas_types[256] = {
 	ABSXIND+0x200, ABSX+0x200,		/* fc-fd */
 	ABSX+0x200, LONGX+0x300,		/* fe-ff */
 };
-	

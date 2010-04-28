@@ -19,13 +19,9 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_sim65816_c[] = "@(#)$KmKId: sim65816.c,v 1.367 2004-11-22 02:39:26-05 kentd Exp $";
-
 #include <math.h>
 
-#define INCLUDE_RCSID_C
 #include "defc.h"
-#undef INCLUDE_RCSID_C
 #ifdef HAVE_TFE
   #include "tfe/tfesupp.h" 
   #include "tfe/protos_tfe.h" 
@@ -2530,4 +2526,3 @@ gsport_malloc_str(char *in_str)
 
 	return str;
 }
-

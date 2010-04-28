@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_scc_c[] = "@(#)$KmKId: scc.c,v 1.44 2004-12-03 17:33:40-05 kentd Exp $";
-
 #include "defc.h"
 
 extern int Verbose;
@@ -1269,4 +1267,3 @@ scc_write_data(int port, word32 val, double dcycs)
 
 	scc_maybe_tx_event(port, dcycs);
 }
-

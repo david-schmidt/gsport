@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_scc_windriver_c[] = "@(#)$KmKId: scc_windriver.c,v 1.4 2004-11-19 02:00:46-05 kentd Exp $";
-
 /* This file contains the Win32 COM1/COM2 calls */
 
 #include "defc.h"

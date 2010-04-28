@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_video_c[] = "@(#)$KmKId: video.c,v 1.135 2004-11-12 23:09:44-05 kentd Exp $";
-
 #include <time.h>
 
 #include "defc.h"

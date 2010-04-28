@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_engine_c_c[] = "@(#)$KmKId: engine_c.c,v 1.57 2004-12-03 23:51:01-05 kentd Exp $";
-
 #include "defc.h"
 #include "protos_engine_c.h"
 
@@ -1033,5 +1031,3 @@ int defs_instr_start_16 = 0;
 int defs_instr_end_16 = 0;
 int op_routs_start = 0;
 int op_routs_end = 0;
-
-

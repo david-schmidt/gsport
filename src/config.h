@@ -19,10 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_C
-const char rcsid_config_h[] = "@(#)$KmKId: config.h,v 1.9 2004-11-12 23:10:28-05 kentd Exp $";
-#endif
-
 #define CONF_BUF_LEN		1024
 #define COPY_BUF_SIZE		4096
 #define CFG_PRINTF_BUFSIZE	2048

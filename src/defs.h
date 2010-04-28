@@ -19,14 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-#ifdef INCLUDE_RCSID_S
-	.data
-	.export rcsdif_defs_h,data
-rcsdif_defs_h
-	.stringz "@(#)$KmKId: defs.h,v 1.22 2002-11-19 03:10:38-05 kadickey Exp $"
-	.code
-#endif
-
 #include "defcomm.h"
 
 link		.reg	%r2

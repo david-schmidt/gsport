@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_prodos_protos_h[] = "@(#)$Id: prodos_protos.h,v 1.4 2002/11/19 07:49:31 kadickey Exp $";
-
 /* to_pro.c */
 void flush_disk(ProDisk *disk);
 void close_file(ProDisk *disk);

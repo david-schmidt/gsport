@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_windriver_c[] = "@(#)$KmKId: windriver.c,v 1.11 2004-11-24 16:43:46-05 kentd Exp $";
-
 /* Based on code from Chea Chee Keong from KEGS32, which is available at */
 /*  http://www.geocities.com/akilgard/kegs32 */
 

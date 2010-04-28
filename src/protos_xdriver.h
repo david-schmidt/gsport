@@ -19,8 +19,6 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-const char rcsid_protos_x_h[] = "@(#)$KmKId: protos_xdriver.h,v 1.19 2004-11-15 16:24:13-05 kentd Exp $";
-
 /* END_HDR */
 
 /* xdriver.c */
@@ -53,4 +51,3 @@ void x_update_modifier_state(int state);
 void x_auto_repeat_on(int must);
 void x_auto_repeat_off(int must);
 void x_full_screen(int do_full);
-
