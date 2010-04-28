@@ -16,6 +16,18 @@ The Makefile includes a file called <<<vars>>> which defines the platform-
 dependent variables.  You need to make <<<vars>>> point to (or be) the appropriate
 file for your machine.
 
+ With the autotools version of the build, the following sequence will
+execute the build from the main directory:
+
+----------------
+autoreconf
+automake --add-missing
+autoheader
+autoconf
+sh configure
+make
+----------------
+
 * Win32
 
  There is a different port of KEGS by Chea Chee Keong (akilgard) called
