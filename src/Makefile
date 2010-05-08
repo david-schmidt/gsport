@@ -133,6 +133,8 @@ tfearch.o:arch/win32/tfearch.c tfe/tfearch.h tfe/tfe_protos.h
 tfesupp.o: tfe/tfesupp.c tfe/tfesupp.h tfe/tfe_protos.h
 uilib.o: tfe/uilib.c tfe/uilib.h tfe/tfe_protos.h
 macdriver.o: macdriver.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
+macdriver_console.o: macdriver_console.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
+macdriver_generic.o: macdriver_generic.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
 macsnd_driver.o: macsnd_driver.c defc.h defcomm.h iwm.h protos.h sound.h
 windriver.o: windriver.c defc.h defcomm.h iwm.h protos.h protos_windriver.h winresource.h gsport32.o
 win_console.o: win_console.c defc.h defcomm.h iwm.h protos.h protos_windriver.h winresource.h

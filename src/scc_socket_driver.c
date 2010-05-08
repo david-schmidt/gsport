@@ -357,8 +357,8 @@ scc_accept_socket(int port, double dcycs)
 		return;		/* just give up */
 	}
 	if(scc_ptr->rdwrfd == -1) {
-		rdwrfd = accept(scc_ptr->sockfd, (sockaddr*)scc_ptr->host_handle,
-						(socklen_t*)&(scc_ptr->host_aux1));
+		rdwrfd = accept(scc_ptr->sockfd, scc_ptr->host_handle,
+						&(scc_ptr->host_aux1));
 		if(rdwrfd < 0) {
 			return;
 		}
