@@ -179,5 +179,3 @@ int x_calc_ratio(float ratiox,float ratioy)
 {
 	return 0; // not stretched
 }
-
-
