@@ -107,7 +107,7 @@ main(int argc, char **argv)
 //	g_main_height = height;
 
 	
-	HWND hwnd = CreateWindow("gsport", "GSport - Apple //gs Emulator",
+	HWND hwnd = CreateWindowEx(WS_EX_ACCEPTFILES, "gsport", "GSport - Apple //gs Emulator",
 		WS_TILED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		X_A2_WINDOW_WIDTH, height,
