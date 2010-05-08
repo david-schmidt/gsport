@@ -25,7 +25,7 @@
 
 /* windriver.c */
 int win_update_mouse(int x, int y, int button_states, int buttons_valid);
-void win_event_mouse(WPARAM wParam, LPARAM lParam);
+void win_event_mouse(int umsg,WPARAM wParam, LPARAM lParam);
 void win_event_key(HWND hwnd, UINT raw_vk, BOOL down, int repeat, UINT flags);
 void win_event_quit(HWND hwnd);
 void win_event_redraw(void);

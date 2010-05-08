@@ -32,7 +32,7 @@ int	g_joystick_scale_factor_y = 0x100;
 int	g_joystick_trim_amount_x = 0;
 int	g_joystick_trim_amount_y = 0;
 
-int	g_joystick_type = 0;	/* 0 = Keypad Joystick */
+int	g_joystick_type = JOYSTICK_TYPE_NATIVE_1;	// OG Trying to set native joystick as default	
 int	g_joystick_native_type1 = -1;
 int	g_joystick_native_type2 = -1;
 int	g_joystick_native_type = -1;
@@ -50,16 +50,18 @@ void
 paddle_fixup_joystick_type()
 {
 	/* If g_joystick_type points to an illegal value, change it */
-	if(g_joystick_type == 2) {
+	if(g_joystick_type == JOYSTICK_TYPE_NATIVE_1) {
 		g_joystick_native_type = g_joystick_native_type1;
 		if(g_joystick_native_type1 < 0) {
-			g_joystick_type = 0;
+			g_joystick_type = JOYSTICK_TYPE_KEYPAD;
+			printf("no joy 1 --- switching to keypad\n");
 		}
 	}
-	if(g_joystick_type == 3) {
+	if(g_joystick_type == JOYSTICK_TYPE_NATIVE_2) {
 		g_joystick_native_type = g_joystick_native_type2;
 		if(g_joystick_native_type2 < 0) {
-			g_joystick_type = 0;
+			g_joystick_type = JOYSTICK_TYPE_KEYPAD;
+			printf("no joy 2 --- switching to keypad\n");
 		}
 	}
 }
@@ -74,10 +76,13 @@ paddle_trigger(double dcycs)
 	paddle_fixup_joystick_type();
 
 	switch(g_joystick_type) {
-	case 0:		/* Keypad Joystick */
+	case JOYSTICK_TYPE_KEYPAD:		/* Keypad Joystick */
 		paddle_trigger_keypad(dcycs);
 		break;
-	case 1:		/* Mouse Joystick */
+	case JOYSTICK_TYPE_MOUSE:		/* Mouse Joystick */
+		paddle_trigger_mouse(dcycs);
+		break;
+	case JOYSTICK_TYPE_NONE:		/* Mouse Joystick */
 		paddle_trigger_mouse(dcycs);
 		break;
 	default:

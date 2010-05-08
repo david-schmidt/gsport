@@ -22,11 +22,8 @@
 #include "defc.h"
 #include "sound.h"
 
-#ifndef __CYGWIN__
 # include <windows.h>
 # include <mmsystem.h>
-#endif
-//#include <unistd.h>
 
 extern int Verbose;
 
@@ -37,10 +34,8 @@ void check_wave_error(int res, char *str);
 
 #define NUM_WAVE_HEADERS	8
 
-#ifndef __CYGWIN__
-HWAVEOUT g_wave_handle;
+HWAVEOUT g_wave_handle = NULL;	// OG Default value must be set
 WAVEHDR g_wavehdr[NUM_WAVE_HEADERS];
-#endif
 
 extern int g_audio_enable;
 extern word32 *g_sound_shm_addr;
@@ -57,18 +52,39 @@ win32snd_init(word32 *shmaddr)
 	return;
 }
 
+
+// OG Added global to free the dedicated win32 sound memory
+byte	*bptr = NULL;
+
+// OG shut win32 sound resources
 void
 win32snd_shutdown()
 {
-	/* hmm */
+
+	if (g_wave_handle)
+	{
+		MMRESULT	res = waveOutReset(g_wave_handle);
+		if (res!=MMSYSERR_NOERROR )
+			printf("waveOutReset Failed");
+
+		res = waveOutClose(g_wave_handle);
+		if (res!=MMSYSERR_NOERROR )
+			printf("waveOutClose Failed");
+		g_wave_handle=NULL;
+}
+	// OG Free dedicated sound memory
+	if (bptr)
+	{
+		free(bptr);
+		bptr = NULL;
+	}
 
 }
 
-#ifndef __CYGWIN__
 
 void CALLBACK
-handle_wav_snd(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1,
-		DWORD_PTR dwParam2)
+handle_wav_snd(HWAVEOUT hwo, UINT uMsg, DWORD dwInstance, DWORD dwParam1,
+		DWORD dwParam2)
 {
 	LPWAVEHDR	lpwavehdr;
 
@@ -85,7 +101,7 @@ handle_wav_snd(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1
 void
 check_wave_error(int res, char *str)
 {
-	char	buf[256];
+	TCHAR	buf[256];
 
 	if(res == MMSYSERR_NOERROR) {
 		return;
@@ -101,7 +117,9 @@ child_sound_init_win32()
 {
 	WAVEFORMATEX wavefmt;
 	WAVEOUTCAPS caps;
-	byte	*bptr;
+
+// OG Moved as global variable (to rename)
+//	byte	*bptr;
 	int	bits_per_sample, channels, block_align;
 	int	blen;
 	int	res;
@@ -110,11 +128,17 @@ child_sound_init_win32()
 	memset(&wavefmt, 0, sizeof(WAVEFORMATEX));
 
 	wavefmt.wFormatTag = WAVE_FORMAT_PCM;
+#ifndef UNDER_CE
 	bits_per_sample = 16;
+	wavefmt.nSamplesPerSec = g_audio_rate;
+#else
+	bits_per_sample = 16;
+	wavefmt.nSamplesPerSec = 12000;
+#endif
+
 	channels = 2;
 	wavefmt.wBitsPerSample = bits_per_sample;
 	wavefmt.nChannels = channels;
-	wavefmt.nSamplesPerSec = g_audio_rate;
 	block_align = channels * (bits_per_sample / 8);
 	wavefmt.nBlockAlign = block_align;
 	wavefmt.nAvgBytesPerSec = block_align * g_audio_rate;
@@ -129,7 +153,7 @@ child_sound_init_win32()
 	}
 
 	res = waveOutOpen(&g_wave_handle, WAVE_MAPPER, &wavefmt,
-		(DWORD_PTR)handle_wav_snd, 0, CALLBACK_FUNCTION | WAVE_ALLOWSYNC);
+		(DWORD)handle_wav_snd, 0, CALLBACK_FUNCTION | WAVE_ALLOWSYNC);
 
 	if(res != MMSYSERR_NOERROR) {
 		printf("Cannot register audio\n");
@@ -141,7 +165,7 @@ child_sound_init_win32()
 
 	blen = (SOUND_SHM_SAMP_SIZE * 4 * 2) / NUM_WAVE_HEADERS;
 	g_win32snd_buflen = blen;
-	bptr = malloc(blen * NUM_WAVE_HEADERS);
+	bptr = (byte*)malloc(blen * NUM_WAVE_HEADERS); // OG Added cast
 	if(bptr == NULL) {
 		printf("Unabled to allocate sound buffer\n");
 		exit(1);
@@ -150,7 +174,7 @@ child_sound_init_win32()
 	for(i = 0; i < NUM_WAVE_HEADERS; i++) {
 		memset(&g_wavehdr[i], 0, sizeof(WAVEHDR));
 		g_wavehdr[i].dwUser = FALSE;
-		g_wavehdr[i].lpData = &(bptr[i*blen]);
+		g_wavehdr[i].lpData = (LPSTR)&(bptr[i*blen]);	// OG Added cast
 		g_wavehdr[i].dwBufferLength = blen;
 		g_wavehdr[i].dwFlags = 0;
 		g_wavehdr[i].dwLoops = 0;
@@ -220,5 +244,3 @@ win32_send_audio(byte *ptr, int in_size)
 
 	return in_size;
 }
-
-#endif /* __CYGWIN */

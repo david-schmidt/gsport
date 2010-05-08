@@ -20,9 +20,17 @@
 */
 
 #include "defc.h"
-#include "sound.h"
+
+#ifdef ACTIVEIPHONE
+void child_sound_init_mac() {}
+void macsnd_init(word32 *shmaddr) {}
+int mac_send_audio(byte *ptr, int in_size) {}
+#else
 
 #include <Carbon/Carbon.h>
+
+
+#include "sound.h"
 #include <unistd.h>
 
 #define MACSND_REBUF_SIZE	(64*1024)
@@ -67,7 +75,7 @@ mac_snd_callback(SndChannelPtr snd_chan_ptr, SndCommand *in_sndcmd)
 		g_macsnd_playing = 1;
 		g_snd_hdr.numFrames = samps;
 		g_snd_hdr.loopEnd = samps;
-		g_snd_hdr.samplePtr = (byte *)g_macsnd_rebuf_cur;
+		g_snd_hdr.samplePtr = (char *)g_macsnd_rebuf_cur; // OG Cast from byte* to ,char*
 
 		g_snd_cmd.cmd = bufferCmd;
 		g_snd_cmd.param1 = 0;
@@ -161,3 +169,4 @@ macsnd_init(word32 *shmaddr)
 	mac_printf("macsnd_init called\n");
 	child_sound_loop(-1, -1, shmaddr);
 }
+#endif

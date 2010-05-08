@@ -168,11 +168,14 @@ Cfg_menu g_cfg_disk_menu[] = {
 { 0, 0, 0, 0, 0 },
 };
 
+// OG Use define instead of const for joystick_types
+#define STRINGIFY(x) #x
+#define TOSTRING(x) STRINGIFY(x)
+
 Cfg_menu g_cfg_joystick_menu[] = {
 { "Joystick Configuration", g_cfg_joystick_menu, 0, 0, CFGTYPE_MENU },
-{ "Joystick Emulation,0,Keypad Joystick,1,Mouse Joystick,2,Native Joystick 1,"
-	"3,Native Joystick 2,4,Disable Joystick", 
-	KNMP(g_joystick_type), CFGTYPE_INT },
+{ "Joystick Emulation,"TOSTRING(JOYSTICK_TYPE_KEYPAD)",Keypad Joystick,"TOSTRING(JOYSTICK_TYPE_MOUSE)",Mouse Joystick,"TOSTRING(JOYSTICK_TYPE_NATIVE_1)",Native Joystick 1,"
+	TOSTRING(JOYSTICK_TYPE_NATIVE_2)",Native Joystick 2,"TOSTRING(JOYSTICK_TYPE_NONE)",No Joystick", KNMP(g_joystick_type), CFGTYPE_INT },
 { "Joystick Scale X,0x100,Standard,0x119,+10%,0x133,+20%,"
 	"0x150,+30%,0xb0,-30%,0xcd,-20%,0xe7,-10%",
 		KNMP(g_joystick_scale_factor_x), CFGTYPE_INT },
@@ -2140,9 +2143,9 @@ cfg_parse_menu(Cfg_menu *menuptr, int menu_pos, int highlight_pos, int change)
 	defval = -1;
 	curstr = 0;
 	if(type == CFGTYPE_INT) {
-		iptr = menuptr->ptr;
+		iptr = (int*)menuptr->ptr;	// OG Added cast
 		curval = *iptr;
-		iptr = menuptr->defptr;
+		iptr = (int*)menuptr->defptr; // OG Added cast
 		defval = *iptr;
 		if(curval == defval) {
 			g_cfg_opt_buf[3] = 'D';	/* checkmark */
@@ -2454,10 +2457,10 @@ cfg_file_add_dirent(Cfg_listhdr *listhdrptr, const char *nameptr, int is_dir,
 		inc_amt = MAX(64, listhdrptr->max);
 		inc_amt = MIN(inc_amt, 1024);
 		listhdrptr->max += inc_amt;
-		listhdrptr->direntptr = realloc(listhdrptr->direntptr,
+		listhdrptr->direntptr = (Cfg_dirent*)realloc(listhdrptr->direntptr,
 					listhdrptr->max * sizeof(Cfg_dirent));
 	}
-	ptr = malloc(namelen+1+is_dir);
+	ptr = (char*)malloc(namelen+1+is_dir); // OG Added cast
 	strncpy(ptr, nameptr, namelen+1);
 	if(is_dir) {
 		strcat(ptr, "/");
@@ -2483,10 +2486,10 @@ cfg_dirent_sortfn(const void *obj1, const void *obj2)
 	/* Called by qsort to sort directory listings */
 	direntptr1 = (const Cfg_dirent *)obj1;
 	direntptr2 = (const Cfg_dirent *)obj2;
-#if defined(_WIN32)
-	ret = _stricmp(direntptr1->name, direntptr2->name);
-#elif defined(MAC) 
-	ret = strcasecmp(direntptr1->name, direntptr2->name);
+#if defined(MAC) || defined(_WIN32)
+	// OG
+	ret = 0;
+//	ret = strcasecmp(direntptr1->name, direntptr2->name); 
 #else
 	ret = strcmp(direntptr1->name, direntptr2->name);
 #endif
@@ -2921,7 +2924,7 @@ cfg_file_update_ptr(char *str)
 	char	*newstr;
 	int	len;
 	len = strlen(str) + 1;
-	newstr = malloc(len);
+	newstr = (char*)malloc(len);
 	memcpy(newstr, str, len);
 	if(g_cfg_file_strptr) {
 		if(*g_cfg_file_strptr) {
@@ -3279,4 +3282,15 @@ config_control_panel()
 	change_display_mode(g_cur_dcycs);
 	g_full_refresh_needed = -1;
 	g_a2_screen_buffer_changed = -1;
+}
+
+ extern byte	g_bram[2][256];
+ extern byte* g_bram_ptr;
+void x_clk_setup_bram_version()
+{
+		if(g_rom_version < 3) {
+		g_bram_ptr = (&g_bram[0][0]);	// ROM 01
+	} else {
+		g_bram_ptr = (&g_bram[1][0]);	// ROM 03
+	}
 }

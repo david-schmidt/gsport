@@ -79,7 +79,7 @@ scc_serial_mac_change_params(int port)
 
 	scc_ptr = &(scc_stat[port]);
 
-	fd = (int)scc_ptr->host_handle;
+	fd = (intptr_t)scc_ptr->host_handle;
 	printf("scc_serial_mac_change_parms port: %d, fd: %d\n", port, fd);
 	if(fd <= 0) {
 		return;
@@ -149,7 +149,7 @@ scc_serial_mac_fill_readbuf(int port, int space_left, double dcycs)
 
 	scc_ptr = &(scc_stat[port]);
 
-	fd = (int)scc_ptr->host_handle;
+	fd = (intptr_t)scc_ptr->host_handle;
 	if(fd <= 0) {
 		return;
 	}
@@ -179,7 +179,7 @@ scc_serial_mac_empty_writebuf(int port)
 
 	scc_ptr = &(scc_stat[port]);
 
-	fd = (int)scc_ptr->host_handle;
+	fd = (intptr_t)scc_ptr->host_handle;
 	if(fd <= 0) {
 		return;
 	}

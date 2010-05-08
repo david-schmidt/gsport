@@ -197,6 +197,11 @@ adb_init()
 	adb_reset();
 }
 
+// OG Added adb_shut()
+void adb_shut()
+{
+	g_adb_init = 0;
+}
 
 void
 adb_reset()
@@ -796,9 +801,14 @@ adb_write_c026(int val)
 			}
 			break;
 		default:
-			halt_printf("ADB ucontroller cmd %02x unknown!\n", val);
 			/* The Gog's says ACS Demo 2 has a bug and writes to */
 			/*  c026 */
+			// OG
+			if (val==0x84)
+				printf("ACS Demo2 (3: Colum& Music scroll) : discarding unknown controller command\n");
+			else
+				halt_printf("ADB ucontroller cmd %02x unknown!\n", val);
+			
 			break;
 		}
 		break;
@@ -1714,6 +1724,8 @@ adb_physical_key_update(int a2code, int is_up)
 
 	if(special && !is_up) {
 		switch(special) {
+// OG Disabled special keys (but warp)
+#ifndef ACTIVEGS
 		case 0x04: /* F4 - Emulator config panel */
 			cfg_toggle_config_panel();
 			break;
@@ -1729,6 +1741,7 @@ adb_physical_key_update(int a2code, int is_up)
 			printf("g_fast_disk_emul is now %d\n",
 							g_fast_disk_emul);
 			break;
+#endif
 		case 0x08: /* F8 - warp pointer */
 			g_warp_pointer = !g_warp_pointer;
 			if(g_hide_pointer != g_warp_pointer) {
@@ -1736,6 +1749,7 @@ adb_physical_key_update(int a2code, int is_up)
 				x_hide_pointer(g_hide_pointer);
 			}
 			break;
+#ifndef ACTIVEGS
 		case 0x09: /* F9 - swap paddles */
 			if(SHIFT_DOWN) {
 				g_swap_paddles = !g_swap_paddles;
@@ -1754,6 +1768,7 @@ adb_physical_key_update(int a2code, int is_up)
 			g_fullscreen = !g_fullscreen;
 			x_full_screen(g_fullscreen);
 			break;
+#endif
 		}
 
 		return;
@@ -1768,7 +1783,7 @@ adb_physical_key_update(int a2code, int is_up)
 		if(ascii > 0x30 && ascii <= 0x39) {
 			g_keypad_key_is_down[ascii - 0x30] = !is_up;
 		}
-		if(g_joystick_type == 0) {
+		if(g_joystick_type == JOYSTICK_TYPE_KEYPAD) {
 			/* If Joystick type is keypad, then do not let these */
 			/*  keypress pass on further, except for cmd/opt */
 			if(ascii == 0x30) {

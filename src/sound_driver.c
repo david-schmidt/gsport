@@ -34,7 +34,9 @@
 # include <sys/socket.h>
 # include <netinet/in.h>
 #endif
+#ifndef UNDER_CE
 #include <errno.h>
+#endif
 
 
 extern int Verbose;
@@ -165,7 +167,7 @@ child_sound_loop(int read_fd, int write_fd, word32 *shm_addr)
 
 	while(1) {
 		errno = 0;
-		ret = read(read_fd, &tmp, 4);
+		ret = read(read_fd, (char*)&tmp, 4);
 		if(ret <= 0) {
 			printf("child dying from ret: %d, errno: %d\n",
 				ret, errno);

@@ -271,4 +271,9 @@ void
 joystick_update_buttons()
 {
 }
+
+// OG
+void joystick_shut()
+{
+}
 #endif

@@ -22,7 +22,7 @@
 #include "defc.h"
 
 extern int Verbose;
-extern int g_vbl_count;
+extern word32 g_vbl_count;	// OG change int to word32
 extern int g_c036_val_speed;
 
 const byte phys_to_dos_sec[] = {
@@ -175,6 +175,24 @@ iwm_init()
 	iwm_reset();
 }
 
+// OG  Added shut function to IWM
+// Free the memory, and more important free the open handle onto the disk
+void
+iwm_shut()
+{
+	int i;
+	for(i = 0; i < 2; i++) {
+		eject_disk(&iwm.drive525[i]);
+		eject_disk(&iwm.drive35[i]);
+	}
+
+	for(i = 0; i < MAX_C7_DISKS; i++) {
+		eject_disk(&iwm.smartport[i]);
+	}
+
+	from_disk_byte_valid = 0;
+}
+
 void
 iwm_reset()
 {
@@ -216,6 +234,19 @@ draw_iwm_status(int line, char *buf)
 	if(g_iwm_motor_on) {
 		flag[apple35_sel][iwm.drive_select] = "*";
 	}
+
+	#ifdef ACTIVEGS	// OG Pass monitoring info 
+	{
+		extern	 void ki_loading(int _motorOn,int _slot,int _drive, int _curtrack);
+		int curtrack=0;
+		if (apple35_sel)
+			curtrack = iwm.drive35[iwm.drive_select].cur_qtr_track  ;
+		else
+			curtrack = iwm.drive525[iwm.drive_select].cur_qtr_track >> 2 ;
+	
+		 ki_loading(g_iwm_motor_on,apple35_sel?5:6,iwm.drive_select+1,curtrack);
+	}
+	#endif
 
 	sprintf(buf, "s6d1:%2d%s   s6d2:%2d%s   s5d1:%2d/%d%s   "
 		"s5d2:%2d/%d%s fast_disk_emul:%d,%d c036:%02x",
@@ -311,7 +342,7 @@ iwm_vbl_update(int doit_3_persec)
 	int	i;
 
 	if(iwm.motor_on && iwm.motor_off) {
-		if(iwm.motor_off_vbl_count <= g_vbl_count) {
+		if((word32)iwm.motor_off_vbl_count <= g_vbl_count) {
 			printf("Disk timer expired, drive off: %08x\n",
 				g_vbl_count);
 			iwm.motor_on = 0;
@@ -724,6 +755,12 @@ iwm_do_action35(double dcycs)
 			break;
 		case 0x0d:	/* eject disk */
 			eject_disk(dsk);
+			#ifdef ACTIVEGS	// OG : pass eject info to the Control (ActiveX specific)
+			{
+				extern void	ejectDisk(int slot,int disk);
+				ejectDisk(dsk->disk_525?6:5,dsk->drive+1);
+			}
+			#endif
 			break;
 		case 0x02:
 		case 0x07:
@@ -1612,6 +1649,7 @@ iwm_denib_track35(Disk *dsk, Trk *trk, int qtr_track, byte *outbuf)
 int
 disk_track_to_unix(Disk *dsk, int qtr_track, byte *outbuf)
 {
+	int	i;
 	Trk	*trk;
 	int	disk_525;
 
@@ -1632,8 +1670,24 @@ disk_track_to_unix(Disk *dsk, int qtr_track, byte *outbuf)
 		return -1;
 	}
 
-	if(disk_525) {
+	if(disk_525) 
+	{
+		// OG
+		// Add support for .nib file
+		if (dsk->image_type!=DSK_TYPE_NIB)
 		return iwm_denib_track525(dsk, trk, qtr_track, outbuf);
+		else
+		{
+			int	len = trk->track_len;
+			byte* trk_ptr = trk->nib_area+1;
+			byte* nib_ptr = outbuf;
+			for(i = 0; i < len; i += 2) 
+			{
+				*nib_ptr++ = *trk_ptr;
+				trk_ptr+=2;
+			}
+			return 1;
+		}
 	} else {
 		return iwm_denib_track35(dsk, trk, qtr_track, outbuf);
 	}

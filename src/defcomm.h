@@ -35,6 +35,8 @@
 
 
 #define HALT_EVENT	0x10
+#define	HALT_WANTTOQUIT	0x20	// OG : added WANTTOQUIT event
+#define	HALT_WANTTOBRK	0x40	// OG : added WANTTOBRK event
 
 #define MAX_BREAK_POINTS	0x20
 
@@ -146,7 +148,10 @@
 
 #define BORDER_WIDTH		32
 
-#define EFF_BORDER_WIDTH	(BORDER_WIDTH + (640-560))
+//#define EFF_BORDER_WIDTH	(BORDER_WIDTH + (640-560))
+
+// OG Eff_border_widht == border side in A2 mode
+#define EFF_BORDER_WIDTH	(BORDER_WIDTH + (640-560)/2)
 
 /* BASE_MARGIN_BOTTOM+MARGIN_TOP must equal 62.  There are 262 scan lines */
 /*  at 60Hz (15.7KHz line rate) and so we just make 62 border lines */

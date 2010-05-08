@@ -38,12 +38,16 @@
 
 extern int Verbose;
 
+extern int g_pause;	// OG Added Pause
+
 extern int g_warp_pointer;
 extern int g_screen_depth;
 extern int g_force_depth;
 int g_screen_mdepth = 0;
 
-extern int g_quit_sim_now;
+// OG replaced g_quit_sim_now by quitEmulator
+// extern int g_quit_sim_now;
+extern void quitEmulator();
 
 int	g_use_shmem = 1;
 int	g_has_focus = 0;
@@ -51,9 +55,9 @@ int	g_auto_repeat_on = -1;
 
 extern Kimage g_mainwin_kimage;
 
-HDC	g_main_dc;
+//HDC	g_main_dc;	// OG dc cannot be a global
 HDC	g_main_cdc;
-int	g_main_height = 0;
+//int	g_main_height = 0;
 
 int	g_win_capslock_down = 0;
 
@@ -87,6 +91,8 @@ extern char *g_status_ptrs[MAX_STATUS_LINES];
 
 int g_win_button_states = 0;
 
+// OG Added calc_ratio
+int x_calc_ratio(float& ratiox,float& ratioy);
 
 /* this table is used to search for the Windows VK_* in col 1 or 2 */
 /* flags bit 8 is or'ed into the VK, so we can distinguish keypad keys */
@@ -94,7 +100,7 @@ int g_win_button_states = 0;
 int g_a2_key_to_wsym[][3] = {
 	{ 0x35,	VK_ESCAPE,	0 },
 	{ 0x7a,	VK_F1,	0 },
-	{ 0x7b,	VK_F2,	0 },
+	{ 0x78,	VK_F2,	0 },	// OG Was 7B but F2 is defined has 0x78 in a2_key_to_ascii
 	{ 0x63,	VK_F3,	0 },
 	{ 0x76,	VK_F4,	0 },
 	{ 0x60,	VK_F5,	0 },
@@ -190,7 +196,19 @@ int g_a2_key_to_wsym[][3] = {
 
 	{ 0x36,	VK_CONTROL, VK_CONTROL+0x100 },
 	{ 0x3a,	VK_SNAPSHOT+0x100, VK_MENU+0x100 },/* Opt=prntscrn or alt-r */
+
+// OG ActiveGS map OA-CA to Win & AltKey
+#ifndef ACTIVEGS
 	{ 0x37,	VK_SCROLL, VK_MENU },		/* Command=scr_lock or alt-l */
+#else
+	{ 0x7f, VK_CANCEL, 0 },
+	{ 0x3A, VK_LWIN+0x100, VK_LWIN },
+	{ 0x37,	VK_MENU, 0 },		/* Command=alt-l */
+	{ 0x37,	VK_LMENU, 0 },		/* Command=alt-l */
+	{ 0x7F,	VK_SCROLL,0 },		/* RESET */
+	{ 0x36,	VK_LCONTROL, 0 },	// CTRL
+#endif
+
 	{ 0x31,	' ', 0 },
 	{ 0x3b,	VK_LEFT+0x100, 0 },
 	{ 0x3d,	VK_DOWN+0x100, 0 },
@@ -201,38 +219,20 @@ int g_a2_key_to_wsym[][3] = {
 	{ -1, -1, -1 }
 };
 
-int
-win_nonblock_read_stdin(int fd, char *bufptr, int len)
-{
-	HANDLE	oshandle;
-	DWORD	dwret;
-	int	ret;
-
-	errno = EAGAIN;
-	oshandle = (HANDLE)_get_osfhandle(fd);	// get stdin handle
-	dwret = WaitForSingleObject(oshandle, 1);	// wait 1msec for data
-	ret = -1;
-	if(dwret == WAIT_OBJECT_0) {
-		ret = read(fd, bufptr, len);
-	}
-	return ret;
-}
-
-void
-x_dialog_create_gsport_conf(const char *str)
-{
-}
-
-int
-x_show_alert(int is_fatal, const char *str)
-{
-	return 0;
-}
+extern int g_config_control_panel;
 
 int
 win_update_mouse(int x, int y, int button_states, int buttons_valid)
 {
 	int	buttons_changed;
+
+#ifdef ACTIVEGS
+	if (g_config_control_panel)	// OG ignore input events while in debugger
+		return 0;
+
+	buttons_valid &= 1;	// filter out middle & right button
+
+#endif
 
 	buttons_changed = ((g_win_button_states & buttons_valid) !=
 								button_states);
@@ -247,8 +247,90 @@ win_update_mouse(int x, int y, int button_states, int buttons_valid)
 	return update_mouse(x, y, button_states, buttons_valid & 7);
 }
 
+
+// OG Added asynchronous key & mouse handler
+#define ASYNCEVENT
+
+#ifndef ASYNCEVENT
+#define WIN_EVENT_MOUSE	win_event_mouse
+#define WIN_EVENT_KEY	win_event_key
+#else
+extern void add_event_mouse(int umsg,WPARAM wParam, LPARAM lParam);
+extern void add_event_key(HWND hwnd, UINT raw_vk, BOOL down, int repeat, UINT flags);
+#define WIN_EVENT_MOUSE	add_event_mouse
+#define WIN_EVENT_KEY	add_event_key
+#endif
+
+struct win32_mouse
+{
+	int	umsg;
+	int wparam;
+	int lparam;
+};
+
+struct win32_key
+{
+	UINT raw_vk;
+	BOOL down;
+	int repeat;
+	UINT flags;
+};
+
+int last_win32_mouse=0;
+int next_win32_mouse=0;
+
+int nb_win32_key=0;
+
+#define MAX_EVENT 1024
+struct win32_mouse win32_mouses[MAX_EVENT];
+struct win32_key win32_keys[MAX_EVENT];
+
+extern int g_config_control_panel;	// OG Expose g_config_control_panel
+
+// OG Push Mouse Event
+
+void add_event_mouse(int umsg,WPARAM wParam, LPARAM lParam)
+{
+	
+#ifdef ACTIVEGS
+	if (g_config_control_panel)	// OG ignore input events while in debugger
+		return ;
+#endif
+
+	win32_mouses[next_win32_mouse].umsg = umsg;
+	win32_mouses[next_win32_mouse].wparam = wParam;
+	win32_mouses[next_win32_mouse].lparam = lParam;
+	next_win32_mouse = (next_win32_mouse+1)%MAX_EVENT;
+
+//	ASSERT (next_win32_mouse==last_win32_mouse)
+}
+
+// OG Push Key Event
+
 void
-win_event_mouse(WPARAM wParam, LPARAM lParam)
+add_event_key(HWND hwnd, UINT raw_vk, BOOL down, int repeat, UINT flags)
+{
+
+#ifdef ACTIVEGS
+	if (g_config_control_panel)	// OG ignore input events while in debugger 
+		return ;
+#endif
+
+	if (nb_win32_key>=MAX_EVENT) 
+		return ;
+
+	win32_keys[nb_win32_key].raw_vk = raw_vk;
+	win32_keys[nb_win32_key].down = down;
+	win32_keys[nb_win32_key].repeat = repeat;
+	win32_keys[nb_win32_key].flags = flags;
+	
+	nb_win32_key++;
+
+}
+
+
+void
+win_event_mouse(int umsg, WPARAM wParam, LPARAM lParam)
 {
 	POINT	pt;
 	word32	flags;
@@ -256,14 +338,27 @@ win_event_mouse(WPARAM wParam, LPARAM lParam)
 	int	x, y;
 	int	motion;
 
+	x = LOWORD(lParam);
+	y = HIWORD(lParam);
+
+
+	// OG Reformat the mouse coordinates
+	float ratiox,ratioy;
+	if (!g_warp_pointer && x_calc_ratio(ratiox,ratioy))
+	{
+		x = (int)((float)(x)/ratiox);
+		y = (int)((float)(y)/ratioy);
+	}
+
 	flags = wParam;
-	x = LOWORD(lParam) - BASE_MARGIN_LEFT;
-	y = HIWORD(lParam) - BASE_MARGIN_TOP;
+	x -= BASE_MARGIN_LEFT;
+	y -= BASE_MARGIN_TOP;
 
 	buttons = (flags & 1) +
 			(((flags >> 1) & 1) << 2) +
 			(((flags >> 4) & 1) << 1);
 #if 0
+	if (umsg!=WM_MOUSEMOVE)
 	printf("Mouse at %d, %d fl: %08x, but: %d\n", x, y, flags, buttons);
 #endif
 	motion = win_update_mouse(x, y, buttons, 7);
@@ -334,18 +429,16 @@ win_event_key(HWND hwnd, UINT raw_vk, BOOL down, int repeat, UINT flags)
 void
 win_event_quit(HWND hwnd)
 {
-	g_quit_sim_now = 1;
-	my_exit(0);
+	quitEmulator();
 }
+
+extern int g_needfullrefreshfornextframe  ;
 
 void
 win_event_redraw()
 {
-	g_full_refresh_needed = -1;
-	g_a2_screen_buffer_changed = -1;
-	g_status_refresh_needed = 1;
-	g_border_sides_refresh_needed = 1;
-	g_border_special_refresh_needed = 1;
+//	outputInfo("win_event_redraw()\n");
+	g_needfullrefreshfornextframe = 1;
 }
 
 LRESULT CALLBACK
@@ -364,7 +457,7 @@ LPTSTR lpszFile;
 	case WM_MBUTTONUP:
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
-		win_event_mouse(wParam, lParam);
+		win_event_mouse(umsg, wParam, lParam);
 		return 0;
 	case WM_PAINT:
 		win_event_redraw();
@@ -510,10 +603,33 @@ show_xcolor_array()
 }
 
 
-void
-xdriver_end()
+// OG Add function to clear all get_images loaded (dev dependent)
+void x_release_kimage(Kimage *kimage_ptr)
 {
-	printf("xdriver_end\n");
+	if ((int)kimage_ptr->dev_handle != -1)
+	{
+		DeleteObject(kimage_ptr->dev_handle);
+		kimage_ptr->dev_handle = (void*)-1;
+	}
+	else
+	if (kimage_ptr->data_ptr)
+	{
+		free(kimage_ptr->data_ptr);
+		kimage_ptr->data_ptr = NULL;
+	}
+}
+
+// OG  Free video global memory 
+void
+xdriver_end()	// Should be renamed to dev_video_shut()  ???
+{
+
+	x_release_kimage(&g_mainwin_kimage);
+		
+	GlobalFree(g_bmapinfo_ptr); // allocated in dev_video_init
+	g_bmapinfo_ptr = 0;
+
+	printf("win32 video driver end\n");
 }
 
 

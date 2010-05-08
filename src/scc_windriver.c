@@ -24,6 +24,10 @@
 #include "defc.h"
 #include "scc.h"
 
+#ifdef UNDER_CE
+#define vsnprintf _vsnprintf
+#endif
+
 extern Scc scc_stat[2];
 extern word32 g_c025_val;
 
@@ -32,7 +36,7 @@ int
 scc_serial_win_init(int port)
 {
 	COMMTIMEOUTS commtimeouts;
-	char	str_buf[8];
+	TCHAR	str_buf[8];
 	Scc	*scc_ptr;
 	HANDLE	host_handle;
 	int	state;
@@ -42,8 +46,11 @@ scc_serial_win_init(int port)
 
 	scc_ptr->state = 0;		/* mark as failed */
 
+#ifdef UNICODE
+	wsprintf(&str_buf[0], _T("COM%d"), port+1);
+#else
 	sprintf(&str_buf[0], "COM%d", port+1);
-
+#endif
 	host_handle = CreateFile(&str_buf[0], GENERIC_READ | GENERIC_WRITE,
 			0, NULL, OPEN_EXISTING, 0, NULL);
 
@@ -88,7 +95,7 @@ scc_serial_win_change_params(int port)
 	scc_ptr = &(scc_stat[port]);
 
 	host_handle = scc_ptr->host_handle;
-	dcbptr = scc_ptr->host_handle2;
+	dcbptr = (DCB*)scc_ptr->host_handle2;	// OG Added cast
 	if(host_handle == 0) {
 		return;
 	}
@@ -166,7 +173,7 @@ scc_serial_win_fill_readbuf(int port, int space_left, double dcycs)
 	Scc	*scc_ptr;
 	HANDLE	host_handle;
 	DWORD	bytes_read;
-	int	i;
+	DWORD	i;
 	int	ret;
 
 	scc_ptr = &(scc_stat[port]);

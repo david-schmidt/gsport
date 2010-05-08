@@ -49,6 +49,7 @@ void do_gen_test(int got_num, int base_seed);
 
 /* engine.s and engine_c.c */
 void fixed_memory_ptrs_init();
+void fixed_memory_ptrs_shut();	// OG Added shut to smoothly free up allocated memory
 word32 get_itimer(void);
 
 word32 get_memory_c(word32 addr, int cycs);
@@ -91,6 +92,7 @@ void joystick_update_buttons(void);
 
 /* adb.c */
 void adb_init(void);
+void adb_shut(); // OG Added adb_shut()
 void adb_reset(void);
 void adb_log(word32 addr, int val);
 void show_adb_log(void);
@@ -294,6 +296,7 @@ void scc_socket_do_answer(int port, double dcycs);
 void iwm_init_drive(Disk *dsk, int smartport, int drive, int disk_525);
 void disk_set_num_tracks(Disk *dsk, int num_tracks);
 void iwm_init(void);
+void iwm_shut(void);	//OG
 void iwm_reset(void);
 void draw_iwm_status(int line, char *buf);
 void iwm_flush_disk_to_unix(Disk *dsk);
@@ -334,6 +337,7 @@ void iwm_show_a_track(Trk *trk);
 
 
 /* moremem.c */
+void moremem_init(); // OG Added moremem_init()
 void fixup_brks(void);
 void fixup_hires_on(void);
 void fixup_bank0_2000_4000(void);
@@ -392,8 +396,10 @@ void do_reset(void);
 void check_engine_asm_defines(void);
 byte *memalloc_align(int size, int skip_amt, void **alloc_ptr);
 void memory_ptr_init(void);
+void memory_ptr_shut(void);	// OG Added shut
 int gsportmain(int argc, char **argv);
 void load_roms_init_memory(void);
+void load_roms_shut_memory(void);	// OG Added shut
 void gsport_expand_path(char *out_ptr, const char *in_ptr, int maxlen);
 void setup_gsport_file(char *outname, int maxlen, int ok_if_missing, int can_create_file, const char **name_ptr);
 void initialize_events(void);

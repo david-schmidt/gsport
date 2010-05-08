@@ -146,6 +146,109 @@ Emustate_word32list g_emustate_word32list[] = {
 	halt_printf("UNIMP WRITE to addr %08x, val: %04x\n", loc, val);	\
 	return;
 
+
+//#ifdef _WINDOWS
+// OG Added Transwarp ROM  
+#define TRANSWARP
+int transwarp_low_val = 0;
+#ifdef _WIN32 
+__declspec(align(256))
+#endif
+unsigned char transwarpcode[][32]
+#ifndef _WIN32
+__attribute__ ((aligned(256)))
+#endif
+={
+{
+/*0xBCFF00*/ 'T','W','G','S',0,0,0,0,0,0,0,0,0,0,0,0,
+/*0xBCFF10*/ 0x5C,0x40,0xFF,0xBC,	//	JMP GetMaxSpeed   
+/*0xBCFF14*/ 0x5C,0x60,0xFF,0xBC,	//	JMP GetNumISpeed   
+/*0xBCFF18*/ 0x6B,0x00,0x00,0x00,	//	???
+/*0xBCFF1C*/ 0x6B,0x00,0x00,0x00	//	???
+},
+{
+/*0xBCFF20*/ 0x5C,0x80,0xFF,0xBC,	//	JMP GetCurSpeed
+/*0xBCFF24*/ 0x5C,0xA0,0xFF,0xBC,	//	JMP SetCurSpeed
+/*0xBCFF28*/ 0x5C,0xC0,0xFF,0xBC,	//	JMP GetCurISpeed
+/*0xBCFF2C*/ 0x5C,0xE0,0xFF,0xBC,	//	JMP SetCurISpeed
+/*0xBCFF30*/ 0x6B,0x00,0x00,0x00,	//	???
+/*0xBCFF34*/ 0x6B,0x00,0x00,0x00,	//	???
+/*0xBCFF38*/ 0x6B,0x00,0x00,0x00,	//	???
+/*0xBCFF3C*/ 0x6B,0x00,0x00,0x00	//	GetTWConfig 
+},
+{
+/* 0xBCFF40*/	// GetMaxSpeed
+#define ZIP_SPEED 8000
+
+0xA9, ZIP_SPEED & 0xFF, (ZIP_SPEED >> 8) &0xFF,	// LDA 0x1F40		// Max Speed = 8.0Mhz
+0x6B,			// RTL
+0x00,0x00,0x00,0x00,		//4
+0x00,0x00,0x00,0x00,		//8
+0x6B,0x00,0x00,0x00,		//C		Space Shark calls this address ???
+},
+{
+/* 0xBCFF60*/	//GetNumISpeed
+0xA9,0x02,0x00,	// LDA 0x0002		// 0=slow, 1=normal, 2=warp
+0x6B,			// RTL
+},
+{
+/* 0xBCFF80*/ //GetCurSpeed
+0xAF, 0x6A, 0xC0, 0x00,		// LDA 0xC06A (/6B)
+0x6B,		// RTL
+},
+{
+/* 0xBCFFA0*/ //SetCurSpeed
+0x8F, 0x6A, 0xC0, 0x00,		// STA 0xC06A (/6B)
+0x6B,		// RTL
+},
+{
+/* 0xBCFFC0*/ //GetCurISpeed
+0x48,						// PHA
+0xAF, 0x6C, 0xC0, 0x00,		// LDA 0xC06C (/6D)
+0xAA,						// TAX
+0x68,						// PLA
+0x6B,		// RTL
+},
+{
+/* 0xBCFFE0*/ //SetCurISpeed
+0x48,						// PHA
+0x8A,						// TXA
+0x8F, 0x6C, 0xC0, 0x00,		// STA 0xC06C (/6D)
+0x68,						// PLA
+0x6B,		// RTL
+}
+}
+
+;
+
+// OG Added moremem_init()
+void moremem_init()
+{
+	g_em_emubyte_cnt = 0;
+	g_paddle_buttons = 0;
+	g_irq_pending = 0;
+
+	g_c023_val = 0;
+	g_c029_val_some = 0x41;
+	g_c02b_val = 0x08;
+	g_c02d_int_crom = 0;
+	g_c031_disk35 = 0;
+	g_c034_val = 0;
+	g_c035_shadow_reg = 0x08;
+	g_c036_val_speed = 0x80;
+	g_c03ef_doc_ptr = 0;
+	g_c041_val = 0;		/* C041_EN_25SEC_INTS, C041_EN_MOVE_INTS */
+	g_c046_val = 0;
+	g_c05x_annuncs = 0;
+	g_c068_statereg = 0;
+	g_c08x_wrdefram = 0;
+	g_zipgs_unlock = 0;
+	g_zipgs_reg_c059 = 0x5f;
+	g_zipgs_reg_c05a = 0x0f;
+	g_zipgs_reg_c05b = 0x40;
+	g_zipgs_reg_c05c = 0x00;
+}
+
 void
 fixup_brks()
 {
@@ -689,55 +792,55 @@ fixup_rdrom()
 void
 set_statereg(double dcycs, int val)
 {
-	int	xor;
+	int	_xor;		// OG renamed xor to _xor
 
-	xor = val ^ g_c068_statereg;
+	_xor = val ^ g_c068_statereg;
 	g_c068_statereg = val;
-	if(xor == 0) {
+	if(_xor == 0) {
 		return;
 	}
 
-	if(xor & 0x80) {
+	if(_xor & 0x80) {
 		/* altzp */
 		fixup_altzp();
 	}
-	if(xor & 0x40) {
+	if(_xor & 0x40) {
 		/* page2 */
 		g_cur_a2_stat = (g_cur_a2_stat & ~ALL_STAT_PAGE2) |
 						(val & ALL_STAT_PAGE2);
 		fixup_page2(dcycs);
 	}
 
-	if(xor & 0x20) {
+	if(_xor & 0x20) {
 		/* RAMRD */
 		fixup_ramrd();
 	}
 
-	if(xor & 0x10) {
+	if(_xor & 0x10) {
 		/* RAMWRT */
 		fixup_ramwrt();
 	}
 
-	if(xor & 0x08) {
+	if(_xor & 0x08) {
 		/* RDROM */
 		fixup_rdrom();
 	}
 
-	if(xor & 0x04) {
+	if(_xor & 0x04) {
 		/* LCBANK2 */
 		fixup_lcbank2();
 	}
 
-	if(xor & 0x02) {
+	if(_xor & 0x02) {
 		/* ROMBANK */
 		halt_printf("Just set rombank = %d\n", ROMB);
 	}
 
-	if(xor & 0x01) {
+	if(_xor & 0x01) {
 		fixup_intcx();
 	}
 
-	if(xor) {
+	if(_xor) {
 		fixup_brks();
 	}
 }
@@ -907,42 +1010,42 @@ fixup_shadow_iolc()
 void
 update_shadow_reg(int val)
 {
-	int	xor;
+	int	_xor;
 
 	if(g_c035_shadow_reg == val) {
 		return;
 	}
 
-	xor = g_c035_shadow_reg ^ val;
+	_xor = g_c035_shadow_reg ^ val;
 	g_c035_shadow_reg = val;
 
-	if(xor & 8) {
+	if(_xor & 8) {
 		fixup_shadow_hires1();
 		fixup_shadow_hires2();
 		fixup_shadow_shr();
-		xor = xor & (~0x16);
+		_xor = _xor & (~0x16);
 	}
-	if(xor & 0x10) {
+	if(_xor & 0x10) {
 		fixup_shadow_hires1();
 		fixup_shadow_hires2();
-		xor = xor & (~0x6);
+		_xor = _xor & (~0x6);
 	}
-	if(xor & 2) {
+	if(_xor & 2) {
 		fixup_shadow_hires1();
 	}
-	if(xor & 4) {
+	if(_xor & 4) {
 		fixup_shadow_hires2();
 	}
-	if(xor & 1) {
+	if(_xor & 1) {
 		fixup_shadow_txt1();
 	}
-	if((xor & 0x20) && ((g_rom_version >= 3) || g_user_page2_shadow)) {
+	if((_xor & 0x20) && ((g_rom_version >= 3) || g_user_page2_shadow)) {
 		fixup_shadow_txt2();
 	}
-	if(xor & 0x40) {
+	if(_xor & 0x40) {
 		fixup_shadow_iolc();
 	}
-	if(xor) {
+	if(_xor) {
 		fixup_brks();
 	}
 }
@@ -1033,6 +1136,10 @@ setup_pageinfo()
 	fixup_shadow_shr();
 	fixup_shadow_iolc();
 	fixup_brks();
+
+#ifdef TRANSWARP	// OG adding Transwarp code
+	SET_PAGE_INFO_RD(0xBCFF,transwarpcode);
+#endif
 }
 
 void
@@ -1417,9 +1524,30 @@ io_read(word32 loc, double *cyc_ptr)
 		case 0x69: /* 0xc069 */
 			/* Reserved reg, return 0 */
 			return 0;
+		// OG Transwarp Read Interface
+		#ifdef TRANSWARP
+				case 0x6a: /* 0xc06a */
+				{
+					extern double g_zip_pmhz;
+					return (int)(g_zip_pmhz*1000)&0xFF;
+				}
+				case 0x6b: /* 0xc06b */
+				{
+					extern double g_zip_pmhz;
+					return (((int)(g_zip_pmhz*1000))>>8)&0xFF;
+				}
+				case 0x6c: /* 0xc06c */
+				{
+					extern double g_zip_pmhz;
+					if (g_zip_pmhz==1.0)		return 0;	// slow
+					else if (g_zip_pmhz>=2.6)	return 2;	// warp
+					else						return 1;	// zip
+				}
+		#else
 		case 0x6a: /* 0xc06a */
 		case 0x6b: /* 0xc06b */
 		case 0x6c: /* 0xc06c */
+		#endif
 		case 0x6d: /* 0xc06d */
 		case 0x6e: /* 0xc06e */
 		case 0x6f: /* 0xc06f */
@@ -1580,12 +1708,11 @@ io_read(word32 loc, double *cyc_ptr)
 		}
 		UNIMPL_READ;
 	case 0xf:
-		if((loc & 0xfff) == 0xfff) {
-			 return g_rom_fc_ff_ptr[0x3cfff];
-		}
-
 		if(INTCX || ((g_c02d_int_crom & (1 << 3)) == 0)) {
 			return(g_rom_fc_ff_ptr[0x3c000 + (loc & 0xfff)]);
+		}
+		if((loc & 0xfff) == 0xfff) {
+			return g_rom_fc_ff_ptr[0x3cfff];
 		}
 		UNIMPL_READ;
 	}
@@ -2088,9 +2215,53 @@ io_write(word32 loc, int val, double *cyc_ptr)
 		case 0x69: /* 0xc069 */
 			/* just ignore, someone writing c068 with m=0 */
 			return;
+
+
+#ifdef TRANSWARP
+	// OG writeTranswarp pseudo-register
+		case 0x6a: /* 0xc06a */
+					transwarp_low_val = val;
+					return ;
+		case 0x6b: /* 0xc06b */
+					val = (val<<8) + transwarp_low_val;
+					if ((val==2600) || (val==0x0028)) // Bug for demo ...
+					{
+						printf("Disabling Transwarp!\n");
+						g_zipgs_reg_c05b |= 0x10;	// disable
+						set_halt(HALT_EVENT);
+					}
+					else if (val==8000)
+					{
+						printf("Enabling Transwarp!\n");
+						g_zipgs_reg_c05b &= ~0x10;	// enable
+						set_halt(HALT_EVENT);
+					}
+					else
+						printf("unknown twgs speed:%d\n",val);
+					return;
+		case 0x6c: /* 0xc06c */
+					if (val==0)
+						; // set slow ?
+					else if (val==1)
+					{
+						// disable zip
+						g_zipgs_reg_c05b |= 0x10;	// disable
+						set_halt(HALT_EVENT);
+					}
+					else if (val==2)
+					{
+						// enable zip
+						g_zipgs_reg_c05b &= ~0x10;	// enable
+						set_halt(HALT_EVENT);
+					}
+					else
+						printf("unknown twgs index:%d\n",val);
+					return ;
+#else
 		case 0x6a: /* 0xc06a */
 		case 0x6b: /* 0xc06b */
 		case 0x6c: /* 0xc06c */
+#endif
 		case 0x6d: /* 0xc06d */
 		case 0x6e: /* 0xc06e */
 		case 0x6f: /* 0xc06f */
@@ -2158,8 +2329,7 @@ io_write(word32 loc, int val, double *cyc_ptr)
 			return;
 
 		/* 0xc090 - 0xc09f */
-		case 0x90: 
-		case 0x91: case 0x92: case 0x93:
+		case 0x90: case 0x91: case 0x92: case 0x93:
 		case 0x94: case 0x95: case 0x96: case 0x97:
 		case 0x98: case 0x99: case 0x9a: case 0x9b:
 		case 0x9c: case 0x9d: case 0x9e: case 0x9f:

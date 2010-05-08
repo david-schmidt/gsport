@@ -29,7 +29,7 @@
 #endif
 
 extern int Verbose;
-extern int g_vbl_count;
+extern word32 g_vbl_count;	// OG change int to word32
 extern int g_rom_version;
 extern int g_config_gsport_update_needed;
 
@@ -106,7 +106,7 @@ micro_sleep(double dtime)
 #endif
 
 #ifdef _WIN32
-	Sleep(dtime * 1000);
+	Sleep((DWORD)(dtime * 1000));
 #else
 	Timer.tv_sec = 0;
 	Timer.tv_usec = (dtime * 1000000.0);
@@ -139,14 +139,13 @@ clk_bram_set(int bram_num, int offset, int val)
 	g_bram[bram_num][offset] = val;
 }
 
+
+extern void x_clk_setup_bram_version();
+
 void
 clk_setup_bram_version()
 {
-	if(g_rom_version < 3) {
-		g_bram_ptr = (&g_bram[0][0]);	// ROM 01
-	} else {
-		g_bram_ptr = (&g_bram[1][0]);	// ROM 03
-	}
+	x_clk_setup_bram_version();
 }
 
 void
@@ -173,14 +172,29 @@ update_cur_time()
 	time_t	cur_time;
 	unsigned int secs, secs2;
 
+
+#ifdef UNDER_CE	// OG Not supported on WIndows CE
+	/*
+	SYSTEMTIME stime;
+	FILETIME ftime;
+	GetLocalTime(&stime);
+	SystemTimeToFileTime(&stime,&ftime);
+	cur_time = ftime.dwLowDateTime;
+	*/
+	cur_time = time(0);
+
+	secs=0;
+	secs2=0;
+
+#else
 	cur_time = time(0);
 
 	/* Figure out the timezone (effectively) by diffing two times. */
 	/* this is probably not right for a few hours around daylight savings*/
 	/*  time transition */
-	secs2 = mktime(gmtime(&cur_time));
+	secs2 = (unsigned int)mktime(gmtime(&cur_time));
 	tm_ptr = localtime(&cur_time);
-	secs = mktime(tm_ptr);
+	secs = (unsigned int)mktime(tm_ptr);
 
 #ifdef MAC
 	/* Mac OS X's mktime function modifies the tm_ptr passed in for */
@@ -195,7 +209,7 @@ update_cur_time()
 		secs += 3600;
 	}
 #endif
-
+#endif
 	/* add in secs to make date based on Apple Jan 1, 1904 instead of */
 	/*   Unix's Jan 1, 1970 */
 	/*  So add in 66 years and 17 leap year days (1904 is a leap year) */
