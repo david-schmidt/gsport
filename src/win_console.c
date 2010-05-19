@@ -34,7 +34,7 @@ extern void gsportshut();
 extern HWND g_hwnd_main;
 
 extern char *g_status_ptrs[MAX_STATUS_LINES];
-
+extern int  g_win_status_debug;
 
 int
 win_nonblock_read_stdin(int fd, char *bufptr, int len)
@@ -158,7 +158,8 @@ x_redraw_status_lines()
 
 	height = 16;
 	margin = 0;
-
+	if (g_win_status_debug)
+	{
 	HDC localdc = GetDC(g_hwnd_main);	// OG Use on the fly DC
 	oldtextcolor = SetTextColor(localdc, 0);
 	oldbkcolor = SetBkColor(localdc, 0xffffff);
@@ -173,6 +174,7 @@ x_redraw_status_lines()
 	SetTextColor(localdc, oldtextcolor);
 	SetBkColor(localdc, oldbkcolor);
 	ReleaseDC(g_hwnd_main,localdc);
+	}
 }
 
 int x_calc_ratio(float ratiox,float ratioy)

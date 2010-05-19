@@ -90,6 +90,14 @@ int g_win_button_states = 0;
 // OG Added calc_ratio
 int x_calc_ratio(float ratiox, float ratioy);
 
+// KEGS32 specific customisations
+HWND    g_win_toolbar=NULL;
+HWND    g_win_status=NULL;
+int     g_win_status_debug = 1;
+RECT	g_main_window_saved_rect;
+HMENU	g_main_window_menu_saved;
+int	g_win_fullscreen_state = 0;
+
 /* this table is used to search for the Windows VK_* in col 1 or 2 */
 /* flags bit 8 is or'ed into the VK, so we can distinguish keypad keys */
 /* regardless of numlock */
@@ -819,7 +827,89 @@ x_hide_pointer(int do_hide)
 }
 
 void
+init_window(HWND hwnd,BOOL initFlag) {
+        RECT rect;
+        RECT wrect;
+        int  adjx,adjy;
+        GetClientRect(hwnd,&rect);
+        GetWindowRect(hwnd,&wrect);
+        adjx=(wrect.right-wrect.left)-(rect.right-rect.left);
+        adjy=(wrect.bottom-wrect.top)-(rect.bottom-rect.top);
+
+        int win_height= X_A2_WINDOW_HEIGHT;
+
+        if (g_win_status_debug) {
+                win_height+=(MAX_STATUS_LINES * 16) + 32;
+        } 
+
+        if (initFlag) {
+                SetWindowPos(hwnd,NULL,
+                             g_main_window_saved_rect.left,
+			     g_main_window_saved_rect.top,
+                             X_A2_WINDOW_WIDTH+adjx,
+                             win_height+adjy,
+                             SWP_NOACTIVATE | SWP_NOZORDER);
+        } else {
+                SetWindowPos(hwnd,HWND_NOTOPMOST,
+                             g_main_window_saved_rect.left,
+			     g_main_window_saved_rect.top,
+                             X_A2_WINDOW_WIDTH+adjx,
+                             win_height+adjy,
+                             SWP_SHOWWINDOW);
+        }
+}
+
+void
 x_full_screen(int do_full)
 {
+    	DEVMODE dmScreenSettings;
+    	int style;
+	g_win_status_debug = 1 - do_full;
+	if (do_full && !g_win_fullscreen_state) {
+		GetWindowRect(g_hwnd_main,&g_main_window_saved_rect);
+		dmScreenSettings.dmSize=sizeof(dmScreenSettings);
+		dmScreenSettings.dmPelsWidth	= 800;
+		dmScreenSettings.dmPelsHeight	= 600;
+		dmScreenSettings.dmBitsPerPel	= 24;	
+		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|
+ 	                                  DM_PELSHEIGHT;
+			
+           	if (ChangeDisplaySettings(&dmScreenSettings, 2) 
+			!=DISP_CHANGE_SUCCESSFUL) {
+			// If 24-bit palette does not work, try 32-bit            
+			dmScreenSettings.dmBitsPerPel	= 32;	
+           		if (ChangeDisplaySettings(&dmScreenSettings, 2)) {
+				printf (
+				"-- Unable to switch to fullscreen mode\n");
+	                    	printf (
+				"-- No 24-bit or 32-bit mode for fullscreen\n");
+                    		dmScreenSettings.dmBitsPerPel=-1;
+			}
+		}
+
+		if (dmScreenSettings.dmBitsPerPel >0) {
+			g_win_fullscreen_state=!g_win_fullscreen_state;
+            		GetWindowRect(g_hwnd_main,&g_main_window_saved_rect);
+                	ChangeDisplaySettings(&dmScreenSettings, 4); 
+			style=GetWindowLong(g_hwnd_main,GWL_STYLE);
+		        style &= ~WS_CAPTION;
+			SetWindowLong(g_hwnd_main,GWL_STYLE,style);
+			SetMenu(g_hwnd_main,NULL);
+            		SetWindowPos(g_hwnd_main,HWND_TOPMOST,0,0,
+            	             GetSystemMetrics(SM_CXSCREEN),
+            	             GetSystemMetrics(SM_CYSCREEN),
+            	             SWP_SHOWWINDOW);
+
+            	}
+	} else {
+		if (g_win_fullscreen_state) {
+			ChangeDisplaySettings(NULL,0);
+            		style=GetWindowLong(g_hwnd_main,GWL_STYLE);
+            		style |= WS_CAPTION;
+            		SetWindowLong(g_hwnd_main,GWL_STYLE,style);
+			init_window(g_hwnd_main,FALSE);
+			g_win_fullscreen_state=!g_win_fullscreen_state;
+		}
+	}
 	return;
 }
