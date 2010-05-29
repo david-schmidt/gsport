@@ -3391,6 +3391,7 @@ video_push_kimages()
 	int	left_pix, right_pix;
 	int	left, right;
 	int	line_div8;
+	float ratiox = 0,ratioy = 0;
 
 	if(g_border_sides_refresh_needed) {
 		g_border_sides_refresh_needed = 0;
@@ -3406,8 +3407,6 @@ video_push_kimages()
 	}
 
 	GET_ITIMER(start_time);
-
-	float ratiox,ratioy;
 
 	if (x_calc_ratio(ratiox,ratioy))
 	{

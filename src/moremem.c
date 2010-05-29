@@ -155,7 +155,7 @@ int transwarp_low_val = 0;
 __declspec(align(256))
 #endif
 unsigned char transwarpcode[][32]
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(__OS2__)
 __attribute__ ((aligned(256)))
 #endif
 ={

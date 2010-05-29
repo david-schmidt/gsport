@@ -731,6 +731,11 @@ void
 do_reset()
 {
 
+	// OG Cleared remaining IRQS on RESET
+	extern int	g_irq_pending;
+	extern	int g_scan_int_events ;
+	extern int g_c023_val;
+
 	g_c068_statereg = 0x08 + 0x04 + 0x01; /* rdrom, lcbank2, intcx */
 	g_c035_shadow_reg = 0;
 
@@ -763,13 +768,8 @@ do_reset()
 
 	g_stepping = 0;
 
-	// OG Cleared remaining IRQS on RESET
-	extern int	g_irq_pending;
-	extern	int g_scan_int_events ;
-	extern int g_c023_val;
-
-		if (g_irq_pending) 
-			halt_printf("*** irq remainings...\n");
+	if (g_irq_pending) 
+		halt_printf("*** irq remainings...\n");
 
 }
 
@@ -900,6 +900,10 @@ int
 gsportmain(int argc, char **argv)
 {
 	int	diff;
+	int	skip_amt;
+	int	tmp1;
+	int	i;
+	char	*final_arg = 0;
 
 	// OG Restoring globals
 	sim65816_initglobals();
@@ -907,11 +911,6 @@ gsportmain(int argc, char **argv)
 
 //OG Disabling argument parsing
 #ifndef ACTIVEGS
-
-	int	skip_amt;
-	int	tmp1;
-	int	i;
-	char	*final_arg = 0;
 
 	/* parse args */
 	for(i = 1; i < argc; i++) {
