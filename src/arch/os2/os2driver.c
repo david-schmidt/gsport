@@ -428,7 +428,7 @@ x_push_kimage(Kimage *kimage_ptr, int destx, int desty, int srcx, int srcy,
 {
 	RECTL  rc;
 	POINTL pt[4];
-	HBITMAP hbmOld;
+	HBITMAP hbmOld, hbmNew;
 
 	char *szString = "Hello, world!\0";
 
@@ -442,9 +442,21 @@ x_push_kimage(Kimage *kimage_ptr, int destx, int desty, int srcx, int srcy,
 	pt[3].x = srcx+width;
 	pt[3].y = srcy+height;
 
+if (width == 560)
+{
+	/* Paint a known-good bitmap until we can figure out why images aren't showing up */
+	hbmNew = GpiLoadBitmap(g_hps_memory,NULLHANDLE,ID_BITMAP,560,400);
+	hbmOld = GpiSetBitmap(g_hps_memory, hbmNew);
+	GpiBitBlt(g_hps_screen,g_hps_memory,4L,pt,ROP_SRCCOPY, BBO_IGNORE);
+	GpiSetBitmap(g_hps_memory, hbmOld);
+	GpiDeleteBitmap(hbmNew);
+}
+else
+{
 	hbmOld = GpiSetBitmap(g_hps_memory, (HBITMAP)kimage_ptr->dev_handle);
 	GpiBitBlt(g_hps_screen,g_hps_memory,4L,pt,ROP_SRCCOPY, BBO_IGNORE);
 	GpiSetBitmap(g_hps_memory, hbmOld);
+}
 
 }
 
@@ -528,4 +540,3 @@ os2_abort(HWND g_hwnd_frame, HWND g_hwnd_client)
 {
   exit(-1);
 }
-

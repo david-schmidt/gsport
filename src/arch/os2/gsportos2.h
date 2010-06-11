@@ -40,3 +40,5 @@ VOID os2_abort(HWND hwndFrame, HWND hwndClient);
 #define IDS_1       263
 #define IDS_2       264
 #define IDS_3       265
+
+#define ID_BITMAP   266 /* For testing backgrounds - can be removed once video works */

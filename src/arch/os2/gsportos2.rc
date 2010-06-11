@@ -24,6 +24,8 @@
 
 ICON    ID_WINDOW gsportos2.ico
 
+BITMAP  ID_BITMAP gsportos2.bmp
+
 MENU    ID_WINDOW PRELOAD
 BEGIN
   SUBMENU "~Options", ID_OPTIONS
