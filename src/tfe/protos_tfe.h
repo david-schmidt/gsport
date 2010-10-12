@@ -20,7 +20,10 @@
 */
 
 /*tfe.c*/
-int tfe_enabled;
+#ifndef _PROTOS_TFE_H
+#define _PROTOS_TFE_H
+
+extern int tfe_enabled;
 
 void tfe_init(void);
 int tfe_resources_init(void);
@@ -93,3 +96,5 @@ int tfe_should_accept(unsigned char *buffer, int length, int *phashed, int *phas
 int tfe_arch_enumadapter_open(void);
 int tfe_arch_enumadapter(char **ppname, char **ppdescription);
 int tfe_arch_enumadapter_close(void);
+
+#endif

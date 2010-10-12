@@ -38,7 +38,12 @@
 #define lib_pcap_h
 
 #include <sys/types.h>
+
+#if defined _MSC_VER
+# include <time.h>
+#else
 #include <sys/time.h>
+#endif
 
 /* RGJ Changed it to "bpf.h" for AppleWin */
 #include "bpf.h"

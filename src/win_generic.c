@@ -471,7 +471,7 @@ LPTSTR lpszFile;
 		numDraggedFiles = DragQueryFile((HDROP)wParam, 0xFFFFFFFF, NULL, 0);
 		for (i = 0; i < numDraggedFiles; i++) {
 			szFilename = DragQueryFile((HDROP)wParam, i, NULL, 0);
-			lpszFile = malloc(szFilename + 1);
+			lpszFile = (LPTSTR)malloc(szFilename + 1);
 			szFilename = DragQueryFile((HDROP)wParam, i, lpszFile, szFilename + 1);
 			cfg_inspect_maybe_insert_file(lpszFile);
 			free(lpszFile);

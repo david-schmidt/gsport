@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{0B4E527A-DB50-4B5F-9B08-303ABAF7356A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>gsport</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;GSPORT_LITTLE_ENDIAN;HAVE_TFE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ErrorReporting>Prompt</ErrorReporting>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Winmm.lib;Ws2_32.lib;$(SolutionDir)$(Configuration)\tfe.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="16inst_c.h" />
+    <ClInclude Include="8inst_c.h" />
+    <ClInclude Include="adb.h" />
+    <ClInclude Include="config.h" />
+    <ClInclude Include="defc.h" />
+    <ClInclude Include="defcomm.h" />
+    <ClInclude Include="defs.h" />
+    <ClInclude Include="defs_instr.h" />
+    <ClInclude Include="disas.h" />
+    <ClInclude Include="gsportfont.h" />
+    <ClInclude Include="instable.h" />
+    <ClInclude Include="iwm.h" />
+    <ClInclude Include="iwm_35_525.h" />
+    <ClInclude Include="op_routs.h" />
+    <ClInclude Include="printer.h" />
+    <ClInclude Include="printer_charmaps.h" />
+    <ClInclude Include="prodos.h" />
+    <ClInclude Include="prodos_protos.h" />
+    <ClInclude Include="protos.h" />
+    <ClInclude Include="protos_engine_c.h" />
+    <ClInclude Include="protos_macdriver.h" />
+    <ClInclude Include="protos_macsnd_driver.h" />
+    <ClInclude Include="protos_windriver.h" />
+    <ClInclude Include="protos_xdriver.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="scc.h" />
+    <ClInclude Include="size_c.h" />
+    <ClInclude Include="size_tab.h" />
+    <ClInclude Include="sound.h" />
+    <ClInclude Include="superhires.h" />
+    <ClInclude Include="support.h" />
+    <ClInclude Include="tfe\protos_tfe.h" />
+    <ClInclude Include="winresource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="adb.c" />
+    <ClCompile Include="clock.c" />
+    <ClCompile Include="compile_time.c" />
+    <ClCompile Include="config.c" />
+    <ClCompile Include="dis.c" />
+    <ClCompile Include="engine_c.c" />
+    <ClCompile Include="iwm.c" />
+    <ClCompile Include="joystick_driver.c" />
+    <ClCompile Include="moremem.c" />
+    <ClCompile Include="paddles.c" />
+    <ClCompile Include="scc.c" />
+    <ClCompile Include="scc_socket_driver.c" />
+    <ClCompile Include="scc_windriver.c" />
+    <ClCompile Include="sim65816.c" />
+    <ClCompile Include="smartport.c" />
+    <ClCompile Include="sound.c" />
+    <ClCompile Include="sound_driver.c" />
+    <ClCompile Include="video.c" />
+    <ClCompile Include="win32snd_driver.c" />
+    <ClCompile Include="win_console.c" />
+    <ClCompile Include="win_generic.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

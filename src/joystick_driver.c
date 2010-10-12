@@ -20,15 +20,16 @@
 */
 
 #include "defc.h"
-#include <sys/time.h>
 
 #ifdef __linux__
 # include <linux/joystick.h>
+# include <sys/time.h>
 #endif
 
 #ifdef _WIN32
 # include <windows.h>
 # include <mmsystem.h>
+# include <time.h>
 #endif
 
 extern int g_joystick_native_type1;		/* in paddles.c */

@@ -291,7 +291,7 @@ scc_regen_clocks(int port)
 	pos = 0;
 	baud_entries = sizeof(g_baud_table)/sizeof(g_baud_table[0]);
 	for(i = 0; i < baud_entries; i++) {
-		diff = abs(g_baud_table[i] - baud);
+		diff = abs((int)(g_baud_table[i] - baud));
 		if(diff < max_diff) {
 			pos = i;
 			max_diff = diff;

@@ -25,7 +25,7 @@
 #include "tfe/protos_tfe.h" 
 #endif
 
-extern char g_gsport_version_str[];
+extern char const g_gsport_version_str[];
 
 extern byte *g_memory_ptr;
 extern byte *g_dummy_memory1_ptr;

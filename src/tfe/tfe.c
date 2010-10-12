@@ -479,7 +479,7 @@ int tfe_activate_i(void)
 #endif
 
     /* allocate memory for visible IO register */
-    tfe = lib_malloc( TFE_COUNT_IO_REGISTER );
+    tfe = (byte *)lib_malloc( TFE_COUNT_IO_REGISTER );
     if (tfe==NULL)
     {
 #ifdef TFE_DEBUG_INIT
@@ -490,7 +490,7 @@ int tfe_activate_i(void)
     }
 
     /* allocate memory for PacketPage register */
-    tfe_packetpage = lib_malloc( MAX_PACKETPAGE_ARRAY );
+    tfe_packetpage = (byte *)lib_malloc( MAX_PACKETPAGE_ARRAY );
     if (tfe_packetpage==NULL)
     {
 #ifdef TFE_DEBUG_INIT

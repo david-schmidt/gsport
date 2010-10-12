@@ -46,6 +46,13 @@
 extern "C" {
 #endif
 
+#ifdef _MSC_VER
+#include <WinSock2.h>
+typedef unsigned int u_int;
+typedef unsigned char u_char;
+typedef unsigned short u_short;
+#endif
+
 /* BSD style release date */
 #define BPF_RELEASE 199606
 

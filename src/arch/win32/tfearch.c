@@ -41,6 +41,7 @@
 #include <string.h>
 
 #include "..\..\defc.h"
+#include "../../tfe/protos_tfe.h"
 
 
 typedef pcap_t	*(*pcap_open_live_t)(const char *, int, int, int, char *);
@@ -413,7 +414,7 @@ typedef struct TFE_PCAP_INTERNAL_tag {
 static
 void TfePcapPacketHandler(u_char *param, const struct pcap_pkthdr *header, const u_char *pkt_data)
 {
-    TFE_PCAP_INTERNAL *pinternal = (void*)param;
+    TFE_PCAP_INTERNAL *pinternal = (TFE_PCAP_INTERNAL*)param;
 
     /* determine the count of bytes which has been returned, 
      * but make sure not to overrun the buffer 
@@ -440,7 +441,7 @@ int tfe_arch_receive_frame(TFE_PCAP_INTERNAL *pinternal)
     int ret = -1;
 
     /* check if there is something to receive */
-    if ((*p_pcap_dispatch)(TfePcapFP, 1, TfePcapPacketHandler, (void*)pinternal)!=0) {
+    if ((*p_pcap_dispatch)(TfePcapFP, 1, (pcap_handler)TfePcapPacketHandler, (u_char*)pinternal)!=0) {
         /* Something has been received */
         ret = pinternal->len;
     }

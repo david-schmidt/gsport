@@ -27,7 +27,7 @@ extern int g_rom_version;
 extern int g_io_amt;
 extern int g_highest_smartport_unit;
 
-int g_cycs_in_io_read = 0;
+word32 g_cycs_in_io_read = 0;
 
 extern Engine_reg engine;
 

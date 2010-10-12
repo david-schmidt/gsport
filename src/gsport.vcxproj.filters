@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="16inst_c.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="8inst_c.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="adb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="defc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="defcomm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="defs_instr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="disas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="gsportfont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="instable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iwm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iwm_35_525.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="op_routs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="printer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="printer_charmaps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="prodos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="prodos_protos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="protos.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="protos_engine_c.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="protos_macdriver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="protos_macsnd_driver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="protos_windriver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="protos_xdriver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="size_c.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="size_tab.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="superhires.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="winresource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tfe\protos_tfe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="adb.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="clock.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="compile_time.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="config.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="dis.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="engine_c.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="iwm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="joystick_driver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="moremem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="paddles.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scc_socket_driver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scc_windriver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sim65816.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="smartport.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sound.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sound_driver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="video.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="win32snd_driver.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="win_console.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="win_generic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
