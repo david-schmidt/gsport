@@ -28,7 +28,7 @@ specials_clean:
 
 # Mac builds:
 gsportmac: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) -arch ppc $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
+	$(CC) $(CCOPTS) $(LDOPTS) -arch $(ARCH) $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
 	mkdir -p ../GSport.app/Contents/Resources/English.lproj/main.nib
 	mkdir -p ../GSport.app/Contents/MacOS
 	mv gsport ../GSport.app/Contents/MacOS/GSport

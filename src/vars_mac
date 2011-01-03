@@ -4,7 +4,8 @@ OBJECTS = $(OBJECTS1) scc_macdriver.o macsnd_driver.o macdriver_generic.o macdri
 CCOPTS = -O2 -DMAC
 SUFFIX =
 NAME = gsportmac
+ARCH = ppc
 
-XOPTS = -Wall -fpascal-strings -mdynamic-no-pic -arch ppc
+XOPTS = -Wall -fpascal-strings -mdynamic-no-pic -arch $(ARCH)
 XLIBS =
 
