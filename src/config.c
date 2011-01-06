@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2011 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -57,6 +57,7 @@ extern int g_fatal_log;
 
 extern word32 g_adb_repeat_vbl;
 
+extern int halt_sim;
 extern int g_limit_speed;
 extern int g_force_depth;
 extern int g_raw_serial;
@@ -3119,7 +3120,7 @@ config_control_panel()
 	menu_inc = 1;
 	g_cfg_slotdrive = -1;
 	g_cfg_select_partition = -1;
-	while(g_config_control_panel) {
+	while(g_config_control_panel & !(halt_sim&HALT_WANTTOQUIT)) {
 		if(g_fatal_log > 0) {
 			x_show_alert(0, 0);
 		}
@@ -3194,7 +3195,7 @@ config_control_panel()
 		}
 #endif
 		key = -1;
-		while(g_config_control_panel) {
+		while(g_config_control_panel & !(halt_sim&HALT_WANTTOQUIT)) {
 			video_update();
 			key = adb_read_c000();
 			if(key & 0x80) {
