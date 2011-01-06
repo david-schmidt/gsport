@@ -19,6 +19,7 @@ clean:
 	- rm $(OBJECTS)
 	- rm 8inst_c.h
 	- rm 16inst_c.h
+	- rm -r ../GSport.app
 
 specials: 8inst_s 16inst_s 8size 16size 8inst_c 16inst_c size_c size_s
 
