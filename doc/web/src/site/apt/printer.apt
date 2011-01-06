@@ -6,7 +6,7 @@
 
 GSport Emulated Printer
 
-* GSport Setup
+* Setup
 
  After GSport starts, press F4 to enter the text based menu and select the "Parallel Card Configuration" option.
  By default, printer emulation is turned off.  Enable it by setting "Parallel Card in Slot 1" to "On":
