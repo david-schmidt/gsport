@@ -6,9 +6,15 @@
 
 GSport Emulated Printer
 
-* Setup
+* "Native" IIgs Setup
 
- After GSport starts, press F4 to enter the text based menu and select the "Parallel Card Configuration" option.
+ Enter the GS native control panel and set slot 1 to "Your Card":
+
+[images/printer0.png]
+
+* GSport Setup
+
+ Press F4 to enter the text-based GSport menu and select the "Parallel Card Configuration" option.
  By default, printer emulation is turned off.  Enable it by setting "Parallel Card in Slot 1" to "On":
 
 [images/printer1.png]
