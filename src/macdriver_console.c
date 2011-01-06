@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2011 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -229,7 +229,7 @@ my_cmd_handler( EventHandlerCallRef handlerRef, EventRef event, void *userdata)
 			break;
 		case 'abou':
 		show_simple_alert("GSport v", (char *)g_gsport_version_str,
-			", Copyright 2010 GSport Contributors\n"
+			"\nCopyright 2010 - 2011 GSport Contributors\n"
 			"Latest version at http://gsport.sourceforge.net/\n", 0);
 		osresult = noErr;
 		break;
