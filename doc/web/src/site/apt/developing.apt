@@ -153,13 +153,13 @@ HP, Motorola, and IBM are big-endian.
 
  * Install Freetype in your build environment - you'll need to link with the freetype library
 
- * Add <<<-DHAVE_PARALLEL>>> to the <<<CCOPTS>>> variable in your <<<vars>>> file
+ * Add <<<-DHAVE_PARALLEL -DWIN32>>> to the <<<CCOPTS>>> variable in your <<<vars>>> file
 
  * Add something like <<<-I/usr/include/freetype2>>> and <<<-I/usr/include/SDL>>> options to your <<<CCOPTS>>> in your vars file to point to the SDL and Freetype include files   
 
  * Compile <<<parallel.c>>> and <<<printer.cpp>>> and include their object code as part of your final linkage
 
- * Include SDL and Freetype libraries as part of your final linkage (i.e. <<<-lSDL -lfreetype>>>)
+ * Include SDL, Freetype, and Win32 common dialog libraries as part of your final linkage (i.e. <<<-lSDL -lfreetype -lcomdlg32>>>)
 
  * After building, you'll need the file <<<parallel.rom>>> in the same directory as your GSport executable
 
