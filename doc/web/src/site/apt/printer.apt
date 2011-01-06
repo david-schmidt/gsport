@@ -1,0 +1,36 @@
+ -----
+ GSport Printer
+ -----
+ David Schmidt (david__schmidt at users dot souceforge dot net)
+ -----
+
+GSport Emulated Printer
+
+* GSport Setup
+
+ After GSport starts, press F4 to enter the text based menu and select the "Parallel Card Configuration" option.
+ By default, printer emulation is turned off.  Enable it by setting "Parallel Card in Slot 1" to "On":
+
+[images/printer1.png]
+
+ Parallel Output for Applesoft text (i.e. when using PR#1) should be set to Mask off high bit, 
+ otherwise output won't look like the ASCII you expect. 
+ In all other cases (like printing from normal applications) it should remain on the default Send Full 8-bit data. 
+ Optionally you can set the virtual printer to ignore the high bit with ESC/P codes.
+
+ Next, navigate back to the main menu and select the "Virtual Printer Configuration" option:
+
+[images/printer2.png]
+
+ Printer Timeout configures how long until a form feed is automatically sent to the printer 
+ (which forces the emulator to kick out a "page".)
+It should be set higher for PR#1-type printing to work correctly. 
+If it is set to "Never", you have to manually send a form feed, fill a page with text, or exit the emulator before any output is saved.
+This behavior is similar to modern laser/inkjet printers when they are used with Applesoft. 
+Most applications are good about sending form feeds at page end, so this issue usually doesn't crop up.
+
+ Make sure to configure font locations.
+ Roman is used by default and the printing emulation won't work if none at all are defined. 
+ Any monospaced truetype font you have will work.
+
+ Printer output should appear in the same directory as GSport as page1.bmp, page2.bmp, etc.
