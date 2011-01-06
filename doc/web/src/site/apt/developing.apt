@@ -144,3 +144,27 @@ easy.  Start with <<<vars_x86linux>>> if you are a little-endian machine, or
 <<<vars_linuxppc>>> if you are big endian.  Don't define <<<-DGSPORT_LITTLE_ENDIAN>>>
 unless your processor is little-endian (x86, Alpha).  Mac, Sun, MIPS,
 HP, Motorola, and IBM are big-endian.
+
+* Incorporating Parallel Printer Support 
+
+ Until parallel printer support is generally integrated into all builds, the following work needs to be done:
+
+ * Install Simple DirectMedia Layer ({{{http://www.libsdl.org/}SDL}}) in your build environment - you'll need to link to the SDL library 
+
+ * Install Freetype in your build environment - you'll need to link with the freetype library
+
+ * Add <<<-DHAVE_PARALLEL>>> to the <<<CCOPTS>>> variable in your <<<vars>>> file
+
+ * Add something like <<<-I/usr/include/freetype2>>> and <<<-I/usr/include/SDL>>> options to your <<<CCOPTS>>> in your vars file to point to the SDL and Freetype include files   
+
+ * Compile <<<parallel.c>>> and <<<printer.cpp>>> and include their object code as part of your final linkage
+
+ * Include SDL and Freetype libraries as part of your final linkage (i.e. <<<-lSDL -lfreetype>>>)
+
+ * After building, you'll need the file <<<parallel.rom>>> in the same directory as your GSport executable
+
+ * You'll probably want a monospaced TrueType font file easily accessible to add as part of the configuration
+
+ * Run through the emulated printer {{{printer.html}configuration}} steps
+
+ []
