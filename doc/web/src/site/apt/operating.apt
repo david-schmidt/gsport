@@ -6,6 +6,18 @@
 
 Operating GSport
 
+* Capabilties
+
+*-----:------:------:------:------+
+ <<Platform>> | <<Base IIgs Emulation>> | <<Ethernet>> | <<Printer>> | <<Drag/Drop Disks>>
+*-----:------:------+
+ Linux     | Yes | No  | No  | No  |
+*-----:------:------+
+ Macintosh | Yes | No  | No  | No  | 
+*-----:------:------+
+ Windows   | Yes | Yes | Yes | Yes | 
+*-----:------:------+
+
 * Getting ROMs
 
  The required ROM for GSport is not part of the distribution, as it is
@@ -18,7 +30,7 @@ order to legally use a ROM file that you may find on the internet.
 the src/ directory, the Windows executable as gsportwin.exe, and the Mac OS X
 executable as GSport.app.
 
- See the GSport project page on Sourceforge.net for more information about compiling for other platforms.
+ See the the {{{developing.html}developing}} page for more information about compiling for other platforms.
 
  On all platforms except Windows and Mac, you must start GSport from a terminal
 window.  GSport will open a new window and use the window you started it from

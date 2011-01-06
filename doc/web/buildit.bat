@@ -3,4 +3,5 @@
 @REM I hope folks don't really want to build the doc themselves.
 @REM
 call c:\dev\env
+rmdir /q /s target
 call mvn site

@@ -7,7 +7,9 @@
 GSport
 
  GSport is a portable (in the programming sense) Apple IIgs emulator, based on the
-KEGS cross-platform IIgs emulator by Kent Dickey.
+KEGS cross-platform IIgs emulator by Kent Dickey.  
+The base emulator builds and runs on all of the same platforms that KEGS did, and
+the new capabilities are being integrated as contributors have time and interest.
 
 * Project Goals
 
