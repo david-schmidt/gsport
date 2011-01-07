@@ -23,8 +23,8 @@
 #include <math.h>
 #include "support.h"
 //#include "png.h"
-//#pragma comment( lib, “libpng.lib” )
-//#pragma comment (lib, “zdll.lib” ) 
+//#pragma comment( lib, "libpng.lib" )
+//#pragma comment (lib, "zdll.lib" ) 
 
 static CPrinter* defaultPrinter = NULL;
 
@@ -1583,7 +1583,7 @@ static void findNextName(char* front, char* ext, char* fname)
 #ifdef WIN32
 		const char* const pathstring = ".\\%s%d%s";
 #else 
-		const char* const pathstring = "/%s%d%s";
+		const char* const pathstring = "./%s%d%s";
 #endif
 		sprintf(fname+strlen(fname), pathstring, front,i++,ext);
 		test = fopen(fname, "rb");
