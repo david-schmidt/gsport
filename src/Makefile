@@ -53,10 +53,16 @@ gsportx: $(OBJECTS) compile_time.o
 
 # Mingw32 (native windows) builds:
 gsport.exe: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32 -lshell32
-	mv $(NAME)$(SUFFIX) ..
-	cp -f ../config.template ../config.txt 
-
+	g++ $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32 -lshell32 -lSDL -lfreetype -lcomdlg32
+	mkdir -p ../GSport.app/lib
+	cp -f gsport.exe ../GSport.app/GSport.exe
+	cp -f ../config.template ../GSport.app/config.txt
+	cp -f ../lib/*.ttf ../GSport.app/lib
+	cp -f ../lib/arch/win32/*.dll ../GSport.app/lib
+	cp -f GSport.bat ../GSport.app/GSport.bat
+	cp -f parallel.rom ../GSport.app
+	cp -f ../COPYING.txt ../GSport.app
+	cp -f ../GSport.html ../GSport.app
 
 8inst_c.h: instable.h
 	$(PERL) make_inst c 8 instable.h > 8inst_c.h
@@ -91,6 +97,9 @@ engine_s.o: 8inst_s.h 16inst_s.h 8size_s.h 16size_s.h size_s.h
 
 .c.o:
 	$(CC) $(CCOPTS) $(XOPTS) -c $(OPTS) -I. -o $*.o $*.c
+
+.cpp.o:
+	$(CC) $(CPPOPTS) $(XOPTS) -c $(OPTS) -I. $*.cpp
 
 .cpp.O:
 	$(CC) $(CCOPTS) $(XOPTS) -c $(OPTS) -I. $*.c
