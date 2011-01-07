@@ -11,7 +11,7 @@ Operating GSport
 *-----:------:------:------:------+
  <<Platform>> | <<Base IIgs Emulation>> | <<Ethernet>> | <<Printer>> | <<Drag/Drop Disks>>
 *-----:------:------+
- Linux     | Yes | No  | No  | No  |
+ Linux     | Yes | No  | Yes  | No  |
 *-----:------:------+
  Macintosh | Yes | No  | No  | No  | 
 *-----:------:------+

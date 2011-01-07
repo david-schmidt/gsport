@@ -6,14 +6,12 @@
 
 GSport Release History
 
-* Unreleased - changes in SVN now
+* Version 0.1 - 1/6/2011 released as interim build
 
  New functionality:
 
  * Added Uthernet support in slot 3.  Code comes from the VICE emulator.
 
  * Added virtual printer support in slot 1.  Code comes from DOSBox emulator.
-
- * GSport project inception, forked from KEGS version 0.91
 
  []
