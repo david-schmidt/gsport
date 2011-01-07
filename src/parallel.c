@@ -37,7 +37,7 @@ int port_block = 0;
 
 byte parallel_read(word16 io_address)
 {
-	printf("parallel card status called at %x\n", io_address);
+	//printf("parallel card status called at %x\n", io_address);
 	//since we only have a virtual printer, always return state as "Ready"
 	return 0xff;
 }
@@ -47,7 +47,7 @@ void parallel_write(word16 io_address, byte val)
 	if(g_parallel_out_masking) {
 		val = val & 0x7f;
 	}
-	printf("parallel card called at %x\n", io_address);
+	//printf("parallel card called at %x\n", io_address);
 	//send a byte to the virtual printer
 	//By default all output to $C090 gets sent to the printer
 	if (io_address == 0x00)
