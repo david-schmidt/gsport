@@ -45,7 +45,7 @@ void parallel_write(word16 io_address, byte val)
 {	
 	//Mask MSB if user has it set.
 	if(g_parallel_out_masking) {
-		val = val & 0xfe;
+		val = val & 0x7f;
 	}
 	printf("parallel card called at %x\n", io_address);
 	//send a byte to the virtual printer
