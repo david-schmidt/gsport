@@ -149,21 +149,21 @@ HP, Motorola, and IBM are big-endian.
 
  Until parallel printer support is generally integrated into all builds, the following work needs to be done:
 
- * Install Simple DirectMedia Layer ({{{http://www.libsdl.org/}SDL}}) in your build environment - you'll need to link to the SDL library 
+ * Install Simple DirectMedia Layer ({{{http://www.libsdl.org/}SDL}}) and Freetype in your build environment - you'll need to link to their libraries 
 
- * Install Freetype in your build environment - you'll need to link with the freetype library
-
- * Add <<<-DHAVE_PARALLEL -DWIN32>>> to the <<<CCOPTS>>> variable in your <<<vars>>> file
+ * Add <<<-DHAVE_PARALLEL>>> to the <<<CCOPTS>>> variable in your <<<vars>>> file; also add  <<<-DWIN32>>> if you're on Windows
 
  * Add something like <<<-I/usr/include/freetype2>>> and <<<-I/usr/include/SDL>>> options to your <<<CCOPTS>>> in your vars file to point to the SDL and Freetype include files   
 
  * Compile <<<parallel.c>>> and <<<printer.cpp>>> and include their object code as part of your final linkage
 
- * Include SDL, Freetype, and Win32 common dialog libraries as part of your final linkage (i.e. <<<-lSDL -lfreetype -lcomdlg32>>>)
+ * Include SDL and Freetype libraries as part of your final linkage (i.e. <<<-lSDL -lfreetype>>>)
+
+ * Include the Win32 common dialog library as part of your final linkage if you're on Windows (i.e. <<<-lcomdlg32>>>)
 
  * After building, you'll need the file <<<parallel.rom>>> in the same directory as your GSport executable
 
- * You'll probably want a monospaced TrueType font file easily accessible to add as part of the configuration
+ * You'll probably want a monospaced TrueType font file easily accessible to add as part of the GSport configuration
 
  * Run through the emulated printer {{{printer.html}configuration}} steps
 
