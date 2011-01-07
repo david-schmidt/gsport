@@ -820,6 +820,7 @@ config_load_roms()
 					"read %d bytes\n", errno, len, ret);
 				continue;
 			}
+			printf("Read: %d bytes of ROM in slot %d\n", ret, i);
 			fclose(file);
 		}
 	}
