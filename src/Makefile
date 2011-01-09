@@ -17,6 +17,8 @@ all: $(TARGET)
 
 clean:
 	- rm $(OBJECTS)
+	- rm $(TARGET)
+	- rm compile_time.o
 	- rm 8inst_c.h
 	- rm 16inst_c.h
 	- rm -r ../GSport.app
