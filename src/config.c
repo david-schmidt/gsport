@@ -248,7 +248,7 @@ Cfg_menu g_cfg_printer_menu[] = {
 		KNMP(g_printer), CFGTYPE_INT },
 { "Printer DPI,60,60x60 dpi,180,180x180 dpi,360,360x360 dpi",
 		KNMP(g_printer_dpi), CFGTYPE_INT },
-{ "Printer Output Type,bmp,Windows Bitmap,ps,Postscript (B&W),printer,Direct to host printer",
+{ "Printer Output Type,bmp,Windows Bitmap,ps,Postscript (B&W),printer,Direct to host printer,text,Text file",
 		KNMP(g_printer_output), CFGTYPE_STR },
 { "Multipage Files? (PS Only),0,No,1,Yes",
 		KNMP(g_printer_multipage), CFGTYPE_INT },

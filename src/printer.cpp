@@ -49,6 +49,13 @@
 
 static CPrinter* defaultPrinter = NULL;
 
+static FILE *textPrinterFile = NULL; 
+#ifdef WIN32
+const char* const textPrinterFileName = ".\\printer.txt";
+#else 
+const char* const textPrinterFileName = "./printer.txt";
+#endif
+
 #define PARAM16(I) (params[I+1]*256+params[I])
 #define PIXX ((Bitu)floor(curX*dpi+0.5))
 #define PIXY ((Bitu)floor(curY*dpi+0.5))
@@ -1262,6 +1269,12 @@ void CPrinter::newPage(bool save, bool resetx)
 	{
         *((Bit8u*)page->pixels+i)=i;
 	}*/
+	if (strcasecmp(output, "text") == 0) { /* Text file */
+		if (textPrinterFile) {
+			fclose(textPrinterFile);
+			textPrinterFile = NULL;
+		}
+	}
 }
 
 void CPrinter::printChar(Bit8u ch)
@@ -1273,7 +1286,14 @@ void CPrinter::printChar(Bit8u ch)
 		if (msb == 0) ch &= 0x7F;
 		if (msb == 1) ch |= 0x80;
 	}
-	
+	if (strcasecmp(output, "text") == 0) {
+		if (!textPrinterFile) {
+			textPrinterFile = fopen(textPrinterFileName,"ab");
+		}
+		fprintf(textPrinterFile,"%c",ch);
+		fflush(textPrinterFile);
+		return;
+	}
 	// Are we currently printing a bit graphic?
 	if (bitGraph.remBytes > 0) {
 		printBitGraph(ch);
