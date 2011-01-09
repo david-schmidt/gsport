@@ -1,8 +1,9 @@
 # GSport central makefile - you need a 'vars' file linked/copied from a 'vars_xxx' template to build.
 
 OBJECTS1 = adb.o clock.o config.o dis.o engine_c.o scc.o iwm.o \
-	joystick_driver.o moremem.o paddles.o sim65816.o smartport.o \
-	sound.o sound_driver.o video.o scc_socket_driver.o
+	joystick_driver.o moremem.o paddles.o parallel.o printer.o \
+	sim65816.o smartport.o sound.o sound_driver.o video.o \
+	scc_socket_driver.o
 
 include vars
 
@@ -31,7 +32,7 @@ specials_clean:
 
 # Mac builds:
 gsportmac: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) -arch $(ARCH) $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
+	g++ $(CCOPTS) $(LDOPTS) -arch $(ARCH) $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
 	mkdir -p ../GSport.app/Contents/Resources/English.lproj/main.nib
 	mkdir -p ../GSport.app/Contents/MacOS
 	mv gsport ../GSport.app/Contents/MacOS/GSport

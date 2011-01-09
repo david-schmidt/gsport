@@ -76,6 +76,7 @@ Bit8u paramc = '0';
 
 #include "printer_charmaps.h"
 
+#ifdef HAVE_SDL
 void CPrinter::FillPalette(Bit8u redmax, Bit8u greenmax, Bit8u bluemax, Bit8u colorID, SDL_Palette* pal)
 {
 	float red=redmax/30.9;
@@ -90,9 +91,11 @@ void CPrinter::FillPalette(Bit8u redmax, Bit8u greenmax, Bit8u bluemax, Bit8u co
 		pal->colors[i+colormask].b=255-(blue*(float)i);
 	}
 }
+#endif // HAVE_SDL
 
 CPrinter::CPrinter(Bit16u dpi, Bit16u width, Bit16u height, char* output, bool multipageOutput) 
 {
+#ifdef HAVE_SDL
 	if (FT_Init_FreeType(&FTlib))
 	{
 		page = NULL;
@@ -186,19 +189,27 @@ CPrinter::CPrinter(Bit16u dpi, Bit16u width, Bit16u height, char* output, bool m
 			PrintDlg(&pd);
 			// TODO: what if user presses cancel?
 			printerDC = pd.hDC;
-#endif
+#endif // WIN32
 		}
 	}
+#endif // HAVE_SDL
+#ifndef HAVE_SDL
+		this->output = output;
+		this->multipageOutput = multipageOutput;
+#endif // !HAVE_SDL
 };
 
 void CPrinter::resetPrinterHard()
 {
+#ifdef HAVE_SDL
 	charRead = false;
 	resetPrinter();
+#endif // HAVE_SDL
 }
 
 void CPrinter::resetPrinter()
 {
+#ifdef HAVE_SDL
 		color=COLOR_BLACK;
 		curX = curY = 0.0;
 		ESCSeen = false;
@@ -235,7 +246,9 @@ void CPrinter::resetPrinter()
 
 		updateFont();
 
+#endif // HAVE_SDL
 		newPage(false,true);
+#ifdef HAVE_SDL
 
 		// Default tabs => Each eight characters
 		for (Bitu i=0;i<32;i++)
@@ -243,11 +256,13 @@ void CPrinter::resetPrinter()
 		numHorizTabs = 32;
 
 		numVertTabs = 255;
+#endif // HAVE_SDL
 }
 
 
 CPrinter::~CPrinter(void)
 {
+#ifdef HAVE_SDL
 	finishMultipage();
 	if (page != NULL)
 	{
@@ -255,11 +270,13 @@ CPrinter::~CPrinter(void)
 		page = NULL;
 		FT_Done_FreeType(FTlib);
 	}
+#endif // HAVE_SDL
 #if defined (WIN32)
 	DeleteDC(printerDC);
 #endif
 };
 
+#ifdef HAVE_SDL
 void CPrinter::selectCodepage(Bit16u cp)
 {
 	Bit16u *mapToUse = NULL;
@@ -314,7 +331,9 @@ void CPrinter::selectCodepage(Bit16u cp)
 	for (int i=0; i<256; i++)
 		curMap[i] = mapToUse[i];
 }
+#endif // HAVE_SDL
 
+#ifdef HAVE_SDL
 void CPrinter::updateFont()
 {
 	//	char buffer[1000];
@@ -432,7 +451,9 @@ void CPrinter::updateFont()
 		FT_Set_Transform(curFont, &matrix, 0);
 	}
 }
+#endif HAVE_SDL
 
+#ifdef HAVE_SDL
 bool CPrinter::processCommandChar(Bit8u ch)
 {
 	if (ESCSeen || FSSeen)
@@ -1244,14 +1265,16 @@ bool CPrinter::processCommandChar(Bit8u ch)
 
 	return false;
 }
+#endif // HAVE_SDL
 
-static void PRINTER_EventHandler(Bitu param);
+//static void PRINTER_EventHandler(Bitu param);
 
 void CPrinter::newPage(bool save, bool resetx)
 {
 	//PIC_RemoveEvents(PRINTER_EventHandler);
 	if(printer_timout) timeout_dirty=false;
 	
+#ifdef HAVE_SDL
 	if (save)
 		outputPage();
 
@@ -1269,6 +1292,7 @@ void CPrinter::newPage(bool save, bool resetx)
 	{
         *((Bit8u*)page->pixels+i)=i;
 	}*/
+#endif // HAVE_SDL
 	if (strcasecmp(output, "text") == 0) { /* Text file */
 		if (textPrinterFile) {
 			fclose(textPrinterFile);
@@ -1279,8 +1303,11 @@ void CPrinter::newPage(bool save, bool resetx)
 
 void CPrinter::printChar(Bit8u ch)
 {
+#ifdef HAVE_SDL
+
 	charRead = true;
 	if (page == NULL) return;
+#endif // HAVE_SDL
 	// Don't think that DOS programs uses this but well: Apply MSB if desired
 	if (msb != 255) {
 		if (msb == 0) ch &= 0x7F;
@@ -1294,6 +1321,8 @@ void CPrinter::printChar(Bit8u ch)
 		fflush(textPrinterFile);
 		return;
 	}
+#ifdef HAVE_SDL
+
 	// Are we currently printing a bit graphic?
 	if (bitGraph.remBytes > 0) {
 		printBitGraph(ch);
@@ -1382,8 +1411,10 @@ void CPrinter::printChar(Bit8u ch)
 		curY += lineSpacing;
 		if (curY > bottomMargin) newPage(true,false);
 	}
+#endif // HAVE_SDL
 }
 
+#ifdef HAVE_SDL
 void CPrinter::blitGlyph(FT_Bitmap bitmap, Bit16u destx, Bit16u desty, bool add) {
 	for (Bitu y=0; y<bitmap.rows; y++) {
 		for (Bitu x=0; x<bitmap.width; x++) {
@@ -1598,15 +1629,18 @@ void CPrinter::printBitGraph(Bit8u ch)
 	// Advance to the left
 	curX += (Real64)1/(Real64)bitGraph.horizDens;
 }
+#endif // HAVE_SDL
 
 void CPrinter::formFeed()
 {
+#ifdef HAVE_SDL
 	// Don't output blank pages
 	newPage(!isBlank(),true);
-
 	finishMultipage();
+#endif // HAVE_SDL
 }
 
+#ifdef HAVE_SDL
 static void findNextName(char* front, char* ext, char* fname)
 {
 	document_path = "";
@@ -1665,6 +1699,7 @@ SDL_Delay(2000);
 SDL_FreeSurface(image);*/
 
 	char fname[200];
+
 	if (strcasecmp(output, "printer") == 0)
 	{
 #if defined (WIN32)
@@ -2060,6 +2095,7 @@ Bit8u CPrinter::getPixel(Bit32u num) {
 	Bit32u pixel = *((Bit8u*)page->pixels + (num % page->w) + ((num / page->w) * page->pitch));
 	return *((Bit8u*)page->pixels + (num % page->w) + ((num / page->w) * page->pitch));
 }
+#endif // HAVE_SDL
 
 //Interfaces to C code
 

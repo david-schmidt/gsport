@@ -26,9 +26,7 @@
   #include "tfe/tfesupp.h" 
   #include "tfe/protos_tfe.h" 
 #endif
-#ifdef HAVE_PARALLEL
   #include "printer.h"
-#endif
 
 #ifdef UNDER_CE
 #define vsnprintf _vsnprintf
@@ -719,9 +717,7 @@ void quitEmulator()
 void my_exit(int ret)
 {
 	end_screen();
-#ifdef HAVE_PARALLEL
 	printer_close();
-#endif
 	printf("exiting (ret=%d)\n",ret);
 	fatalExit(ret);
 }
@@ -1061,9 +1057,7 @@ gsportmain(int argc, char **argv)
 	// If the final argument was not a switch, then treat it like a disk image filename to insert
 	if (final_arg)
 		cfg_inspect_maybe_insert_file(final_arg);
-#ifdef HAVE_PARALLEL
 	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage);
-#endif
 	//If ethernet is enabled in config.gsport, lets initialize it
 #ifdef HAVE_TFE
 	if (g_ethernet == 1)
@@ -2346,13 +2340,11 @@ update_60hz(double dcycs, double dtime_now)
 	sound_update(dcycs);
 	clock_update();
 	scc_update(dcycs);
-	#ifdef HAVE_PARALLEL
 	//Check and see if virtual printer timeout has been reached.
 	if (g_printer_timeout)
 	{
 	printer_update();
 	}
-	#endif
 	paddle_update_buttons();
 }
 

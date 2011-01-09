@@ -1,4 +1,25 @@
 /*
+ GSport - an Apple //gs Emulator
+ Copyright (C) 2010 - 2011 by GSport contributors
+ 
+ Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
+
+ This program is free software; you can redistribute it and/or modify it 
+ under the terms of the GNU General Public License as published by the 
+ Free Software Foundation; either version 2 of the License, or (at your 
+ option) any later version.
+
+ This program is distributed in the hope that it will be useful, but 
+ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ for more details.
+
+ You should have received a copy of the GNU General Public License along 
+ with this program; if not, write to the Free Software Foundation, Inc., 
+ 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
+/*
  *  Copyright (C) 2002-2004  The DOSBox Team
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -19,8 +40,6 @@
 //#include <dosbox.h>
 //#include "config.h"
 
-
-
 #if !defined __PRINTER_H
 #define __PRINTER_H
 #ifdef __cplusplus
@@ -28,10 +47,12 @@
 #include <png.h>
 #endif
 
+#ifdef HAVE_SDL
 #include "SDL.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#endif
 
 #if defined (WIN32)
 #include <windows.h>
@@ -129,27 +150,36 @@ public:
 	// Manual formfeed
 	void formFeed();
 
+#ifdef HAVE_SDL
 	// Returns true if the current page is blank
 	bool isBlank();
+#endif // HAVE_SDL
 
 private:
-
-	// used to fill the color "sub-pallettes"
-	void FillPalette(Bit8u redmax, Bit8u greenmax, Bit8u bluemax, Bit8u colorID,
-							SDL_Palette* pal);
-
-    // Checks if given char belongs to a command and process it. If false, the character
-	// should be printed
-	bool processCommandChar(Bit8u ch);
 
 	// Resets the printer to the factory settings
 	void resetPrinter();
 
-	// Reload font. Must be called after changing dpi, style or cpi
-	void updateFont();
-
 	// Clears page. If save is true, saves the current page to a bitmap
 	void newPage(bool save, bool resetx);
+
+	// Closes a multipage document
+	void finishMultipage();
+
+	// Output current page 
+	void outputPage();
+
+#ifdef HAVE_SDL
+	// used to fill the color "sub-pallettes"
+	void FillPalette(Bit8u redmax, Bit8u greenmax, Bit8u bluemax, Bit8u colorID,
+							SDL_Palette* pal);
+
+	// Checks if given char belongs to a command and process it. If false, the character
+	// should be printed
+	bool processCommandChar(Bit8u ch);
+
+	// Reload font. Must be called after changing dpi, style or cpi
+	void updateFont();
 
 	// Blits the given glyph on the page surface. If add is true, the values of bitmap are
 	// added to the values of the pixels in the page
@@ -167,14 +197,8 @@ private:
 	// Copies the codepage mapping from the constant array to CurMap
 	void selectCodepage(Bit16u cp);
 
-	// Output current page 
-	void outputPage();
-
 	// Prints out a byte using ASCII85 encoding (only outputs something every four bytes). When b>255, closes the ASCII85 string
 	void fprintASCII85(FILE* f, Bit16u b);
-
-	// Closes a multipage document
-	void finishMultipage();
 
 	// Returns value of the num-th pixel (couting left-right, top-down) in a safe way
 	Bit8u getPixel(Bit32u num);
@@ -250,6 +274,9 @@ private:
 #if defined (WIN32)
 	HDC printerDC;						// Win32 printer device
 #endif
+
+#endif // HAVE_SDL
+	Bit8u msb;							// MSB mode
 
 	char* output;						// Output method selected by user
 	void* outputHandle;					// If not null, additional pages will be appended to the given handle
