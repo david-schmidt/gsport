@@ -29,14 +29,34 @@ GSport Emulated Printer
 [images/printer2.png]
 
  Printer Timeout configures how long until a form feed is automatically sent to the printer 
- (which forces the emulator to kick out a "page".)
-It should be set higher for PR#1-type printing to work correctly. 
+ (which forces the emulator to kick out a "page").
+It should be set higher for PR#1-type printing to work as you might expect. 
 If it is set to "Never", you have to manually send a form feed, fill a page with text, or exit the emulator before any output is saved.
 This behavior is similar to modern laser/inkjet printers when they are used with Applesoft. 
 Most applications are good about sending form feeds at page end, so this issue usually doesn't crop up.
 
  Make sure to configure font locations.
- Roman is used by default and the printing emulation won't work if none at all are defined. 
- Any monospaced truetype font you have will work.
+Roman is used by default and the printing emulation won't work if none at all are defined. 
+Any monospaced truetype font you have will work.
 
  Printer output should appear in the same directory as GSport as page1.bmp, page2.bmp, etc.
+
+* Printer Output Type
+
+ GSport can produce various types of graphical or textual output based on your platform and 
+ what has been compiled into your binary.
+ Cycling through the various options in "Printer Output Type," there are:
+
+ * Windows Bitmap
+
+ * Postscript (B&W)
+
+ * Direct to host printer
+
+ * Text file
+
+ []
+
+ Windows Bitmap will produce .BMP files for each "page" produced.  The same is true for Postscript, but .PS files are produced.
+"Direct to host printer" is only implemented for Windows, and will send page-oriented output directly to your system's printer.
+"Text file" will append text-only output to a file named "printer.txt" in GSport's current working directory.

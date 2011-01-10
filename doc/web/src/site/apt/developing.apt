@@ -145,23 +145,21 @@ easy.  Start with <<<vars_x86linux>>> if you are a little-endian machine, or
 unless your processor is little-endian (x86, Alpha).  Mac, Sun, MIPS,
 HP, Motorola, and IBM are big-endian.
 
-* Incorporating Parallel Printer Support 
+* Incorporating Graphical Printer Support 
 
- Until parallel printer support is generally integrated into all builds, the following work needs to be done:
+ Until graphical prallel printer support is generally integrated into all builds, the following work needs to be done:
 
  * Install Simple DirectMedia Layer ({{{http://www.libsdl.org/}SDL}}) and Freetype in your build environment - you'll need to link to their libraries 
 
- * Add <<<-DHAVE_PARALLEL>>> to the <<<CCOPTS>>> variable in your <<<vars>>> file; also add  <<<-DWIN32>>> if you're on Windows
+ * Add the <<<-DHAVE_SDL>>> option to your <<<CCOPTS>>> and add the same (perhaps to a new) <<<CPPOPTS>>> in your <<<vars>>> file
 
- * Add something like <<<-I/usr/include/freetype2>>> and <<<-I/usr/include/SDL>>> options to your <<<CCOPTS>>> in your vars file to point to the SDL and Freetype include files   
+ * Add something like <<<-I/usr/include/freetype2>>> and <<<-I/usr/include/SDL>>> options to your <<<CCOPTS>>> and add the same (perhaps for a new) <<<CPPOPTS>>> in your <<<vars>>> file to point to the SDL and Freetype include files
 
- * Compile <<<parallel.c>>> and <<<printer.cpp>>> and include their object code as part of your final linkage
+ * Include SDL and Freetype libraries to <<<EXTRA_LIBS>>> in your <<<vars>>> file (i.e. <<<EXTRA_LIBS = -lSDL -lfreetype>>>)
 
- * Include SDL and Freetype libraries as part of your final linkage (i.e. <<<-lSDL -lfreetype>>>)
+ * Include the Win32 common dialog library to <<<EXTRA_LIBS>>> as part of your final linkage if you're on Windows (i.e. <<<EXTRA_LIBS = -lSDL -lfreetype -lcomdlg32>>>)
 
- * Include the Win32 common dialog library as part of your final linkage if you're on Windows (i.e. <<<-lcomdlg32>>>)
-
- * After building, you'll need the file <<<parallel.rom>>> in the same directory as your GSport executable
+ * After building, you'll need the file <<<parallel.rom>>> in the same directory that <<<config.txt>>> is found
 
  * You'll probably want a monospaced TrueType font file easily accessible to add as part of the GSport configuration
 
