@@ -6,18 +6,6 @@
 
 Operating GSport
 
-* Capabilties
-
-*-----:------:------:------:------+
- <<Platform>> | <<Base IIgs Emulation>> | <<Ethernet>> | <<Printer>> | <<Drag/Drop Disks>>
-*-----:------:------+
- Linux     | Yes | No  | Yes  | No  |
-*-----:------:------+
- Macintosh | Yes | No  | No  | No  | 
-*-----:------:------+
- Windows   | Yes | Yes | Yes | Yes | 
-*-----:------:------+
-
 * Getting ROMs
 
  The required ROM for GSport is not part of the distribution, as it is

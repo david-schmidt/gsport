@@ -145,7 +145,21 @@ easy.  Start with <<<vars_x86linux>>> if you are a little-endian machine, or
 unless your processor is little-endian (x86, Alpha).  Mac, Sun, MIPS,
 HP, Motorola, and IBM are big-endian.
 
-* Incorporating Graphical Printer Support 
+* Capabilties 
+
+*-----:------:------:------:------:------+
+ <<Platform>> | <<Base IIgs Emulation>> | <<Ethernet>> | <<Text Printer>> | <<Graphical Printer>> | <<Drag/Drop Disks>>
+*-----:------:------+
+ Linux     | Yes | No  | Yes  | Yes  | No  |
+*-----:------:------+
+ Macintosh | Yes | No  | Yes  | Yes  | No  | 
+*-----:------:------+
+ Windows   | Yes | Yes | Yes  | Yes | Yes | 
+*-----:------:------+
+
+[]
+
+* Building Graphical Printer Support 
 
  Until graphical prallel printer support is generally integrated into all builds, the following work needs to be done:
 
