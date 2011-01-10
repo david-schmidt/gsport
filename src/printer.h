@@ -52,7 +52,7 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
-#endif
+#endif // HAVE_SDL
 
 #if defined (WIN32)
 #include <windows.h>
@@ -268,7 +268,6 @@ private:
 
 	Real64 hmi;							// Horizontal motion index (in inch; overrides CPI settings)
 
-	Bit8u msb;							// MSB mode
 	Bit16u numPrintAsChar;				// Number of bytes to print as characters (even when normally control codes)
 
 #if defined (WIN32)

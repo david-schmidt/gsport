@@ -60,12 +60,9 @@ const char* const textPrinterFileName = "./printer.txt";
 #define PIXX ((Bitu)floor(curX*dpi+0.5))
 #define PIXY ((Bitu)floor(curY*dpi+0.5))
 
-static Bit16u confdpi, confwidth, confheight;
 static Bitu printer_timout;
 static bool timeout_dirty;
 static const char* document_path;
-static char confoutputDevice[50];
-static bool confmultipageOutput;
 extern "C" char* g_printer_font_roman;
 extern "C" char* g_printer_font_sans;
 extern "C" char* g_printer_font_courier;
@@ -451,7 +448,7 @@ void CPrinter::updateFont()
 		FT_Set_Transform(curFont, &matrix, 0);
 	}
 }
-#endif HAVE_SDL
+#endif // HAVE_SDL
 
 #ifdef HAVE_SDL
 bool CPrinter::processCommandChar(Bit8u ch)
