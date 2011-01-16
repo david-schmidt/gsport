@@ -46,7 +46,7 @@ int	g_queued_samps = 0;
 int	g_queued_nonsamps = 0;
 int	g_num_osc_interrupting = 0;
 
-#if defined(HPUX) || defined(__linux__) || defined(_WIN32) || defined(MAC)
+#if defined(HPUX) || defined(__linux__) || defined(WIN_SOUND) || defined(MAC)	/* Workaround - gcc in cygwin wasn't defining _WIN32, substituted WIN_SOUND instead */
 int	g_audio_enable = -1;
 #else
 # if defined(OSS)
@@ -263,7 +263,7 @@ sound_init()
 void
 sound_init_general()
 {
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(MAC) && !defined(__OS2__)
+#if !defined(WIN_SOUND) && !defined(__CYGWIN__) && !defined(MAC) && !defined(__OS2__)	/* Workaround - gcc in cygwin wasn't defining _WIN32 */
 	int	pid;
 	int	shmid;
 	int	tmp;
@@ -273,7 +273,7 @@ sound_init_general()
 	int	size;
 	int	ret;
 
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(MAC) && !defined(__OS2__)
+#if !defined(WIN_SOUND) && !defined(__CYGWIN__) && !defined(MAC) && !defined(__OS2__)	/* Workaround - gcc in cygwin wasn't defining _WIN32 */
 	if(!g_use_shmem) {
 		if(g_audio_enable < 0) {
 			printf("Defaulting audio off for slow X display\n");
@@ -290,7 +290,7 @@ sound_init_general()
 
 	size = SOUND_SHM_SAMP_SIZE * SAMPLE_CHAN_SIZE;
 
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !defined(MAC) && !defined(__OS2__)
+#if !defined(WIN_SOUND) && !defined(__CYGWIN__) && !defined(MAC) && !defined(__OS2__)	/* Workaround - gcc in cygwin wasn't defining _WIN32 */
 	shmid = shmget(IPC_PRIVATE, size, IPC_CREAT | 0777);
 	if(shmid < 0) {
 		printf("sound_init: shmget ret: %d, errno: %d\n", shmid,
@@ -321,7 +321,7 @@ sound_init_general()
 
 	fflush(stdout);
 
-#if !defined(MAC) && !defined(_WIN32) && !defined(__CYGWIN__) && !defined(__OS2__)
+#if !defined(MAC) && !defined(WIN_SOUND) && !defined(__CYGWIN__) && !defined(__OS2__)	/* Workaround - gcc in cygwin wasn't defining _WIN32 */
 	/* prepare pipe so parent can signal child each other */
 	/*  pipe[0] = read side, pipe[1] = write end */
 	ret = pipe(&g_pipe_fd[0]);
@@ -373,12 +373,12 @@ sound_init_general()
 #else
 # ifdef MAC
 	macsnd_init(shmaddr);
-# elif defined (_WIN32)
+# elif defined (WIN_SOUND)	/* Workaround - gcc in cygwin wasn't defining _WIN32 */
 /* windows */
 	win32snd_init(shmaddr);
 # elif defined (__OS2__)
 # endif
-#endif /* _WIN32 */
+#endif /* WIN_SOUND */
 
 }
 
@@ -446,7 +446,7 @@ sound_shutdown()
 	// OG stop sound and free memory on sound_shutdown
 	sound_reset(g_cur_dcycs);
 
-#ifdef _WIN32
+#ifdef WIN_SOUND	/* Workaround - gcc in cygwin wasn't defining _WIN32 */
 	win32snd_shutdown();
 #elif defined(__OS2__)
 #else
@@ -640,7 +640,7 @@ send_sound(int real_samps, int size)
 	DOC_LOG("send_sound", -1, g_last_sound_play_dsamp,
 						(real_samps << 30) + size);
 
-#if defined(MAC) || defined(_WIN32)
+#if defined(MAC) || defined(WIN_SOUND)	/* Workaround - gcc in cygwin wasn't defining _WIN32 */
 	ret = 0;
 	child_sound_playit(tmp);
 #elif defined(__OS2__)

@@ -30,7 +30,7 @@
 # include <sys/soundcard.h>
 #endif
 
-#ifndef _WIN32
+#ifndef WIN_SOUND	/* Workaround - gcc in cygwin wasn't defining _WIN32 */
 # include <sys/socket.h>
 # include <netinet/in.h>
 #endif
@@ -63,7 +63,7 @@ word32 *g_childsnd_shm_addr = 0;
 
 void child_sound_init_linux();
 void child_sound_init_hpdev();
-void child_sound_init_win32();
+void child_sound_initWIN_SOUND();
 void child_sound_init_mac();
 
 void
@@ -84,7 +84,7 @@ reliable_buf_write(word32 *shm_addr, int pos, int size)
 	size = size * 4;
 
 	while(size > 0) {
-#ifdef _WIN32
+#ifdef WIN_SOUND
 		ret = win32_send_audio(ptr, size);
 #else
 # ifdef MAC
@@ -145,7 +145,7 @@ child_sound_loop(int read_fd, int write_fd, word32 *shm_addr)
 #if defined(__linux__) || defined(OSS)
 	child_sound_init_linux();
 #endif
-#ifdef _WIN32
+#ifdef WIN_SOUND
 	child_sound_init_win32();
 	return;
 #endif
