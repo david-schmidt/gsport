@@ -6,6 +6,21 @@
 
 GSport Release History
 
+* Unreleased - in SVN now
+
+ New functionality:
+
+ * Added text-based virtual printer output
+
+ []
+
+ Bug fixes:
+
+ * Added sound libraries in Win32 binary, mistakenly omitted
+
+ []
+
+
 * Version 0.1 - 1/6/2011 released as interim build
 
  New functionality:

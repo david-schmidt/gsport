@@ -38,17 +38,17 @@ The Win32 code in GSport is leveraged from KEGS32.
  GSport can be compiled with {{{http://www.mingw.org/}Mingw}}
 and {{{http://www.cygwin.com/}Cygwin}} as well as via standard Microsoft compiler suites.
 
- In order to compile:
+ In order to compile with Cygwin:
 
 ------------------
 cd into the src/ directory
 rm vars
 ln -s vars_win32 vars
-./make_win
+make
 ------------------
 
  You need to have a ROM file (named
-ROM, ROM.01, or ROM.03) in the same directory.
+ROM, ROM.01, or ROM.03) in the same directory as the resulting executable.
 
  To quit, either click the close box, or force quit the application.
 You can also middle-click (if you have a 3-button mouse) or
@@ -59,6 +59,7 @@ Shift-F6 to get the debugger in the terminal window, and then type "q".
  Use the <<<vars_mac>>> file:
 
 -------------------------------------
+cd into the src/ directory
 rm vars; ln -s vars_mac vars
 make
 -------------------------------------
@@ -70,6 +71,7 @@ make
  Use the <<<vars_x86linux>>> file:
 
 -------------------------------------
+cd into the src/ directory
 rm vars; ln -s vars_x86linux vars
 make
 -------------------------------------
@@ -93,6 +95,7 @@ tell it to disable audio with the following command-line argument:
  Use the <<<vars_linuxppc>>> file:
 
 -------------
+cd into the src/ directory
 rm vars; ln -s vars_linuxppc vars
 make
 ---------
@@ -110,6 +113,7 @@ come out.
  Use the <<<vars_solaris>>> file:
 
 -------------------------------------
+cd into the src/ directory
 rm vars; ln -s vars_solaris vars
 make
 -------------------------------------
@@ -126,6 +130,7 @@ by runnning the command: <<<gsportx -audio 1>>>
  Use the <<<vars_x86solaris>>> file:
 
 -------------------------------------
+cd into the src/ directory
 rm vars; ln -s vars_x86solaris vars
 make
 -------------------------------------
@@ -161,7 +166,7 @@ HP, Motorola, and IBM are big-endian.
 
 * Building Graphical Printer Support 
 
- Until graphical prallel printer support is generally integrated into all builds, the following work needs to be done:
+ Until graphical parallel printer support is generally integrated into all builds, the following work needs to be done:
 
  * Install Simple DirectMedia Layer ({{{http://www.libsdl.org/}SDL}}) and Freetype in your build environment - you'll need to link to their libraries 
 
