@@ -65,5 +65,5 @@ Telnet application included with Marinetti
 
  A note about 8-bit applications:
 
- Uthernet enabled versions of Contiki seem to work fine with GSport. Other 8-bit software should work fine but
-are untested at this time.
+ Uthernet enabled versions of Contiki and ADTPro work fine with GSport. Other 8-bit software should work fine but
+are untested.
