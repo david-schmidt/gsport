@@ -3,45 +3,19 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.gsport</groupId>
   <artifactId>doc</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>Website</version>
   <name>GSport</name>
   <url>http://maven.apache.org/maven2</url>
   <inceptionYear>2010</inceptionYear>
+  <organization>
+    <name>GSport Contributors</name>
+  </organization>
   <distributionManagement>
     <site>
       <id>website</id>
       <url>scp://webhost.company.com/www/website</url>
     </site>
   </distributionManagement>
-        <reporting>
-            <plugins>
-              <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-project-info-reports-plugin</artifactId>
-                  <reportSets>
-                     <reportSet>
-                        <reports>
-                        </reports>
-                     </reportSet>
-                  </reportSets>
-              </plugin>
-            </plugins>
-        </reporting>
   <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <locales>en</locales>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <locales>en</locales>
-        </configuration>
-      </plugin>
-    </plugins>
   </build>
 </project>
