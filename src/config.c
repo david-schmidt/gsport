@@ -1370,7 +1370,7 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 	}
 
 	if((!dsk->file) && can_write) {
-rrrrr		printf("Trying to open %s read-only, errno: %d\n", name_ptr,
+		printf("Trying to open %s read-only, errno: %d\n", name_ptr,
 								errno);
 		dsk->file = fopen(name_ptr, "rb");
 		can_write = 0;
