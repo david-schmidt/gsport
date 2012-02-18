@@ -1057,20 +1057,7 @@ gsportmain(int argc, char **argv)
 	config_init();
 	// If the final argument was not a switch, then treat it like a disk image filename to insert
 	if (final_arg) {
-#if defined(_WIN32) || defined(__CYGWIN__)
-		// On Windows, we need to change backslashes to forward slashes.
-		filename_ptr = malloc(strlen(final_arg +1));
-		strcpy(filename_ptr,final_arg);
-		for (i = 0; i < strlen(filename_ptr);i++) {
-			if (filename_ptr[i] == '\\') filename_ptr[i] = '/';
-		}
-#else
-		filename_ptr = final_arg;
-#endif
-		cfg_inspect_maybe_insert_file(filename_ptr);
-f#if defined(_WIN32) || defined(__CYGWIN__)
-		free(filename_ptr);
-#endif
+		cfg_inspect_maybe_insert_file(final_arg);
 	}
 	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage);
 	//If ethernet is enabled in config.gsport, let's initialize it

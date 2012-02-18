@@ -1294,7 +1294,19 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 
 	name_len = strlen(name);
 	name_ptr = (char *)malloc(name_len + 1);
+#if defined(_WIN32) || defined(__CYGWIN__)
+	// On Windows, we need to change backslashes to forward slashes.
+	for (i = 0; i < name_len; i++) {
+		if (name[i] == '\\') {
+			name_ptr[i] = '/';
+		} else {
+			name_ptr[i] = name[i];
+		}
+	}
+	name_ptr[name_len] = 0;
+#else
 	strncpy(name_ptr, name, name_len + 1);
+#endif
 	dsk->name_ptr = name_ptr;
 
 	dsk->partition_name = 0;
@@ -1358,7 +1370,7 @@ insert_disk(int slot, int drive, const char *name, int ejected, int force_size,
 	}
 
 	if((!dsk->file) && can_write) {
-		printf("Trying to open %s read-only, errno: %d\n", name_ptr,
+rrrrr		printf("Trying to open %s read-only, errno: %d\n", name_ptr,
 								errno);
 		dsk->file = fopen(name_ptr, "rb");
 		can_write = 0;
