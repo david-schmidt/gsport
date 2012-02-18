@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -40,7 +40,7 @@ int	g_accept_events = 0; // OG To know if the emulator is ready to accept extern
 
 char g_argv0_path[256] = "./";
 
-const char *g_gsport_default_paths[] = { "", "./", "${HOME}/",
+const char *g_gsport_default_paths[] = { "", "./", "${HOME}/","${CD}/",
 	"${HOME}/Library/GSport/",
 	"${0}/Contents/Resources/", "/usr/local/lib/",
 	"/usr/local/gsport/", "/usr/local/lib/gsport/", "/usr/share/gsport/",
@@ -900,6 +900,7 @@ gsportmain(int argc, char **argv)
 	int	tmp1;
 	int	i;
 	char	*final_arg = 0;
+	char	*filename_ptr;
 
 	// OG Restoring globals
 	sim65816_initglobals();
@@ -1055,10 +1056,24 @@ gsportmain(int argc, char **argv)
 	iwm_init();
 	config_init();
 	// If the final argument was not a switch, then treat it like a disk image filename to insert
-	if (final_arg)
-		cfg_inspect_maybe_insert_file(final_arg);
+	if (final_arg) {
+#if defined(_WIN32) || defined(__CYGWIN__)
+		// On Windows, we need to change backslashes to forward slashes.
+		filename_ptr = malloc(strlen(final_arg +1));
+		strcpy(filename_ptr,final_arg);
+		for (i = 0; i < strlen(filename_ptr);i++) {
+			if (filename_ptr[i] == '\\') filename_ptr[i] = '/';
+		}
+#else
+		filename_ptr = final_arg;
+#endif
+		cfg_inspect_maybe_insert_file(filename_ptr);
+f#if defined(_WIN32) || defined(__CYGWIN__)
+		free(filename_ptr);
+#endif
+	}
 	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage);
-	//If ethernet is enabled in config.gsport, lets initialize it
+	//If ethernet is enabled in config.gsport, let's initialize it
 #ifdef HAVE_TFE
 	if (g_ethernet == 1)
 	{
@@ -1282,6 +1297,15 @@ setup_gsport_file(char *outname, int maxlen, int ok_if_missing,
 	}
 
 	if(can_create_file) {
+		// If we didn't find a file, pick a place to put it.
+#if defined (_WIN32) || defined(__CYGWIN__)
+		// Windows - use the current working directory
+		gsport_expand_path(&(local_path[0]), "${CD}/config.txt", 250);
+#else
+		// Non-windows - use home directory
+		gsport_expand_path(&(local_path[0]), "${HOME}/config.txt", 250);
+#endif
+		strcpy(outname, &(local_path[0]));
 		// Ask user if it's OK to create the file
 		x_dialog_create_gsport_conf(*name_ptr);
 		can_create_file = 0;
@@ -1299,8 +1323,6 @@ setup_gsport_file(char *outname, int maxlen, int ok_if_missing,
 		x_show_alert(0, 0);
 		return;
 	}
-
-	system("pwd");
 
 	my_exit(2);
 }

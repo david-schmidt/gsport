@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 - 2011 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -556,7 +556,7 @@ cfg_get_tfe_name()
 	}
 	else
 	{
-		#ifdef WIN32
+		#ifdef _WIN32
 		cfg_printf("ERROR: Install/Enable WinPcap for Ethernet Support!!");	
 		#else
 		cfg_printf("ERROR: Install/Enable LibPcap for Ethernet Support!!");	
@@ -799,10 +799,8 @@ config_load_roms()
 		if(*names_ptr == 0) {
 			continue;
 		}
-
 		setup_gsport_file(&g_cfg_tmp_path[0], CFG_PATH_MAX, 1, 0,
 								names_ptr);
-
 		if(g_cfg_tmp_path[0] != 0) {
 			file = fopen(&(g_cfg_tmp_path[0]), "rb");
 			if(!file) {
@@ -817,14 +815,13 @@ config_load_roms()
 			if(ret != len) {
 				fatal_printf("While reading card ROM %s, file "
 					"is too short. (%d) Expected %d bytes, "
-					"read %d bytes\n", errno, len, ret);
+					"read %d bytes\n", &g_cfg_tmp_path[0], errno, len, ret);
 				continue;
 			}
-			printf("Read: %d bytes of ROM in slot %d\n", ret, i);
+			printf("Read: %d bytes of ROM in slot %d from file %s.\n", ret, i, &g_cfg_tmp_path[0]);
 			fclose(file);
 		}
 	}
-
 	more_than_8mb = (g_mem_size_exp > 0x800000);
 	/* Only do the patch if users wants more than 8MB of expansion mem */
 
@@ -1151,7 +1148,7 @@ config_write_config_gsport_file()
 
 	fconf = fopen(g_config_gsport_name, "w+");
 	if(fconf == 0) {
-		halt_printf("cannot open %s!  Stopping!\n");
+		halt_printf("cannot open %s!  Stopping!\n",g_config_gsport_name);
 		return;
 	}
 

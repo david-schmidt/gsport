@@ -448,7 +448,7 @@ win_event_redraw()
 LRESULT CALLBACK
 win_event_handler(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lParam)
 {
-int i;
+int i, j;
 int numDraggedFiles;
 int szFilename;
 LPTSTR lpszFile;
@@ -473,6 +473,14 @@ LPTSTR lpszFile;
 			szFilename = DragQueryFile((HDROP)wParam, i, NULL, 0);
 			lpszFile = (LPTSTR)malloc(szFilename + 1);
 			szFilename = DragQueryFile((HDROP)wParam, i, lpszFile, szFilename + 1);
+			// Need to swap out backslashes, swap in forward slashes
+			if (szFilename > 0) {
+				for (j = 0;j<szFilename;j++) {
+					if (lpszFile[j] == '\\') {
+						lpszFile[j] = '/';
+					}
+				}
+			}
 			cfg_inspect_maybe_insert_file(lpszFile);
 			free(lpszFile);
 		}
