@@ -18,6 +18,8 @@ GSport Release History
 
  * Added sound libraries in Win32 binary, mistakenly omitted
 
+ * Enabled better drag/drop and "open file as... GSport" functionality for Win32 
+
  []
 
 
