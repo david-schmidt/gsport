@@ -57,11 +57,11 @@ gsportx: $(OBJECTS) compile_time.o
 # Mingw32 (native windows) builds:
 gsport.exe: $(OBJECTS) compile_time.o
 	g++ $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32 -lshell32
-	mkdir -p ../GSport.app/lib
+	mkdir -p ../GSport.app
 	cp -f gsport.exe ../GSport.app/GSport.exe
 	cp -f ../config.template ../GSport.app/config.txt
-	cp -f ../lib/*.ttf ../GSport.app/lib
-	cp -f ../lib/arch/win32/*.dll ../GSport.app/lib
+	cp -f ../lib/*.ttf ../GSport.app
+	cp -f ../lib/arch/win32/*.dll ../GSport.app
 	cp -f GSport.bat ../GSport.app/GSport.bat
 	cp -f parallel.rom ../GSport.app
 	cp -f ../COPYING.txt ../GSport.app
