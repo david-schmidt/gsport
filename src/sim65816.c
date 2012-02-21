@@ -1214,6 +1214,12 @@ gsport_expand_path(char *out_ptr, const char *in_ptr, int maxlen)
 				if(!strncmp("0", name_buf, 128)) {
 					/* Replace ${0} with g_argv0_path */
 					tmp_ptr = &(g_argv0_path[0]);
+#if defined (_WIN32) || defined(__CYGWIN__)
+				} else if(!strncmp("PWD", name_buf, 128)) {
+					/* Replace ${PWD} with cwd in Windows */
+					get_cwd(out_ptr,128);
+					tmp_ptr = out_ptr;
+#endif
 				} else {
 					tmp_ptr = getenv(name_buf);
 					if(tmp_ptr == 0) {
@@ -1285,15 +1291,10 @@ setup_gsport_file(char *outname, int maxlen, int ok_if_missing,
 
 	if(can_create_file) {
 		// If we didn't find a file, pick a place to put it.
-#if defined (_WIN32) || defined(__CYGWIN__)
-		// Windows - use the current working directory
-		gsport_expand_path(&(local_path[0]), "${CD}/config.txt", 250);
-#else
-		// Non-windows - use pwd to get current directory
+		// Default is the current working directory.
 		gsport_expand_path(&(local_path[0]), "${PWD}/config.txt", 250);
-#endif
 		strcpy(outname, &(local_path[0]));
-		// Ask user if it's OK to create the file
+		// Ask user if it's OK to create the file (or just create it)
 		x_dialog_create_gsport_conf(*name_ptr);
 		can_create_file = 0;
 

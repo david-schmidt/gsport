@@ -21,6 +21,7 @@
 
 #include <windows.h>
 #include <windowsx.h>
+#include <Shlwapi.h>
 #include <mmsystem.h>
 #include <winsock.h>
 //#include <commctrl.h>
@@ -54,6 +55,15 @@ win_nonblock_read_stdin(int fd, char *bufptr, int len)
 	}
 	return ret;
 
+}
+
+void get_cwd(LPTSTR buffer, int size)
+{
+	HMODULE hSelf;
+	hSelf = GetModuleHandle(NULL);
+	GetModuleFileName(hSelf,buffer,size);
+	PathRemoveFileSpec(buffer);
+	printf("Local directory: [%s]\n",buffer);
 }
 
 void
