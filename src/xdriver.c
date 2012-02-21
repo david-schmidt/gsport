@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -260,8 +260,8 @@ main(int argc, char **argv)
 void
 x_dialog_create_gsport_conf(const char *str)
 {
-	/* do nothing -- not implemented yet */
-	return;
+	// Just write the config file already...
+	config_write_config_gsport_file();
 }
 
 int

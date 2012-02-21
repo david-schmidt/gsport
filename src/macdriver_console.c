@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 - 2011 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -143,7 +143,7 @@ x_show_alert(int is_fatal, const char *str)
 	if(str) {
 		// Provide an extra option--create a file
 		cfstrref2 = CFStringCreateWithFormat(kCFAllocatorDefault, NULL,
-				CFSTR("Create ~/%s"), str);
+				CFSTR("Create ./%s"), str);
 		alert_param.otherText = cfstrref2;
 	}
 	okstrref = CFSTR("Click OK to continue");
@@ -201,10 +201,7 @@ x_dialog_create_gsport_conf(const char *str)
 
 	ret = x_show_alert(1, str);
 	if(ret) {
-		// Create empty file
-		path = "~";
-		snprintf(tmp_buf, 500, "touch %s/%s", path, str);
-		system(tmp_buf);
+		config_write_config_gsport_file();
 	}
 }
 

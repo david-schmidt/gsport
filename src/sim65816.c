@@ -40,7 +40,7 @@ int	g_accept_events = 0; // OG To know if the emulator is ready to accept extern
 
 char g_argv0_path[256] = "./";
 
-const char *g_gsport_default_paths[] = { "", "./", "${HOME}/","${CD}/",
+const char *g_gsport_default_paths[] = { "", "./", "${HOME}/","${CD}/","${PWD}/",
 	"${HOME}/Library/GSport/",
 	"${0}/Contents/Resources/", "/usr/local/lib/",
 	"/usr/local/gsport/", "/usr/local/lib/gsport/", "/usr/share/gsport/",
@@ -1289,8 +1289,8 @@ setup_gsport_file(char *outname, int maxlen, int ok_if_missing,
 		// Windows - use the current working directory
 		gsport_expand_path(&(local_path[0]), "${CD}/config.txt", 250);
 #else
-		// Non-windows - use home directory
-		gsport_expand_path(&(local_path[0]), "${HOME}/config.txt", 250);
+		// Non-windows - use pwd to get current directory
+		gsport_expand_path(&(local_path[0]), "${PWD}/config.txt", 250);
 #endif
 		strcpy(outname, &(local_path[0]));
 		// Ask user if it's OK to create the file
