@@ -45,7 +45,13 @@ gsportmac: $(OBJECTS) compile_time.o
 	cp -f 525.icns ../GSport.app/Contents/Resources/
 	cp -f 2mg.icns ../GSport.app/Contents/Resources/
 	touch '../GSport.app/Icon?'
-	cp -f ../config.template ../config.txt 
+	rm -rf ../GSportDmg
+	mkdir ../GSportDmg
+	mkdir ../GSportDmg/GSport
+	mv ../GSport.app ../GSportDmg/GSport
+	cp -f ../config.template ../GSportDmg/GSport/config.txt
+	cp ../GSport.html ../GSportDmg/GSport/GSport.html
+	arch/mac/makedmg.sh .. GSportDmg GSport GSport 7
 
 # Linux for X builds:
 gsportx: $(OBJECTS) compile_time.o
