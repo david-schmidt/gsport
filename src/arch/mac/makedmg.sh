@@ -22,19 +22,20 @@ cd $BASE
 hdiutil create -megabytes $MEGABYTES $DEST$TEMP.dmg -layout NONE
 MY_DISK=`hdid -nomount $DEST$TEMP.dmg`
 newfs_hfs -v $VOLUME $MY_DISK
+rm -rf /Volumes/$VOLUME/.Trashes
+rm -rf /Volumes/$VOLUME/.fseventsd
 hdiutil eject $MY_DISK
 hdid $DEST$TEMP.dmg
 chflags -R nouchg,noschg "$SRC"
 ditto -rsrcFork -v "$SRC" "/Volumes/$VOLUME"
 
+mypwd=`pwd`
 mkdir "/Volumes/$VOLUME/.background"
-cp ./lib/arch/mac/GSportMacInstallBackground.png "/Volumes/$VOLUME/.background/background.png"
-cp GSportDMG.icns "/Volumes/$VOLUME/.VolumeIcon.icns"
+cp ./src/arch/mac/GSportMacInstallBackground.png "/Volumes/$VOLUME/.background/background.png"
+cp ./src/arch/mac/GSportDMG.icns "/Volumes/$VOLUME/.VolumeIcon.icns"
 SetFile -c icns "/Volumes/$VOLUME/.VolumeIcon.icns"
 SetFile -a C /Volumes/$VOLUME
-./lib/arch/mac/setfileicon GSportFolder.icns /Volumes/$VOLUME/$VOLUME
-rm -rf /Volumes/$VOLUME/.Trashes
-rm -rf /Volumes/$VOLUME/.fseventsd
+./lib/arch/mac/setfileicon ./src/arch/mac/GSportFolder.icns /Volumes/$VOLUME/$VOLUME
 
 echo '
    tell application "Finder"
@@ -47,7 +48,7 @@ echo '
            set theViewOptions to the icon view options of container window
            set arrangement of theViewOptions to not arranged
            set icon size of theViewOptions to 72
-           #set background picture of theViewOptions to file ".background:background.png"
+           set background picture of theViewOptions to file ".background:background.png"
            make new alias file at container window to POSIX file "/Applications" with properties {name:"Applications"}
            set position of item "'${VOLUME}'" of container window to {83, 101}
            set position of item "Applications" of container window to {242, 101}
