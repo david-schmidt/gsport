@@ -12,6 +12,8 @@ GSport Release History
 
  * Added text-based virtual printer output
 
+ * Added OSX drag/drop "installer" disk image (.dmg) 
+
  []
 
  Bug fixes:
