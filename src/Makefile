@@ -37,17 +37,18 @@ gsportmac: $(OBJECTS) compile_time.o
 	mkdir -p ../GSport.app/Contents/MacOS
 	mv gsport ../GSport.app/Contents/MacOS/GSport
 	echo "APPL????" > ../GSport.app/Contents/PkgInfo
-	cp -f Info.plist ../GSport.app/Contents/
-	cp -f info.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
-	cp -f classes.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
-	cp -f objects.xib ../GSport.app/Contents/Resources/English.lproj/main.nib
-	cp -f gsporticon.icns ../GSport.app/Contents/Resources/
-	cp -f 525.icns ../GSport.app/Contents/Resources/
-	cp -f 2mg.icns ../GSport.app/Contents/Resources/
+	cp -f arch/mac/Info.plist ../GSport.app/Contents/
+	cp -f arch/mac/info.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
+	cp -f arch/mac/classes.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
+	cp -f arch/mac/objects.xib ../GSport.app/Contents/Resources/English.lproj/main.nib
+	cp -f arch/mac/gsporticon.icns ../GSport.app/Contents/Resources/
+	cp -f arch/mac/525.icns ../GSport.app/Contents/Resources/
+	cp -f arch/mac/2mg.icns ../GSport.app/Contents/Resources/
 	touch '../GSport.app/Icon?'
 	rm -rf ../GSportDmg
 	mkdir ../GSportDmg
 	mkdir ../GSportDmg/GSport
+	cp ../COPYING.txt ../GSportDmg/GSport
 	mv ../GSport.app ../GSportDmg/GSport
 	cp -f ../config.template ../GSportDmg/GSport/config.txt
 	cp ../GSport.html ../GSportDmg/GSport/GSport.html
