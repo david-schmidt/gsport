@@ -1,9 +1,9 @@
 
 TARGET = gsportx
 OBJECTS = $(OBJECTS1) xdriver.o
-CC = cc
+CC = g++
 CCOPTS = -O2 -Wall -fomit-frame-pointer -march=pentium
-OPTS = -DGSPORT_LITTLE_ENDIAN
+OPTS = -DGSPORT_LITTLE_ENDIAN 
 SUFFIX =
 NAME = gsportx
 LDFLAGS =

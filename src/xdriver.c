@@ -38,7 +38,6 @@
 #endif
 
 int XShmQueryExtension(Display *display);
-void _XInitImageFuncPtrs(XImage *xim);
 
 #include "defc.h"
 #include "protos_xdriver.h"
@@ -675,7 +674,7 @@ x_try_find_visual(int depth, int screen_num, XVisualInfo **visual_list_ptr)
 			(word32)visualList[i].visualid,
 			visualList[i].screen,
 			visualList[i].depth,
-			visualList[i].class);
+			visualList[i].c_class);
 		printf("	red: %08lx, green: %08lx, blue: %08lx\n",
 			visualList[i].red_mask,
 			visualList[i].green_mask,
@@ -683,8 +682,8 @@ x_try_find_visual(int depth, int screen_num, XVisualInfo **visual_list_ptr)
 		printf("	cmap size: %d, bits_per_rgb: %d\n",
 			visualList[i].colormap_size,
 			visualList[i].bits_per_rgb);
-		match8 = (visualList[i].class == PseudoColor);
-		match24 = (visualList[i].class == TrueColor);
+		match8 = (visualList[i].c_class == PseudoColor);
+		match24 = (visualList[i].c_class == TrueColor);
 		if((depth == 8) && match8) {
 			visual_chosen = i;
 			Max_color_size = visualList[i].colormap_size;
@@ -901,7 +900,7 @@ get_ximage(Kimage *kimage_ptr)
 #else
 	xim->byte_order = MSBFirst;
 #endif
-	_XInitImageFuncPtrs(xim);	/* adjust to new byte order */
+	XInitImage(xim);	/* adjust to new byte order */
 
 	/* check mdepth! */
 	if(xim->bits_per_pixel != mdepth) {
@@ -1093,7 +1092,7 @@ check_input_events()
 				(word32)(ev.xcolormap.window));
 			vid_printf("colormap: %08x, new: %d, state: %d\n",
 				(word32)ev.xcolormap.colormap,
-				ev.xcolormap.new, ev.xcolormap.state);
+				ev.xcolormap.c_new, ev.xcolormap.state);
 			break;
 		default:
 			printf("X event 0x%08x is unknown!\n",

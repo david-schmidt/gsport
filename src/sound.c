@@ -298,7 +298,7 @@ sound_init_general()
 		exit(2);
 	}
 
-	shmaddr = shmat(shmid, 0, 0);
+	shmaddr = (word32*)shmat(shmid, 0, 0);
 	tmp = (int)PTR2WORD(shmaddr);
 	if(tmp == -1) {
 		printf("sound_init: shmat ret: %p, errno: %d\n", shmaddr,

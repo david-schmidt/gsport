@@ -358,7 +358,7 @@ scc_accept_socket(int port, double dcycs)
 	}
 	if(scc_ptr->rdwrfd == -1) {
 		rdwrfd = accept(scc_ptr->sockfd, (struct sockaddr*)scc_ptr->host_handle,
-						&(scc_ptr->host_aux1));
+						(socklen_t*)&(scc_ptr->host_aux1));
 		if(rdwrfd < 0) {
 			return;
 		}
