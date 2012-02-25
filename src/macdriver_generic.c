@@ -313,15 +313,12 @@ dev_video_init()
 	else
 	{
 		
-	
-	CGColorSpaceRef colorSpace;
-	
 	int pixelsWide = 704;
 	int pixelsHigh = 462;
 		bitmapBytesPerRow   = (pixelsWide * 4);// 1
 		bitmapByteCount     = (bitmapBytesPerRow * pixelsHigh);
 		
-		colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceGenericRGB);// 2
+		CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
 		bitmapData = (char*)malloc( bitmapByteCount );// 3
 		if (bitmapData == NULL)
 		{
