@@ -5,6 +5,7 @@ CCOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DWIN_SOUND
 CPPOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE
 SUFFIX = ".exe"
 NAME = gsport
+EXTRA_LIBS = -lSDL -lfreetype -lcomdlg32 -lShlwapi
 
 XOPTS = -Wall -fomit-frame-pointer -march=pentium
 XLIBS =
