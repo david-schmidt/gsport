@@ -137,7 +137,7 @@ char* g_printer_font_script = "script.ttf";
 char* g_printer_font_ocra = "ocra.ttf";
 
 int	g_config_iwm_vbl_count = 0;
-extern const char g_gsport_version_str[] = "0.1";
+extern const char g_gsport_version_str[] = "0.2";
 int g_pause=0;	// OG Added pause
 
 #define START_DCYCS	(0.0)
