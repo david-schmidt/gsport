@@ -1,11 +1,13 @@
-
+CC = /usr/bin/g++-4.0
+ARCH = -arch i386 -arch ppc
+SDK = /Developer/SDKs/MacOSX10.4u.sdk
 TARGET = gsportmac
 OBJECTS = $(OBJECTS1) scc_macdriver.o macsnd_driver.o macdriver_generic.o macdriver_console.o
-CCOPTS = -O2 -DMAC
+CCOPTS = -O2 -DMAC $(ARCH) -isysroot $(SDK)
+CPPOPTS = $(ARCH) -isysroot $(SDK)
 SUFFIX =
 NAME = gsportmac
-ARCH = ppc
 
-XOPTS = -Wall -fpascal-strings -mdynamic-no-pic -arch $(ARCH)
+XOPTS = -Wall -fpascal-strings -mdynamic-no-pic
 XLIBS =
-
+LDOPTS = -I. -prebind -framework Carbon -framework Quicktime

@@ -23,6 +23,7 @@ clean:
 	- rm 8inst_c.h
 	- rm 16inst_c.h
 	- rm -r ../GSport.app
+	- rm -r ../GSportDmg
 
 specials: 8inst_s 16inst_s 8size 16size 8inst_c 16inst_c size_c size_s
 
@@ -32,7 +33,7 @@ specials_clean:
 
 # Mac builds:
 gsportmac: $(OBJECTS) compile_time.o
-	g++ $(CCOPTS) $(LDOPTS) -arch $(ARCH) $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS) -prebind -framework Carbon -framework Quicktime
+	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS)
 	mkdir -p ../GSport.app/Contents/Resources/English.lproj/main.nib
 	mkdir -p ../GSport.app/Contents/MacOS
 	mv gsport ../GSport.app/Contents/MacOS/GSport
