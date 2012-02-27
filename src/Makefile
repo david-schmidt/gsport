@@ -50,6 +50,7 @@ gsportmac: $(OBJECTS) compile_time.o
 	mkdir ../GSportDmg
 	mkdir ../GSportDmg/GSport
 	cp ../COPYING.txt ../GSportDmg/GSport
+	cp -f parallel.rom ../GSportDmg/GSport
 	mv ../GSport.app ../GSportDmg/GSport
 	cp -f ../config.template ../GSportDmg/GSport/config.txt
 	cp ../GSport.html ../GSportDmg/GSport/GSport.html
