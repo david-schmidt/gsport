@@ -51,6 +51,7 @@ gsportmac: $(OBJECTS) compile_time.o
 	mkdir ../GSportDmg/GSport
 	cp ../COPYING.txt ../GSportDmg/GSport
 	cp -f parallel.rom ../GSportDmg/GSport
+	cp -f ../lib/NoBoot.po ../GSportDmg/GSport
 	mv ../GSport.app ../GSportDmg/GSport
 	cp -f ../config.template ../GSportDmg/GSport/config.txt
 	cp ../GSport.html ../GSportDmg/GSport/GSport.html
@@ -71,6 +72,7 @@ gsport.exe: $(OBJECTS) compile_time.o
 	cp -f ../config.template ../GSport.app/config.txt
 	cp -f ../lib/*.ttf ../GSport.app/lib
 	cp -f ../lib/arch/win32/*.dll ../GSport.app
+	cp -f ../lib/NoBoot.po ../GSport.app
 	cp -f GSport.bat ../GSport.app/GSport.bat
 	cp -f parallel.rom ../GSport.app
 	cp -f ../COPYING.txt ../GSport.app
