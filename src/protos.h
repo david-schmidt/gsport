@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -139,6 +139,7 @@ double get_dtime(void);
 int micro_sleep(double dtime);
 void clk_bram_zero(void);
 void clk_bram_set(int bram_num, int offset, int val);
+void clk_calculate_bram_checksum(void);
 void clk_setup_bram_version(void);
 void clk_write_bram(FILE *fconf);
 void update_cur_time(void);
@@ -158,7 +159,7 @@ void cfg_exit(void);
 void cfg_toggle_config_panel(void);
 void cfg_text_screen_dump(void);
 void cfg_get_tfe_name(void);
-void cfg_inspect_maybe_insert_file(char *filename);
+void cfg_inspect_maybe_insert_file(char *filename, int should_boot);
 int cfg_guess_image_size(char *filename);
 void config_vbl_update(int doit_3_persec);
 void config_parse_option(char *buf, int pos, int len, int line);
