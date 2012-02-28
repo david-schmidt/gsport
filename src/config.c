@@ -96,6 +96,10 @@ extern word32 g_full_refresh_needed;
 extern word32 g_a2_screen_buffer_changed;
 extern int g_a2_new_all_stat[];
 extern int g_new_a2_stat_cur_line;
+extern byte g_bram[2][256];
+extern byte* g_bram_ptr;
+extern byte g_temp_boot_slot;
+extern byte g_orig_boot_slot;
 
 extern int g_key_down;
 extern const char g_gsport_version_str[];
@@ -2669,18 +2673,19 @@ cfg_file_readdir(const char *pathptr)
 }
 
 void
-cfg_inspect_maybe_insert_file(char *filename)
+cfg_inspect_maybe_insert_file(char *filename, int should_boot)
 {
 /*
 Take a look at a file.  Based on its size, guess a slot/drive to insert it into.
-Used for blind operations like dragging/dropping files. 
+Used for blind operations like dragging/dropping files.
+Optionally boot from that slot. 
 */
 	int rc = 0;
 	int slot = 0;
 	rc = cfg_guess_image_size(filename);
 	switch (rc)
 	{
-		case 0:	slot = 5; break;
+		case 0:	slot = 7; break;
 		case 1:	slot = 6; break;
 		case 2: slot = 5; break;
 		case 3: slot = 7; break;
@@ -2689,7 +2694,11 @@ Used for blind operations like dragging/dropping files.
 	if (slot > 0)
 	{
 		insert_disk(slot,0,filename,0,0,0,-1);	
-		printf("Inserted disk in slot %d, drive 1.  Filename: %s\n",slot,filename);
+		printf("Inserted disk in slot %d, drive 1.  Filename: %s\n", slot, filename);
+		if (should_boot) {
+			g_temp_boot_slot = slot;
+			printf("That slot has been set to boot.\n");
+		}
 	}
 	else
 		printf("Unable to determine appropriate place to insert file %s.\n",filename);
@@ -3296,8 +3305,6 @@ config_control_panel()
 	g_a2_screen_buffer_changed = -1;
 }
 
- extern byte	g_bram[2][256];
- extern byte* g_bram_ptr;
 void x_clk_setup_bram_version()
 {
 		if(g_rom_version < 3) {

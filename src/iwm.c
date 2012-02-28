@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -334,6 +334,11 @@ iwm_flush_disk_to_unix(Disk *dsk)
 
 /* Check for dirty disk 3 times a second */
 
+extern byte g_bram[2][256];
+extern byte* g_bram_ptr;
+extern byte g_temp_boot_slot;
+extern byte g_orig_boot_slot;
+extern int g_config_gsport_update_needed;
 void
 iwm_vbl_update(int doit_3_persec)
 {
@@ -347,6 +352,13 @@ iwm_vbl_update(int doit_3_persec)
 				g_vbl_count);
 			iwm.motor_on = 0;
 			iwm.motor_off = 0;
+			if (g_temp_boot_slot != 254) {
+				// Drive is off, now's a good time to turn off the temp boot slot if it was on.
+				g_temp_boot_slot = 254;
+				g_bram_ptr[40] = g_orig_boot_slot;
+				clk_calculate_bram_checksum();
+				g_config_gsport_update_needed = 1;
+			}
 		}
 	}
 
@@ -357,6 +369,14 @@ iwm_vbl_update(int doit_3_persec)
 	motor_on = iwm.motor_on;
 	if(g_c031_disk35 & 0x40) {
 		motor_on = iwm.motor_on35;
+		if (g_temp_boot_slot != 254) {
+			// Now's a good time to turn off the temp boot slot if it was on.
+			g_temp_boot_slot = 254;
+			g_bram_ptr[40] = g_orig_boot_slot;
+			clk_calculate_bram_checksum();
+			g_config_gsport_update_needed = 1;
+		}
+
 	}
 
 	if(motor_on == 0 || iwm.motor_off) {

@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -757,11 +757,22 @@ do_format_c7(int unit_num)
 }
 
 
+extern byte g_bram[2][256];
+extern byte* g_bram_ptr;
+extern byte g_temp_boot_slot;
+extern byte g_orig_boot_slot;
+extern int g_config_gsport_update_needed;
 void
 do_c700(word32 ret)
 {
 	disk_printf("do_c700 called, ret: %08x\n", ret);
-
+	if (g_temp_boot_slot != 254) {
+		// Booting from slot 7 - now is a good time to turn off the temp boot slot, if it was on.
+		g_temp_boot_slot = 254;
+		g_bram_ptr[40] = g_orig_boot_slot;
+		clk_calculate_bram_checksum();
+		g_config_gsport_update_needed = 1;
+	}
 	ret = do_read_c7(0, 0x800, 0);
 
 	set_memory_c(0x7f8, 7, 0);

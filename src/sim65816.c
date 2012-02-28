@@ -1060,7 +1060,8 @@ gsportmain(int argc, char **argv)
 	config_init();
 	// If the final argument was not a switch, then treat it like a disk image filename to insert
 	if (final_arg) {
-		cfg_inspect_maybe_insert_file(final_arg);
+		// ...and flag it to boot
+		cfg_inspect_maybe_insert_file(final_arg, 1);
 	}
 	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage);
 	//If ethernet is enabled in config.gsport, let's initialize it

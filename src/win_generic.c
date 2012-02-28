@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -473,7 +473,7 @@ LPTSTR lpszFile;
 			szFilename = DragQueryFile((HDROP)wParam, i, NULL, 0);
 			lpszFile = (LPTSTR)malloc(szFilename + 1);
 			szFilename = DragQueryFile((HDROP)wParam, i, lpszFile, szFilename + 1);
-			cfg_inspect_maybe_insert_file(lpszFile);
+			cfg_inspect_maybe_insert_file(lpszFile, 0);
 			free(lpszFile);
 		}
 		DragFinish((HDROP)wParam);

@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -48,6 +48,8 @@ extern int g_c034_val;
 
 byte	g_bram[2][256];
 byte	*g_bram_ptr = &(g_bram[0][0]);
+byte	g_temp_boot_slot = 254;
+byte	g_orig_boot_slot = 0;
 
 word32	g_clk_cur_time = 0xa0000000;
 int	g_clk_next_vbl_update = 0;
@@ -162,6 +164,36 @@ clk_write_bram(FILE *fconf)
 			}
 			fprintf(fconf, "\n");
 		}
+	}
+}
+
+void
+clk_calculate_bram_checksum(void) {
+	int checksum = 0;
+	int i;
+	if (g_bram_ptr[251] == 0xff) {
+		// Only make the checksum valid if we have non-zeron data!
+		// Otherwise you have very valid zeroes, which confuses the GS firmware mightily.
+		for (i = 250; i >= 0; i--) {
+			checksum = (checksum & 0xFFFF) << 1;
+			checksum = (checksum & 0xFFFF)
+				+ g_bram_ptr[i]
+				+ ((int)g_bram_ptr[i + 1] << 8)
+				+ (checksum >> 16);
+		}
+		checksum &= 0xFFFF;
+		checksum += ((checksum ^ 0xAAAA) << 16);
+#ifdef GSPORT_LITTLE_ENDIAN
+		g_bram_ptr[252] = (checksum & 0xFF);
+		g_bram_ptr[253] = (checksum >> 8);
+		g_bram_ptr[254] = (checksum >> 16);
+		g_bram_ptr[255] = (checksum >> 24);
+#else
+		g_bram_ptr[255] = (checksum & 0xFF);
+		g_bram_ptr[254] = (checksum >> 8);
+		g_bram_ptr[253] = (checksum >> 16);
+		g_bram_ptr[252] = (checksum >> 24);
+#endif
 	}
 }
 
@@ -325,7 +357,13 @@ do_clock_data()
 		if(read) {
 			if(g_clk_read) {
 				/* Yup, read */
-				g_c033_data = g_bram_ptr[g_clk_reg1];
+				if ((g_clk_reg1 == 0x28) && (g_temp_boot_slot != 254)){
+					// Modify boot slot
+					g_c033_data = g_temp_boot_slot;
+					clk_calculate_bram_checksum();
+				} else {
+					g_c033_data = g_bram_ptr[g_clk_reg1];
+				}
 				clk_printf("Reading BRAM loc %02x: %02x\n",
 					g_clk_reg1, g_c033_data);
 			} else {
@@ -336,9 +374,15 @@ do_clock_data()
 				halt_printf("CLK_BRAM1: said rd, now write\n");
 			} else {
 				/* Yup, write */
+				if ((g_clk_reg1 == 0x28) && (g_temp_boot_slot != 254)) {
+					// Modify boot slot
+					g_bram_ptr[g_clk_reg1] = g_temp_boot_slot;
+					clk_calculate_bram_checksum();
+				} else {
+					g_bram_ptr[g_clk_reg1] = g_c033_data;
+				}
 				clk_printf("Writing BRAM loc %02x with %02x\n",
 					g_clk_reg1, g_c033_data);
-				g_bram_ptr[g_clk_reg1] = g_c033_data;
 				g_config_gsport_update_needed = 1;
 			}
 		}
