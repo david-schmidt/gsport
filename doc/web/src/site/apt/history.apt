@@ -6,21 +6,23 @@
 
 GSport Release History
 
-* Unreleased - in SVN now
+* Version 0.2 - 2/29/2012
 
  New functionality:
 
- * Added text-based virtual printer output
+ * Added text-based virtual printer output for all platforms
 
- * Added OSX drag/drop "installer" disk image (.dmg) 
+ * Added OSX drag/drop "installer" disk image (.dmg)
+
+ * Disk images will automatically mount and boot when specified as
+   the last argument on the command line, or when invoked from the
+   Windows shell (file->open as GSport.exe)
 
  []
 
  Bug fixes:
 
  * Added sound libraries in Win32 binary, mistakenly omitted
-
- * Enabled better drag/drop and "open file as... GSport" functionality for Win32 
 
  []
 

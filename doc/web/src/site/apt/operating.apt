@@ -6,54 +6,49 @@
 
 Operating GSport
 
-* Getting ROMs
+* Getting a ROM file
 
  The required ROM for GSport is not part of the distribution, as it is
 not freely distributable.  You must own a IIgs ROM (i.e. a IIgs machine) in
-order to legally use a ROM file that you may find on the internet.  
+order to legally use a ROM file that you may find on the internet.
+
+ GSport can use the ROM image from either a ROM01 or ROM03 IIgs machine.
+By default, that file should be named <<rom>>> and be placed in the same folder as the GSport program/app.
+The name and location are configurable options, but it will "just work" with the defaults.   
 
 * Running GSport
-
- The distribution comes with the full source code for all platforms in
-the src/ directory, the Windows executable as gsportwin.exe, and the Mac OS X
-executable as GSport.app.
-
- See the the {{{developing.html}developing}} page for more information about compiling for other platforms.
 
  On all platforms except Windows and Mac, you must start GSport from a terminal
 window.  GSport will open a new window and use the window you started it from
 as a "debug" window.  
 
- On a Mac, you need to place the <<<config.txt>>> file someplace where GSport
-can find it.  The simplest place is in your home directory, so copy it there
-with the Finder (or using the Terminal).  You can also make the directory
-Library/GSport from your home directory, and then place <<<config.txt>>> there
-along with the ROM file.  You do not need a starting <<<config.txt>>> file
-on a Mac--GSport will offer to make it for you if it cannot find one.
+ GSport will look in a number of places for two files it requires: <<<config.txt>>>
+and  <<<rom>>>.  The suggested place for these files is right alongside the GSport
+application itself.
 
  Start GSport by Double-clicking the GSport icon on a Mac, or by running
-the executable (<<<gsportwin>>> on Windows, and <<<gsportx>>> on Linux).  GSport can
-be run by the Terminal window on a Mac as well (which enables access to
+the executable (<<<gsport.exe>>> on Windows, and <<<gsportx>>> on Linux). 
+GSport can be run by the Terminal window on a Mac as well (which enables access to
 more debug information) by typing: "./GSport.app/Contents/MacOS/GSport".
 
- Assuming all goes well, GSport will then boot up but probably not find any
-disk images.  See below for how to tell GSport what disk images to use.
+ Assuming all goes well, GSport will then boot up but probably not find any disk images.  
+Hit the "F4" key and see below for how to tell GSport what disk images to use.
 Tip: Hitting "F8" locks the mouse in the window (and hides the host cursor)
 until you hit "F8" again.
 
+ See the the {{{developing.html}developing}} page for information about developing GSport and compiliing it for yourself.
+
 * Configuration Panel
 
- You enter the Configuration panel by pressing F4 at any time.  You tell
-GSport what disk images to use through the Configuration panel.  (If GSport
-couldn't find a ROM file, you will be forced into the Configuration
-Panel mode until you select a valid ROM file).
+ The Configuration panel is accessed by pressing the F4 key at any time.
+(If GSport couldn't find a ROM file when it started, you will be forced
+into the Configuration Panel mode until you select a valid ROM file).
 
  To select a ROM file, select "ROM File Selection" and then select your
 ROM file.  If you were not forced into the panel at startup, the GSport
 found one and you can skip this step.
 
 * Disk Images
-
 
  The primary use of the Configuration Panel is to select disk images.  To
 change disk images being used, select "Disk Configuration".  Each slot
@@ -64,12 +59,13 @@ any size at all (although ProDOS-formatted images should be less than
 32MB).
  
  Just use the arrow keys to navigate to the device entry to change, and
-then select it by pressing Return.  A scrollable file selection
+then select it by pressing the Enter or Return key.
+A scrollable file selection
 interface is presented, letting you locate your image files.  To quickly
 jump to a particular path, you can press Tab to toggle between entering
 a path manually, and using the file selector. Press Return on ".."
 entries to go up a directory level.  When you find the image you want,
-just press Return.
+just press the Enter or Return key.
 
  If the image has partitions that GSport supports, another selection
 dialog will have you select which partition to mount.  You will probably
@@ -89,32 +85,12 @@ your computer.  For 3.5" disks, for example, a raw image would be exactly
 800K bytes long (819200 bytes).  GSport directs the emulated GS accesses to
 the image, and does the correct reads and writes of the Unix file instead.
 
- To do "useful" things with GSport, you need to get a bootable disk image.
-You can go to http://www.info.apple.com/support/oldersoftwarelist.html and
-get Apple IIgs System 6.  Unfortunately, Apple now only has .sea files which
-are executable files for Macintosh only.  You need a macintosh to execute
-those programs, which creates Disk Copy image files with no special extensions
-(and with spaces in the names).  Once you get those files back to your
-host machine, you can use them by selecting them from the Configuration Panel.
-
- You can also get Apple II programs in ".dsk" format from a variety of
-sites on the internet, and these should all work on GSport as well.
-
- GSport also supports partitioned devices.  For instance, if you have a CD-ROM
-on your computer, just pop an Apple II CD in, and GSport can mount it, if
-you have a Unix-based system (Linux, any Unix, and Mac OS X).
-
- If you're on a Mac, be careful letting GSport use your HFS partitions--
-GSOS has many HFS bugs when it is writing.  Also avoid having GSport access
-an image which have mounted on your Mac at the same time (always unmount
-it from your Mac before letting GSport access it)!
-
  If you do not have any disk mounted in s7d1, GSport will jump into the monitor.
 To boot slot 6 (or slot 5), use the Apple IIgs Control Panel by pressing
 Ctrl-Command-ESC.
 
  Support for 5.25" nibblized images is read-only for now (since the
-format is kinda simplistic, it's tricky for GSport to write to it since GSport
+format is simplistic, it's tricky for GSport to write to it since GSport
 has more information than fits in that format).  Just select your image,
 like "disk.nib" in the <<<config.txt>>> file like any .dsk or .po image.
 
