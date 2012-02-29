@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -1058,7 +1058,7 @@ sound_play(double dsamps)
 #if defined(__linux__) || defined(OSS)
 				/* Linux seems to expect little-endian */
 				/*  samples always, even on PowerPC */
-# ifdef GSPORT_LITTLE_ENDIAN
+#if defined(GSPORT_LITTLE_ENDIAN) || defined (__LITTLE_ENDIAN__) // OSX needs to calculate endianness mid-compilation, can't be passed on compile command
 				sndptr[pos] = (val << 16) + (val0 & 0xffff);
 # else
 				sndptr[pos] = ((val & 0xff) << 24) +
@@ -1067,7 +1067,7 @@ sound_play(double dsamps)
 						((val0 >> 8) & 0xff);
 # endif
 #else
-# ifdef GSPORT_LITTLE_ENDIAN
+#if defined(GSPORT_LITTLE_ENDIAN) || defined (__LITTLE_ENDIAN__) // OSX needs to calculate endianness mid-compilation, can't be passed on compile command
 				sndptr[pos] = (val << 16) + (val0 & 0xffff);
 # else
 				sndptr[pos] = (val0 << 16) + (val & 0xffff);

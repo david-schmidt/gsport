@@ -183,7 +183,7 @@ clk_calculate_bram_checksum(void) {
 		}
 		checksum &= 0xFFFF;
 		checksum += ((checksum ^ 0xAAAA) << 16);
-#ifdef GSPORT_LITTLE_ENDIAN
+#if defined(GSPORT_LITTLE_ENDIAN) || defined (__LITTLE_ENDIAN__) // OSX needs to calculate endianness mid-compilation, can't be passed on compile command
 		g_bram_ptr[252] = (checksum & 0xFF);
 		g_bram_ptr[253] = (checksum >> 8);
 		g_bram_ptr[254] = (checksum >> 16);

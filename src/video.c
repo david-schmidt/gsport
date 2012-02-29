@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -516,7 +516,7 @@ video_init()
 		val1 = g_dhires_colors_16[col[1] & 0xf];
 		val2 = g_dhires_colors_16[col[2] & 0xf];
 		val3 = g_dhires_colors_16[col[3] & 0xf];
-#ifdef GSPORT_LITTLE_ENDIAN
+#if defined(GSPORT_LITTLE_ENDIAN) || defined (__LITTLE_ENDIAN__) // OSX needs to calculate endianness mid-compilation, can't be passed on compile command
 		val = (val3 << 24) + (val2 << 16) + (val1 << 8) + val0;
 #else
 		val = (val0 << 24) + (val1 << 16) + (val2 << 8) + val3;
@@ -1622,7 +1622,7 @@ redraw_changed_gr(int start_offset, int start_line, int num_lines, int reparse,
 						(val0 << 8) + val0;
 				val1_wd = (val1 << 24) + (val1 << 16) +
 						(val1 << 8) + val1;
-#ifdef GSPORT_LITTLE_ENDIAN
+#if defined(GSPORT_LITTLE_ENDIAN) || defined (__LITTLE_ENDIAN__) // OSX needs to calculate endianness mid-compilation, can't be passed on compile command
 				val01_wd = (val1_wd << 16) + (val0_wd & 0xffff);
 #else
 				val01_wd = (val0_wd << 16) + (val1_wd & 0xffff);
@@ -1762,7 +1762,7 @@ redraw_changed_dbl_gr(int start_offset, int start_line, int num_lines,
 						(val2 << 8) + val2;
 				val3_wd = (val3 << 24) + (val3 << 16) +
 						(val3 << 8) + val3;
-#ifdef GSPORT_LITTLE_ENDIAN
+#if defined(GSPORT_LITTLE_ENDIAN) || defined (__LITTLE_ENDIAN__) // OSX needs to calculate endianness mid-compilation, can't be passed on compile command
 				val01_wd = (val1_wd << 24) + (val0_wd&0xffffff);
 				val12_wd = (val2_wd << 16) + (val1_wd & 0xffff);
 				val23_wd = (val3_wd << 8) + (val2_wd & 0xff);

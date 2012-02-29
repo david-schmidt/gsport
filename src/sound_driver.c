@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -398,7 +398,7 @@ child_sound_init_linux()
 		exit(1);
 	}
 
-#ifdef GSPORT_LITTLE_ENDIAN
+#if defined(GSPORT_LITTLE_ENDIAN) || defined (__LITTLE_ENDIAN__) // OSX needs to calculate endianness mid-compilation, can't be passed on compile command
 	fmt = AFMT_S16_LE;
 #else
 	fmt = AFMT_S16_BE;

@@ -895,7 +895,7 @@ get_ximage(Kimage *kimage_ptr)
 	xim = XCreateImage(g_display, g_vis, depth, ZPixmap, 0,
 		(char *)ptr, width, height, 8, 0);
 
-#ifdef GSPORT_LITTLE_ENDIAN
+#if defined(GSPORT_LITTLE_ENDIAN) || defined (__LITTLE_ENDIAN__) // OSX needs to calculate endianness mid-compilation, can't be passed on compile command
 	xim->byte_order = LSBFirst;
 #else
 	xim->byte_order = MSBFirst;

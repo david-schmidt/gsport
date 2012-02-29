@@ -642,7 +642,7 @@ do_write_c7(int unit_num, word32 buf, int blk)
 		val1 = get_memory16_c(buf + i, 0);
 		val2 = get_memory16_c(buf + i + 2, 0);
 		/* reorder the little-endian bytes to be big-endian */
-#ifdef GSPORT_LITTLE_ENDIAN
+#if defined(GSPORT_LITTLE_ENDIAN) || defined (__LITTLE_ENDIAN__) // OSX needs to calculate endianness mid-compilation, can't be passed on compile command
 		val = (val2 << 16) + val1;
 #else
 		val = (val1 << 24) + ((val1 << 8) & 0xff0000) +
