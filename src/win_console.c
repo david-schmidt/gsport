@@ -62,7 +62,7 @@ void get_cwd(LPTSTR buffer, int size)
 	HMODULE hSelf;
 	hSelf = GetModuleHandle(NULL);
 	GetModuleFileName(hSelf,buffer,size);
-	PathRemoveFileSpec(buffer);
+	//PathRemoveFileSpec(buffer);
 	printf("Local directory: [%s]\n",buffer);
 }
 

@@ -13,7 +13,7 @@ not freely distributable.  You must own a IIgs ROM (i.e. a IIgs machine) in
 order to legally use a ROM file that you may find on the internet.
 
  GSport can use the ROM image from either a ROM01 or ROM03 IIgs machine.
-By default, that file should be named <<rom>>> and be placed in the same folder as the GSport program/app.
+By default, that file should be named <<<rom>>> and be placed in the same folder as the GSport program/app.
 The name and location are configurable options, but it will "just work" with the defaults.   
 
 * Running GSport
@@ -29,7 +29,7 @@ application itself.
  Start GSport by Double-clicking the GSport icon on a Mac, or by running
 the executable (<<<gsport.exe>>> on Windows, and <<<gsportx>>> on Linux). 
 GSport can be run by the Terminal window on a Mac as well (which enables access to
-more debug information) by typing: "./GSport.app/Contents/MacOS/GSport".
+more debug information) by typing: <<<./GSport.app/Contents/MacOS/GSport>>> from the folder GSport is in.
 
  Assuming all goes well, GSport will then boot up but probably not find any disk images.  
 Hit the "F4" key and see below for how to tell GSport what disk images to use.

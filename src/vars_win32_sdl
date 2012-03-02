@@ -1,8 +1,8 @@
 TARGET = gsport.exe
 TFEOBJ = tfe/tfe.o arch/win32/tfearch.o tfe/tfesupp.o
 OBJECTS = $(OBJECTS1) $(TFEOBJ) scc_windriver.o win32snd_driver.o win_console.o win_generic.o
-CCOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DWIN_SOUND -DHAVE_SDL
-CPPOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DHAVE_SDL -I /usr/include/freetype2 -I/usr/include/SDL
+CCOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DWIN_SOUND -DHAVE_SDL -DWIN32 -D_WIN32 -D__USE_W32_SOCKETS
+CPPOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DHAVE_SDL -DWIN32 -D_WIN32 -D__USE_W32_SOCKETS -I /usr/include/freetype2 -I/usr/include/SDL
 SUFFIX = ".exe"
 NAME = gsport
 EXTRA_LIBS = -lSDL -lfreetype -lcomdlg32
