@@ -5,7 +5,7 @@ CCOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DWIN_SOUND -DHAVE_SDL -DWIN32 -D
 CPPOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DHAVE_SDL -DWIN32 -D_WIN32 -D__USE_W32_SOCKETS -I /usr/include/freetype2 -I/usr/include/SDL
 SUFFIX = ".exe"
 NAME = gsport
-EXTRA_LIBS = -lSDL -lfreetype -lcomdlg32
+EXTRA_LIBS = -lSDL -lfreetype -lcomdlg32 -lShlwapi
 
 XOPTS = -Wall -fomit-frame-pointer -march=pentium
 XLIBS =
