@@ -1,3 +1,8 @@
+#
+# There is some very useful information on compilation on the Mac, where we need
+# to take a lot of things into account (bitness, OS level, endianness), here:
+# http://www.kyngchaos.com/macosx/notes/universal64 
+#
 CC = /usr/bin/g++-4.0
 ARCH = -arch i386 -arch ppc
 SDK = -isysroot /Developer/SDKs/MacOSX10.4u.sdk -isysroot /Developer/SDKs/MacOSX10.5.sdk
