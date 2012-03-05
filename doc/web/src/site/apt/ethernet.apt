@@ -6,14 +6,15 @@
 
 GSport Emulated Ethernet
 
- The Uthernet (TFE) support in GSport was made possible by implementing the GPL source written by Spiro Trikaliotis for the {{{http://www.viceteam.org/}Vice emulator}}.  This version of GSport contains the latest code from VICE 2.2.
+ The Uthernet (TFE) support in GSport was made possible by implementing the GPL source written by Spiro Trikaliotis for the {{{http://www.viceteam.org/}Vice emulator}}.
+This version of GSport contains the latest code from VICE 2.2.
 
 * Details
 
- Right now Uthernet emulation only works under Windows. Future support for PCap under OS X and Linux is planned. 
+ Right now Uthernet emulation only works under Windows.
+Support for emulation under OS X and Linux is planned. 
 In order to use Uthernet emulation, you must install {{{http://www.WinPcap.org/install/default.html}WinPCap}} and 
-have a wired (not wireless) ethernet connecton on the host computer.
-
+have a wired (not wireless) Ethernet connection on the host computer.
 
 * GSport Setup
 
@@ -25,7 +26,7 @@ have a wired (not wireless) ethernet connecton on the host computer.
 interfaces is provided on screen. For most the default of interface "0" is correct.
 
  Return back to the main menu and save your configuration for good measure. Due to limitations, you must exit
-and restart GSport for the changes you made to take effect. Next is configuring the Apple IIgs side of things.
+and restart GSport for the changes you made to take effect.
 
 * GS/OS Setup
 
@@ -63,7 +64,7 @@ Telnet application included with Marinetti
 
  Casper web server: It will not serve web pages. This is likely a limitation of WinPCap.
 
- A note about 8-bit applications:
+* 8-bit Applications
 
  Uthernet enabled versions of Contiki and ADTPro work fine with GSport. Other 8-bit software should work fine but
 are untested.

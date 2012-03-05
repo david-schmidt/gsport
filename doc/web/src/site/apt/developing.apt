@@ -147,13 +147,13 @@ by runnning the command: <<<gsportx -audio 1>>>
  If you are porting to an X-windows and Unix-based machine, it should be
 easy.  Start with <<<vars_x86linux>>> if you are a little-endian machine, or
 <<<vars_linuxppc>>> if you are big endian.  Don't define <<<-DGSPORT_LITTLE_ENDIAN>>>
-unless your processor is little-endian (x86, Alpha).  Mac, Sun, MIPS,
-HP, Motorola, and IBM are big-endian.
+unless your processor is little-endian (Alpha, x86, Mac Intel).  Mac PPC, Sun, MIPS,
+HP, Motorola, and IBM Power are big-endian.
 
 * Capabilties 
 
 *-----:------:------:------:------:------+
- <<Platform>> | <<Base IIgs Emulation>> | <<Ethernet>> | <<Text Printer>> | <<Graphical Printer>> | <<Drag/Drop Disks>>
+|| <<Platform>> || <<Base IIgs Emulation>> || <<Ethernet>> || <<Text Printer>> || <<Graphical Printer>> || <<Drag/Drop Disks>>
 *-----:------:------+
  Linux     | Yes | No  | Yes  | Yes  | No  |
 *-----:------:------+

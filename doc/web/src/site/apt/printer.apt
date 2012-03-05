@@ -36,8 +36,9 @@ This behavior is similar to modern laser/inkjet printers when they are used with
 Most applications are good about sending form feeds at page end, so this issue usually doesn't crop up.
 
  Make sure to configure font locations.
-Roman is used by default and the printing emulation won't work if none at all are defined. 
-Any monospaced truetype font you have will work.
+The default Roman font is used by default, and the matching <<<lib/letgothl.ttf>>> is included in the distribution package.
+Printing emulation won't work if no fonts at all are defined. 
+Any mono-spaced TrueType font you have will work.
 
  Printer output should appear in the same directory as GSport as page1.bmp, page2.bmp, etc.
 
@@ -57,6 +58,7 @@ Any monospaced truetype font you have will work.
 
  []
 
- Windows Bitmap will produce .BMP files for each "page" produced.  The same is true for Postscript, but .PS files are produced.
+ Windows Bitmap will produce .BMP files for each "page" produced.
+The same is true for Postscript, but .PS files are produced.
 "Direct to host printer" is only implemented for Windows, and will send page-oriented output directly to your system's printer.
 "Text file" will append text-only output to a file named "printer.txt" in GSport's current working directory.

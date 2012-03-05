@@ -6,7 +6,7 @@
 
 GSport Release History
 
-* Version 0.2 - 2/29/2012
+* Version 0.2a - 2/29/2012
 
  New functionality:
 
@@ -22,7 +22,9 @@ GSport Release History
 
  Bug fixes:
 
- * Added sound libraries in Win32 binary, mistakenly omitted
+ * Win32: Added sound and native printer libraries, mistakenly omitted
+
+ * OSX: Fixed some "endianness" troubles with the fat binaries
 
  []
 

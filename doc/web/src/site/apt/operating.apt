@@ -28,8 +28,11 @@ application itself.
 
  Start GSport by Double-clicking the GSport icon on a Mac, or by running
 the executable (<<<gsport.exe>>> on Windows, and <<<gsportx>>> on Linux). 
-GSport can be run by the Terminal window on a Mac as well (which enables access to
+GSport can be run from the Terminal window on a Mac as well (which enables access to
 more debug information) by typing: <<<./GSport.app/Contents/MacOS/GSport>>> from the folder GSport is in.
+This also enables the automatic mounting/booting feature by allowing you to specify a disk
+image of your choice on that command line; for example: \
+<<<./GSport.app/Contents/MacOS/GSport /path/to/my/disk.po>>> 
 
  Assuming all goes well, GSport will then boot up but probably not find any disk images.  
 Hit the "F4" key and see below for how to tell GSport what disk images to use.
@@ -45,8 +48,8 @@ until you hit "F8" again.
 into the Configuration Panel mode until you select a valid ROM file).
 
  To select a ROM file, select "ROM File Selection" and then select your
-ROM file.  If you were not forced into the panel at startup, the GSport
-found one and you can skip this step.
+ROM file.  If you were not forced into the panel at startup, then GSport
+found one and it is working.
 
 * Disk Images
 
@@ -117,7 +120,7 @@ F8:	Toggle pointer hiding on/off.
 F9:	Invert the sense of the joystick.
 Shift-F9: Swap x and y joystick/paddle axes.
 F10:	Attempt to change the a2vid_palette (only useful on 256-color displays)
-F11:	Full screen mode (only on Mac OS X).
+F11:	Full screen mode (on Mac OS X and Windows).
 F12:	Alias of Pause/Break which is treated as Reset
 
 F2, Alt_R, Meta_r, Menu, Print, Mode_switch, Option:   Option key
