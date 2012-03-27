@@ -7,7 +7,7 @@
 GSport Emulated Printer
 
  There are several different ways of using the virtual printer output.
-Some ways scenarios are detailed below:
+Common scenarios are detailed below:
 
  * Windows {{{printer.html#Bitmap}Bitmap or Postscript}} (B&W) - when you want a graphical file saved on the host computer
 
@@ -24,7 +24,7 @@ Some ways scenarios are detailed below:
  This value should be set to a value like 15 seconds or more for PR#1-type printing to work as you might expect. 
 If it is set to "Never", you must manually send a form feed, fill a page with text, or exit the emulator before output is saved.
 This behavior is similar to modern laser/inkjet printers when they are used with Applesoft. 
-Most applications are good about sending form feeds at page end, so this issue usually doesn't crop up.
+Most applications are good about sending form feeds at page end, so this issue doesn't usually come up.
 
  * The Roman font is used in graphical printing by default, and the matching <<<lib/letgothl.ttf>>> is included in the distribution package.
 Printing emulation won't work if no fonts at all are defined. 
@@ -55,7 +55,7 @@ Any other mono-spaced TrueType font you have may also be used.
 
 * Direct to {Host} Printer
 
- The "Direct to host printer" feature is only implemented for Windows.
+ The "Direct to host printer" feature is only implemented on the Windows platform.
  To set up GSport to send page-oriented output directly to your system's printer, apply the following settings:
 
  Enter the GS native control panel and set slot 1 to "Your Card", then save and exit the control panel.
@@ -79,15 +79,16 @@ Any other mono-spaced TrueType font you have may also be used.
    
 [images/printer7.png]
 
- The printer you choose here will be the place that page-oriented output is sent.
+ The printer you choose here will be the place that page-oriented output is sent, subject to the page ejection
+ timeouts discussed earlier.
  Note that it is even possible to use a printer driver that itself produces PDF output instead of physical paper.
 
 * {Text} File
 
  Printing to a text file will bypass all printer emulation and simply append printed data to a file
- named "printer.txt" in GSport's current working directory.
+ named <<<printer.txt>>> in GSport's current working directory.
  This is especially useful for text-based operations like Applesoft listings using the traditional
- PR#1:LIST:PR#0 command sequences.  
+ <<<PR#1:LIST:PR#0>>> command sequences.  
  Output from GSOS applications like TeachText are not actually textual in nature - they are graphical.
  It would be more appropriate to use a different type of printer output in that situation. 
   
@@ -110,4 +111,5 @@ Any other mono-spaced TrueType font you have may also be used.
 
 [images/printer5.png]
 
- Save the configuration, and printed output will be appended in the "printer.txt" file in GSport's current working directory.
+ Save the configuration, and printed output will be appended in the <<<printer.txt>>> 
+ file in GSport's current working directory.
