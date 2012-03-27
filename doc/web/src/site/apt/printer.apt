@@ -6,59 +6,108 @@
 
 GSport Emulated Printer
 
-* "Native" IIgs Setup
+ There are several different ways of using the virtual printer output.
+Some ways scenarios are detailed below:
 
- Enter the GS native control panel and set slot 1 to "Your Card":
+ * Windows {{{printer.html#Bitmap}Bitmap or Postscript}} (B&W) - when you want a graphical file saved on the host computer
 
-[images/printer0.png]
+ * Direct to {{{printer.html#Host}host printer}} - when you want a real, paper-based copy immediately (or, a Postscript file with an appropriate printer driver)   
 
-* GSport Setup
-
- Press F4 to enter the text-based GSport menu and select the "Parallel Card Configuration" option.
- By default, printer emulation is turned off.  Enable it by setting "Parallel Card in Slot 1" to "On":
-
-[images/printer1.png]
-
- Parallel Output for Applesoft text (i.e. when using PR#1) should be set to Mask off high bit, 
- otherwise output won't look like the ASCII you expect. 
- In all other cases (like printing from normal applications) it should remain on the default Send Full 8-bit data. 
- Optionally you can set the virtual printer to ignore the high bit with ESC/P codes.
-
- Next, navigate back to the main menu and select the "Virtual Printer Configuration" option:
-
-[images/printer2.png]
-
- Printer Timeout configures how long until a form feed is automatically sent to the printer 
- (which forces the emulator to kick out a "page").
-It should be set higher for PR#1-type printing to work as you might expect. 
-If it is set to "Never", you have to manually send a form feed, fill a page with text, or exit the emulator before any output is saved.
-This behavior is similar to modern laser/inkjet printers when they are used with Applesoft. 
-Most applications are good about sending form feeds at page end, so this issue usually doesn't crop up.
-
- Make sure to configure font locations.
-The default Roman font is used by default, and the matching <<<lib/letgothl.ttf>>> is included in the distribution package.
-Printing emulation won't work if no fonts at all are defined. 
-Any mono-spaced TrueType font you have will work.
-
- Printer output should appear in the same directory as GSport as page1.bmp, page2.bmp, etc.
-
-* Printer Output Type
-
- GSport can produce various types of graphical or textual output based on your platform and 
- what has been compiled into your binary.
- Cycling through the various options in "Printer Output Type," there are:
-
- * Windows Bitmap
-
- * Postscript (B&W)
-
- * Direct to host printer
-
- * Text file
+ * {{{printer.html#Text}Text File}} - when you want a file of plain text saved on the host computer 
 
  []
 
- Windows Bitmap will produce .BMP files for each "page" produced.
-The same is true for Postscript, but .PS files are produced.
-"Direct to host printer" is only implemented for Windows, and will send page-oriented output directly to your system's printer.
-"Text file" will append text-only output to a file named "printer.txt" in GSport's current working directory.
+ When configuring the virtual printer (details below), these notes apply in all situations:
+ 
+ * The "Printer Timeout" setting configures how long until a form feed is automatically sent to the printer 
+(which forces the emulator to kick out a "page").
+ This value should be set to a value like 15 seconds or more for PR#1-type printing to work as you might expect. 
+If it is set to "Never", you must manually send a form feed, fill a page with text, or exit the emulator before output is saved.
+This behavior is similar to modern laser/inkjet printers when they are used with Applesoft. 
+Most applications are good about sending form feeds at page end, so this issue usually doesn't crop up.
+
+ * The Roman font is used in graphical printing by default, and the matching <<<lib/letgothl.ttf>>> is included in the distribution package.
+Printing emulation won't work if no fonts at all are defined. 
+Any other mono-spaced TrueType font you have may also be used.
+
+* Windows {Bitmap} or Postscript
+
+ To set up GSport to write .BMP or .PS files for each "page" produced, apply the following settings:
+  
+ Enter the GS native control panel and set slot 1 to "Your Card", then save and exit the control panel.
+ You will need to reboot the emulated GS (with a cold boot - Ctrl-Alt-F12, etc.) 
+ or restart GSport to have this change take effect, just like a real GS:
+
+[images/printer0.png]
+
+ Press F4 to enter the text-based GSport menu and select the "Parallel Card Configuration" option.
+ By default, printer emulation is turned off.  Enable it by setting "Parallel Card in Slot 1" to "On,"
+ and leave the "Parallel Output" option set to its default value, "Send full 8-bit data:"
+
+[images/printer1.png]
+
+ Next, navigate back to the main menu and select the "Virtual Printer Configuration" option
+ and set "Printer Output Type" to either "Windows Bitmap" or "Postscript (B&W)" based on your preference:
+
+[images/printer3.png]
+
+ Save the configuration, and printed output will be saved as files in GSport's current working directory.
+
+* Direct to {Host} Printer
+
+ The "Direct to host printer" feature is only implemented for Windows.
+ To set up GSport to send page-oriented output directly to your system's printer, apply the following settings:
+
+ Enter the GS native control panel and set slot 1 to "Your Card", then save and exit the control panel.
+ Note that you will need to restart GSport after all of the changes below are made, so don't restart just yet:
+
+[images/printer0.png]
+
+ Press F4 to enter the text-based GSport menu and select the "Parallel Card Configuration" option.
+ By default, printer emulation is turned off.  Enable it by setting "Parallel Card in Slot 1" to "On,"
+ and leave the "Parallel Output" option set to its default value, "Send full 8-bit data:"
+
+[images/printer1.png]
+
+ Next, navigate back to the main menu and select the "Virtual Printer Configuration" option
+ and set "Printer Output Type" to "Direct to host printer:"
+
+[images/printer6.png]
+
+ Save the configuration, and stop the GSport application altogether and restart it.
+ You should be presented with your system's default printer selection dialog box:
+   
+[images/printer7.png]
+
+ The printer you choose here will be the place that page-oriented output is sent.
+ Note that it is even possible to use a printer driver that itself produces PDF output instead of physical paper.
+
+* {Text} File
+
+ Printing to a text file will bypass all printer emulation and simply append printed data to a file
+ named "printer.txt" in GSport's current working directory.
+ This is especially useful for text-based operations like Applesoft listings using the traditional
+ PR#1:LIST:PR#0 command sequences.  
+ Output from GSOS applications like TeachText are not actually textual in nature - they are graphical.
+ It would be more appropriate to use a different type of printer output in that situation. 
+  
+ To set up GSport to append printed text to a printer.txt file, apply the following settings:
+  
+ Enter the GS native control panel and set slot 1 to "Your Card", then save and exit the control panel.
+ You will need to reboot the emulated GS (with a cold boot - Ctrl-Alt-F12, etc.) 
+ or restart GSport to have this change take effect, just like a real GS:
+
+[images/printer0.png]
+
+ Press F4 to enter the text-based GSport menu and select the "Parallel Card Configuration" option.
+ By default, printer emulation is turned off.  Enable it by setting "Parallel Card in Slot 1" to "On."
+ Also change the "Parallel Output" option to "Mask off high bit:"
+
+[images/printer4.png]
+
+ Next, navigate back to the main menu and select the "Virtual Printer Configuration" option
+ and set "Printer Output Type" to "Text file:"
+
+[images/printer5.png]
+
+ Save the configuration, and printed output will be appended in the "printer.txt" file in GSport's current working directory.
