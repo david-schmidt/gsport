@@ -30,41 +30,15 @@ and restart GSport for the changes you made to take effect.
 
 * GS/OS Setup
 
- In order to use TCP/IP connectivity under GS/OS, you have to install the latest version of Marinetti and the
-Uthernet Link Layer.
+ In order to use TCP/IP connectivity under GS/OS, you need to install the latest version of Marinetti
+and its Uthernet Link Layer.
+Ewen Wannop has prepared a ready-made hard drive image with everything pre-installed, and that image
+is available in a version tuned specifically to GSport's Uthernet emulation.
+Download and use the disk image in the "GSport Internet Starter Kit":
 
- First download and install the latest version of Marinetti 3.0 available at:
-{{{http://www.apple2.org/marinetti/Marinetti3.0b1.SHK}http://www.apple2.org/marinetti/Marinetti3.0b1.SHK}}
-
- Then install the latest TCPIP INIT available at:
-{{{http://www.apple2.org/marinetti/TCPIP30b3.SHK}http://www.apple2.org/marinetti/TCPIP30b3.SHK}}
-
- Just extract and copy the file to the "System.Setup" folder in your GS/OS system folder, overwriting the existing file
-
- Last, install the latest Uthernet Link Layer (1.0.1b5) available at:
-{{{http://www.wannop.info/speccie/uthernetll.bxy}http://www.wannop.info/speccie/uthernetll.bxy}}
-
- Just extract and copy the file to the "TCPIP" folder in your GS/OS system folder.
-After copying over all the files, reboot the emulated IIgs. Once at the desktop, bring up the graphical control
-panel available in the Apple menu and double click the "TCP/IP" icon.
-
- Click on "Setup Connection..." Select the "Uthernet" link layer from the drop down and then click "Configure..."
-
- Set "Lan Slot:" to "3", check off the DHCP option and then click "Save". Click "OK" to leave the setup dialog.
-
- You should be able to click "Connect to network" and successfully connect to your TCP/IP netowork.
- From this point on, you are free to run any TCP/IP aware GS/OS applications.
-
- The following applications have been tested and seem to work fine:
-
- Spectrum Automated File Exchange 2.1.9 (FTP client, use passive mode)
-Telnet application included with Marinetti
-
- The following applications have been tested and DO NOT work:
-
- Casper web server: It will not serve web pages. This is likely a limitation of WinPCap.
+ {{{http://sourceforge.net/projects/gsport/files/Emulator%20Software%20Images/}http://sourceforge.net/projects/gsport/files/Emulator Software Images/}}
 
 * 8-bit Applications
 
- Uthernet enabled versions of Contiki and ADTPro work fine with GSport. Other 8-bit software should work fine but
+ Uthernet enabled versions of Contiki and ADTPro work fine with GSport. Other 8-bit software should also work but
 are untested.
