@@ -179,5 +179,11 @@
     <ClCompile Include="win_generic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="parallel.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="printer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

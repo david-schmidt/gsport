@@ -267,10 +267,10 @@ CPrinter::~CPrinter(void)
 		page = NULL;
 		FT_Done_FreeType(FTlib);
 	}
-#endif // HAVE_SDL
 #if defined (WIN32)
 	DeleteDC(printerDC);
 #endif
+#endif // HAVE_SDL
 };
 
 #ifdef HAVE_SDL

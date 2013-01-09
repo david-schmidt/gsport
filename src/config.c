@@ -22,10 +22,12 @@
 #include "defc.h"
 #include <stdarg.h>
 #include "config.h"
-#ifndef __OS2__
-#include <dirent.h>
-#else
+#if defined(__OS2__)
 #include "arch\os2\src\dirport.h"
+#elif defined(_MSC_VER)
+#include "arch\win32\dirent-win32.h"
+#else
+#include <dirent.h>
 #endif
 
 #ifdef HAVE_TFE

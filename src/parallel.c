@@ -30,7 +30,7 @@ parallel port, files, and additional types of emulated printers.
 #include "defc.h"
 #include "printer.h"
 extern int g_parallel_out_masking;
-extern int g_vbl_count;
+extern word32 g_vbl_count;
 extern int g_printer_timeout;
 int printer_vbl_count = 0;
 int port_block = 0;

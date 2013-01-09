@@ -32,6 +32,10 @@
 #define vsnprintf _vsnprintf
 #endif
 
+#if defined (_WIN32) || defined(__CYGWIN__)
+extern void get_cwd(LPTSTR buffer, int size);
+#endif
+
 #define PC_LOG_LEN	(8*1024)
 
 int g_speed_fast ;	// OG Expose fast parameter
