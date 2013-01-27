@@ -98,6 +98,9 @@ RECT	g_main_window_saved_rect;
 HMENU	g_main_window_menu_saved;
 int	g_win_fullscreen_state = 0;
 
+LPSTR   g_clipboard;
+size_t  g_clipboard_pos;
+
 /* this table is used to search for the Windows VK_* in col 1 or 2 */
 /* flags bit 8 is or'ed into the VK, so we can distinguish keypad keys */
 /* regardless of numlock */
@@ -912,4 +915,46 @@ x_full_screen(int do_full)
 		}
 	}
 	return;
+}
+
+void
+clipboard_paste(void)
+{
+    if (!IsClipboardFormatAvailable(CF_TEXT))
+        return;
+    if (!OpenClipboard(g_hwnd_main))
+        return;
+    {
+        HGLOBAL hclipboard = GetClipboardData(CF_TEXT);
+        if (!hclipboard) {
+            CloseClipboard();
+            return;
+        }
+        {
+            LPSTR clipboard = (LPSTR)GlobalLock(hclipboard);
+            if (!clipboard) {
+                CloseClipboard();
+                return;
+            }
+            if (g_clipboard) {
+                free(g_clipboard);
+                g_clipboard_pos = 0;
+            }
+            g_clipboard = strdup(clipboard);
+        }
+        GlobalUnlock(hclipboard);
+    }
+    CloseClipboard();
+}
+
+int
+clipboard_get_char(void)
+{
+    if (!g_clipboard)
+        return 0;
+    if (g_clipboard[g_clipboard_pos] == '\n')
+        g_clipboard_pos++;
+    if (g_clipboard[g_clipboard_pos] == '\0')
+        return 0;
+    return g_clipboard[g_clipboard_pos++] | 0x80;
 }

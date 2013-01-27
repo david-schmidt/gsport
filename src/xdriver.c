@@ -1360,3 +1360,16 @@ int x_calc_ratio(float x,float y)
 {
 	return 1;
 }
+
+void
+clipboard_paste(void)
+{
+	// TODO: Add clipboard support
+}
+
+int
+clipboard_get_char(void)
+{
+	// TODO: Add clipboard support
+	return 0;
+}

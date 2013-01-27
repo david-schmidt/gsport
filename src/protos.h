@@ -42,6 +42,8 @@ void x_push_done();
 void x_hide_pointer(int);
 void x_get_kimage(Kimage *kimage_ptr);
 void x_full_screen(int do_full);
+void clipboard_paste(void);
+int clipboard_get_char(void);
 
 /* test65.c */
 void do_gen_test(int got_num, int base_seed);

@@ -1562,7 +1562,13 @@ adb_read_c000()
 	word32	vbl_count;
 
 	if( ((g_kbd_buf[0] & 0x80) == 0) && (g_key_down == 0)) {
-		/* nothing happening, just get out */
+		/* nothing happening, check clipboard */
+		int c = clipboard_get_char();
+		if(c) {
+			/* inject clipboard char into keyboard buffer */
+			g_kbd_buf[0] = c;
+		}
+		/* just get out */
 		return g_kbd_buf[0];
 	}
 	if(g_kbd_buf[0] & 0x80) {
@@ -1726,8 +1732,11 @@ adb_physical_key_update(int a2code, int is_up)
 		switch(special) {
 // OG Disabled special keys (but warp)
 #ifndef ACTIVEGS
-		case 0x04: /* F4 - Emulator config panel */
+		case 0x04: /* F4 - emulator config panel */
 			cfg_toggle_config_panel();
+			break;
+		case 0x05: /* F5 - emulator clipboard paste */
+			clipboard_paste();
 			break;
 		case 0x06: /* F6 - emulator speed */
 			if(SHIFT_DOWN) {

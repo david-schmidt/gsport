@@ -113,6 +113,7 @@ F1:	Alias of Command
 F2:	Alias of Option
 F3:	Alias of ESC
 F4:	Configuration Panel
+F5:	Paste from clipboard (on Windows)
 F6:	Toggle through the 4 speeds: Unlimited, 1MHz, 2.8MHz, 8.0MHz
 Shift-F6: Enter GSport debugger
 F7:	Toggle fast_disk_emul on/off
