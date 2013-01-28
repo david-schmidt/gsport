@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2012 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -92,11 +92,11 @@ scc_socket_maybe_open_incoming(int port, double dcycs)
 		return;
 	}
 	if(scc_ptr->socket_state < 0) {
-		/* not initialized, get out */
-		return;
+		/* not initialized; ok, since we need to listen */
+		//return;
 	}
 
-	printf("scc socket close being called from socket_open_out\n");
+	printf("scc socket close being called from scc_socket_maybe_open_incoming\n");
 	scc_socket_close(port, 0, dcycs);
 
 	scc_ptr->socket_state = 0;
@@ -171,7 +171,7 @@ scc_socket_open_outgoing(int port, double dcycs)
 
 	scc_ptr = &(scc_stat[port]);
 
-	printf("scc socket close being called from socket_open_out\n");
+	printf("scc socket close being called from scc_socket_open_outgoing\n");
 	scc_socket_close(port, 0, dcycs);
 
 	scc_ptr->socket_state = 0;
