@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2013 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -1718,6 +1718,11 @@ adb_physical_key_update(int a2code, int is_up)
 		default:
 			break;
 		}
+	}
+
+	/* CUA clipboard paste - for those that remember ctrl-insert/shift-insert */
+	if(is_up == 0 && a2code == 0x72 && SHIFT_DOWN) {
+			clipboard_paste();
 	}
 
 	/* Only process reset requests here */

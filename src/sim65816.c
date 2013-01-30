@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 - 2012 by GSport contributors
+ Copyright (C) 2010 - 2013 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -33,6 +33,9 @@
 #endif
 
 #if defined (_WIN32) || defined(__CYGWIN__)
+#define WIN32_LEAN_AND_MEAN	/* Tell windows we want less header gunk */
+#define STRICT			/* Tell Windows we want compile type checks */
+#include <windows.h>		/* Need a definition for LPTSTR in CYGWIN */
 extern void get_cwd(LPTSTR buffer, int size);
 #endif
 
