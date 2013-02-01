@@ -533,7 +533,9 @@ clipboard_paste(void)
 					bufsize += CHUNK_SIZE + 1;
 					expanding_buffer = realloc(expanding_buffer, bufsize);
 				}
-				strcat((char*)expanding_buffer,"\r");
+				/* Skip the leading return character when this is the first line in the paste buffer */
+				if (strlen((char*)expanding_buffer) > 0)
+					strcat((char*)expanding_buffer,"\r");
 				strncat((char*)expanding_buffer,buffer,strlen(buffer));
 				g_clipboard = (char*)expanding_buffer;
 			}
