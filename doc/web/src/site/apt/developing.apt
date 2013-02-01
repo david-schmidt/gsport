@@ -150,16 +150,16 @@ easy.  Start with <<<vars_x86linux>>> if you are a little-endian machine, or
 unless your processor is little-endian (Alpha, x86, Mac Intel).  Mac PPC, Sun, MIPS,
 HP, Motorola, and IBM Power are big-endian.
 
-* Capabilties 
+* {Capabilties} 
 
-*-----:------:------:------:------:------+
-|| <<Platform>> || <<Base IIgs Emulation>> || <<Ethernet>> || <<Text Printer>> || <<Graphical Printer>> || <<Drag/Drop Disks>>
+*-----:------:------:------:------:------:------+
+|| <<Platform>> || <<Base IIgs Emulation>> || <<Ethernet>> || <<Text Printer>> || <<Graphical Printer>> || <<Drag/Drop Disks>> || <<Clipboard Paste>>
 *-----:------:------+
- Linux     | Yes | No  | Yes  | Yes  | No  |
+ Linux     | Yes | No  | Yes  | Yes  | No  | No  |
 *-----:------:------+
- Macintosh | Yes | No  | Yes  | Yes  | No  | 
+ Macintosh | Yes | No  | Yes  | Yes  | No  | Yes |
 *-----:------:------+
- Windows   | Yes | Yes | Yes  | Yes | Yes | 
+ Windows   | Yes | Yes | Yes  | Yes  | Yes | Yes |
 *-----:------:------+
 
 []
