@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2013 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -30,7 +30,7 @@
 #define ENABLEQD
 #endif
 
-
+#include "stdio.h"
 #include "defc.h"
 #include "protos_macdriver.h"
 
@@ -50,7 +50,8 @@ WindowRef	g_main_window;
 CGrafPtr mac_window_port;
 #endif
 
-
+char *g_clipboard = 0x00;
+int   g_clipboard_pos;
 
 
 
@@ -508,12 +509,45 @@ int x_calc_ratio(float x,float y)
 void
 clipboard_paste(void)
 {
-	// TODO: Add clipboard support
+#define CHUNK_SIZE 1024
+	char buffer[CHUNK_SIZE];
+	int bufsize = 1;
+	void *expanding_buffer = 0x00;
+	if (g_clipboard)
+	{
+		g_clipboard_pos = 0;
+		free(g_clipboard);
+		g_clipboard = 0x00;
+	}
+	FILE *pipe = popen("pbpaste", "r");
+	if (pipe)
+	{
+		expanding_buffer = calloc(CHUNK_SIZE+1,1);
+		bufsize = CHUNK_SIZE;
+		while (!feof(pipe))
+		{
+			if (fgets(buffer, CHUNK_SIZE, pipe) != NULL)
+			{
+				while (strlen((char*)expanding_buffer) + strlen(buffer) > bufsize)
+				{
+					bufsize += CHUNK_SIZE + 1;
+					expanding_buffer = realloc(expanding_buffer, bufsize);
+				}
+				strcat((char*)expanding_buffer,"\r");
+				strncat((char*)expanding_buffer,buffer,strlen(buffer));
+				g_clipboard = (char*)expanding_buffer;
+			}
+		}
+	}
 }
 
-int
-clipboard_get_char(void)
+int clipboard_get_char(void)
 {
-	// TODO: Add clipboard support
-	return 0;
+	if (!g_clipboard)
+		return 0;
+	if (g_clipboard[g_clipboard_pos] == '\n')
+		g_clipboard_pos++;
+	if (g_clipboard[g_clipboard_pos] == '\0')
+		return 0;
+	return g_clipboard[g_clipboard_pos++] | 0x80;
 }
