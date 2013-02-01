@@ -6,6 +6,23 @@
 
 GSport Release History
 
+* Unreleased - in SVN now
+
+ New functionality:
+
+ * Added clipboard text paste capability (OSX, Windows)
+
+ []
+
+ Bug fixes:
+
+ * IN#1 and IN#2 now triggers the incoming IP port to listen when
+   using IP simulated serial ports; previously, only PR#1 or PR#2
+   did 
+
+ []
+
+
 * Version 0.2a - 2/29/2012
 
  New functionality:
