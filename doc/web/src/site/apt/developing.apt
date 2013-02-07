@@ -8,7 +8,7 @@ Developing GSport
 
  Information, mosly concerning building, about various platforms:
 
-* General build instructions
+* General Build Instructions
 
  You need to build with a <<<make>>> utility.
 There's a default Makefile, which should work for nearly any environment.
@@ -150,16 +150,32 @@ easy.  Start with <<<vars_x86linux>>> if you are a little-endian machine, or
 unless your processor is little-endian (Alpha, x86, Mac Intel).  Mac PPC, Sun, MIPS,
 HP, Motorola, and IBM Power are big-endian.
 
-* {Capabilties} 
+* Extended {Capabilities} by Platform
 
-*-----:------:------:------:------:------:------+
-|| <<Platform>> || <<Base IIgs Emulation>> || <<Ethernet>> || <<Text Printer>> || <<Graphical Printer>> || <<Drag/Drop Disks>> || <<Clipboard Paste>>
+ All platforms have a common core of capabilities:
+ 
+ * Base IIgs emulation
+ 
+ * Ensoniq sound emulation
+ 
+ * Virtual serial ports mapped to real hardware or IP-emulated ports
+ 
+ * Text and graphical printers 
+
+ []
+ 
+ The table below notes where the various builds differ in the support they have in the 
+ code base now for various extended capabilities.  
+ Turning the "No" boxes into "Yes" are all opportunities for contributions!
+
+*-----:------:------:------+
+|| <<Platform>> || <<Ethernet>> || <<Drag/Drop Disks>> || <<Clipboard Paste>>
 *-----:------:------+
- Linux     | Yes | No  | Yes  | Yes  | No  | No  |
+ Linux     |  No  | No  | No  |
 *-----:------:------+
- Macintosh | Yes | No  | Yes  | Yes  | No  | Yes |
+ Macintosh |  No  | No  | Yes |
 *-----:------:------+
- Windows   | Yes | Yes | Yes  | Yes  | Yes | Yes |
+ Windows   |  Yes | Yes | Yes |
 *-----:------:------+
 
 []
