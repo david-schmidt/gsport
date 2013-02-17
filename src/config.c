@@ -334,7 +334,7 @@ int g_cfg_file_pathfield = 0;
 const char *g_gsport_rom_names[] = { "ROM", "ROM", "ROM.01", "ROM.03", 0 };
 	/* First entry is special--it will be overwritten by g_cfg_rom_path */
 
-const char *g_gsport_c1rom_names[] = { "parallel.rom" };
+const char *g_gsport_c1rom_names[] = { "parallel.rom", 0 };
 const char *g_gsport_c2rom_names[] = { 0 };
 const char *g_gsport_c3rom_names[] = { 0 };
 const char *g_gsport_c4rom_names[] = { 0 };
