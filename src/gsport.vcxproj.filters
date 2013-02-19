@@ -45,9 +45,6 @@
     <ClInclude Include="gsportfont.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="instable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="iwm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -94,9 +91,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="size_c.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="size_tab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sound.h">
@@ -185,5 +179,13 @@
     <ClCompile Include="printer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="size_tab.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="instable.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
   </ItemGroup>
 </Project>

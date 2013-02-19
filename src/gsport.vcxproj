@@ -20,12 +20,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -96,7 +98,20 @@
     <ClInclude Include="defs_instr.h" />
     <ClInclude Include="disas.h" />
     <ClInclude Include="gsportfont.h" />
-    <ClInclude Include="instable.h" />
+    <CustomBuild Include="instable.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">perl make_inst c 8 instable.h &gt; 8inst_c.h
+perl make_inst c 16 instable.h &gt; 16inst_c.h
+perl make_inst s 8 instable.h &gt; 8inst_s.h
+perl make_inst s 16 instable.h &gt; 16inst_s.h</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">8inst_c.h 16inst_c.h 8inst_s.h 16inst_s.h</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">perl make_inst c 8 instable.h &gt; 8inst_c.h
+perl make_inst c 16 instable.h &gt; 16inst_c.h
+perl make_inst s 8 instable.h &gt; 8inst_s.h
+perl make_inst s 16 instable.h &gt; 16inst_s.h</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">8inst_c.h 16inst_c.h 8inst_s.h 16inst_s.h</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
+    </CustomBuild>
     <ClInclude Include="iwm.h" />
     <ClInclude Include="iwm_35_525.h" />
     <ClInclude Include="op_routs.h" />
@@ -113,7 +128,22 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="scc.h" />
     <ClInclude Include="size_c.h" />
-    <ClInclude Include="size_tab.h" />
+    <CustomBuild Include="size_tab.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">perl make_size c size_tab.h &gt; size_c.h
+perl make_size s size_tab.h &gt; size_s.h
+perl make_size 8 size_tab.h &gt; 8size_s.h
+perl make_size 16 size_tab.h &gt; 16size_s.h
+perl make_size c size_tab.h &gt; size_c.h</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">size_c.h size_s.h 8size_s.h 16size_s.h</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkObjects>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">perl make_size c size_tab.h &gt; size_c.h
+perl make_size s size_tab.h &gt; size_s.h
+perl make_size 8 size_tab.h &gt; 8size_s.h
+perl make_size 16 size_tab.h &gt; 16size_s.h
+perl make_size c size_tab.h &gt; size_c.h</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">size_c.h size_s.h 8size_s.h 16size_s.h</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
+    </CustomBuild>
     <ClInclude Include="sound.h" />
     <ClInclude Include="superhires.h" />
     <ClInclude Include="support.h" />
