@@ -830,39 +830,6 @@ x_hide_pointer(int do_hide)
 }
 
 void
-init_window(HWND hwnd,BOOL initFlag) {
-        RECT rect;
-        RECT wrect;
-        int  adjx,adjy;
-        GetClientRect(hwnd,&rect);
-        GetWindowRect(hwnd,&wrect);
-        adjx=(wrect.right-wrect.left)-(rect.right-rect.left);
-        adjy=(wrect.bottom-wrect.top)-(rect.bottom-rect.top);
-
-        int win_height= X_A2_WINDOW_HEIGHT;
-
-        if (g_win_status_debug) {
-                win_height+=(MAX_STATUS_LINES * 16) + 32;
-        } 
-
-        if (initFlag) {
-                SetWindowPos(hwnd,NULL,
-                             g_main_window_saved_rect.left,
-			     g_main_window_saved_rect.top,
-                             X_A2_WINDOW_WIDTH+adjx,
-                             win_height+adjy,
-                             SWP_NOACTIVATE | SWP_NOZORDER);
-        } else {
-                SetWindowPos(hwnd,HWND_NOTOPMOST,
-                             g_main_window_saved_rect.left,
-			     g_main_window_saved_rect.top,
-                             X_A2_WINDOW_WIDTH+adjx,
-                             win_height+adjy,
-                             SWP_SHOWWINDOW);
-        }
-}
-
-void
 x_full_screen(int do_full)
 {
     	DEVMODE dmScreenSettings;
@@ -910,7 +877,10 @@ x_full_screen(int do_full)
             		style=GetWindowLong(g_hwnd_main,GWL_STYLE);
             		style |= WS_CAPTION;
             		SetWindowLong(g_hwnd_main,GWL_STYLE,style);
-			init_window(g_hwnd_main,FALSE);
+			SetWindowPos(g_hwnd_main, HWND_TOPMOST,
+				g_main_window_saved_rect.top, g_main_window_saved_rect.left, 
+				g_main_window_saved_rect.right - g_main_window_saved_rect.left, g_main_window_saved_rect.bottom - g_main_window_saved_rect.top,
+            	             SWP_SHOWWINDOW);
 			g_win_fullscreen_state=!g_win_fullscreen_state;
 		}
 	}

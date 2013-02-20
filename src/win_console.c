@@ -79,6 +79,17 @@ x_show_alert(int is_fatal, const char *str)
 	return 0;
 }
 
+void get_default_window_size(LPRECT rect)
+{
+	rect->left = 0;
+	rect->top = 0;
+	rect->bottom = X_A2_WINDOW_HEIGHT;
+	if (g_win_status_debug) 
+		rect->bottom += (MAX_STATUS_LINES * 16) + 32;
+	rect->right = X_A2_WINDOW_WIDTH;
+	AdjustWindowRect(rect, WS_TILED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, FALSE);
+}
+
 int WINAPI WinMain (
 	HINSTANCE hInstance,
     HINSTANCE hPrevInstance,
@@ -95,8 +106,6 @@ main(int argc, char **argv)
 
 	WNDCLASS wndclass;
 	RECT	rect;
-	int	height;
-
 
 	wndclass.style = 0;
 	wndclass.lpfnWndProc = (WNDPROC)win_event_handler;
@@ -115,17 +124,16 @@ main(int argc, char **argv)
 		exit(1);
 	}
 
-	height = X_A2_WINDOW_HEIGHT + (MAX_STATUS_LINES * 16) + 32;
-//	g_main_height = height;
-
+	// Create the window.
+	get_default_window_size(&rect);
 	
 	HWND hwnd = CreateWindowEx(WS_EX_ACCEPTFILES, "gsport", "GSport - Apple //gs Emulator",
 		WS_TILED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT,
-		X_A2_WINDOW_WIDTH, height,
+		rect.right, rect.bottom,
 		NULL, NULL, GetModuleHandle(NULL), NULL);
 
-	printf("g_hwnd_main = %p, height = %d\n", hwnd, height);
+	printf("g_hwnd_main = %p, height = %d\n", hwnd, rect.bottom);
 	GetWindowRect(hwnd, &rect);
 	printf("...rect is: %ld, %ld, %ld, %ld\n", rect.left, rect.top,
 		rect.right, rect.bottom);
