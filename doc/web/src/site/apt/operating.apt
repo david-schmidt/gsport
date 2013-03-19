@@ -121,6 +121,7 @@ F8:	Toggle pointer hiding on/off.
 F9:	Invert the sense of the joystick.
 Shift-F9: Swap x and y joystick/paddle axes.
 F10:	Attempt to change the a2vid_palette (only useful on 256-color displays)
+Shift-F10:	Toggle visibility of the debug status lines (on Windows only)
 F11:	Full screen mode (on Mac OS X and Windows).
 F12:	Alias of Pause/Break which is treated as Reset
 

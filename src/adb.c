@@ -1776,7 +1776,14 @@ adb_physical_key_update(int a2code, int is_up)
 			}
 			break;
 		case 0x0a: /* F10 - change a2vid paletter */
-			change_a2vid_palette((g_a2vid_palette + 1) & 0xf);
+			if (SHIFT_DOWN) {
+#ifdef WIN32
+				extern void x_toggle_status_lines();
+				x_toggle_status_lines();
+#endif
+			} else {
+				change_a2vid_palette((g_a2vid_palette + 1) & 0xf);
+			}
 			break;
 		case 0x0b: /* F11 - full screen */
 			g_fullscreen = !g_fullscreen;

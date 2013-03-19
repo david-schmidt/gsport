@@ -36,6 +36,7 @@ extern HWND g_hwnd_main;
 
 extern char *g_status_ptrs[MAX_STATUS_LINES];
 extern int  g_win_status_debug;
+extern int  g_win_fullscreen_state;
 
 int
 win_nonblock_read_stdin(int fd, char *bufptr, int len)
@@ -79,15 +80,37 @@ x_show_alert(int is_fatal, const char *str)
 	return 0;
 }
 
-void get_default_window_size(LPRECT rect)
+void get_default_window_size(LPSIZE size)
 {
-	rect->left = 0;
-	rect->top = 0;
-	rect->bottom = X_A2_WINDOW_HEIGHT;
+	// Calculate the window client dimensions.
+	RECT rect;
+	rect.left = 0;
+	rect.top = 0;
+	rect.bottom = X_A2_WINDOW_HEIGHT;
 	if (g_win_status_debug) 
-		rect->bottom += (MAX_STATUS_LINES * 16) + 32;
-	rect->right = X_A2_WINDOW_WIDTH;
-	AdjustWindowRect(rect, WS_TILED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, FALSE);
+		rect.bottom += (MAX_STATUS_LINES * 16);
+	rect.right = X_A2_WINDOW_WIDTH;
+
+	// Calculate the window rectangle, which is the client area plus non-client area (e.g. frame and caption).
+	AdjustWindowRect(&rect, WS_TILED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, FALSE);
+	
+	// Return the window size.
+	size->cx = rect.right - rect.left;
+	size->cy = rect.bottom - rect.top;
+}
+
+void x_toggle_status_lines()
+{
+	SIZE size;
+
+	if (!g_win_fullscreen_state)
+	{
+		g_win_status_debug = !g_win_status_debug;
+
+		get_default_window_size(&size);
+		SetWindowPos(g_hwnd_main, NULL, 0, 0, size.cx, size.cy, SWP_NOMOVE | SWP_NOZORDER);
+		x_redraw_status_lines();
+	}
 }
 
 int WINAPI WinMain (
@@ -105,6 +128,7 @@ main(int argc, char **argv)
 //	InitCommonControls();
 
 	WNDCLASS wndclass;
+	SIZE	size;
 	RECT	rect;
 
 	wndclass.style = 0;
@@ -125,15 +149,15 @@ main(int argc, char **argv)
 	}
 
 	// Create the window.
-	get_default_window_size(&rect);
+	get_default_window_size(&size);
 	
 	HWND hwnd = CreateWindowEx(WS_EX_ACCEPTFILES, "gsport", "GSport - Apple //gs Emulator",
 		WS_TILED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
 		CW_USEDEFAULT, CW_USEDEFAULT,
-		rect.right, rect.bottom,
+		size.cx, size.cy,
 		NULL, NULL, GetModuleHandle(NULL), NULL);
 
-	printf("g_hwnd_main = %p, height = %d\n", hwnd, rect.bottom);
+	printf("g_hwnd_main = %p, height = %d\n", hwnd, size.cx);
 	GetWindowRect(hwnd, &rect);
 	printf("...rect is: %ld, %ld, %ld, %ld\n", rect.left, rect.top,
 		rect.right, rect.bottom);
