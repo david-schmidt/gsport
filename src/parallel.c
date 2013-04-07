@@ -32,7 +32,7 @@ parallel port, files, and additional types of emulated printers.
 extern int g_parallel_out_masking;
 extern word32 g_vbl_count;
 extern int g_printer_timeout;
-int printer_vbl_count = 0;
+word32 printer_vbl_count = 0;
 int port_block = 0;
 
 byte parallel_read(word16 io_address)

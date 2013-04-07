@@ -231,7 +231,7 @@ IWM_WRITE_ROUT (Disk *dsk, word32 val, int fast_disk_emul, double dcycs)
 	word32	prev_val;
 	double	dcycs_this_nib;
 	double	dcycs_passed;
-	int	sdiff;
+	double	sdiff;
 	int	prev_bits;
 
 	if((!dsk->file) || dsk->trks == 0) {

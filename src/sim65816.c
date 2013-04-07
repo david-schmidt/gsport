@@ -32,10 +32,12 @@
 #define vsnprintf _vsnprintf
 #endif
 
-#if defined (_WIN32) || defined(__CYGWIN__)
+#if defined(__CYGWIN__)
 #define WIN32_LEAN_AND_MEAN	/* Tell windows we want less header gunk */
 #define STRICT			/* Tell Windows we want compile type checks */
 #include <windows.h>		/* Need a definition for LPTSTR in CYGWIN */
+#endif
+#if defined (_WIN32) || defined(__CYGWIN__)
 extern void get_cwd(LPTSTR buffer, int size);
 #endif
 
@@ -910,7 +912,6 @@ gsportmain(int argc, char **argv)
 	int	tmp1;
 	int	i;
 	char	*final_arg = 0;
-	char	*filename_ptr;
 
 	// OG Restoring globals
 	sim65816_initglobals();
@@ -1070,7 +1071,7 @@ gsportmain(int argc, char **argv)
 		// ...and flag it to boot
 		cfg_inspect_maybe_insert_file(final_arg, 1);
 	}
-	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage);
+	printer_init(g_printer_dpi,85,110,g_printer_output,g_printer_multipage != 0);
 	//If ethernet is enabled in config.gsport, let's initialize it
 #ifdef HAVE_TFE
 	if (g_ethernet == 1)

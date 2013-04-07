@@ -451,7 +451,7 @@ win_event_redraw()
 LRESULT CALLBACK
 win_event_handler(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lParam)
 {
-int i, j;
+int i;
 int numDraggedFiles;
 int szFilename;
 LPTSTR lpszFile;
