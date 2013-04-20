@@ -18,7 +18,9 @@ GSport Release History
 
  * IN#1 and IN#2 now trigger the incoming IP port to listen when
    using IP simulated serial ports; previously, only PR#1 or PR#2
-   did 
+   did   
+
+ * Fixed crash when parallel.rom is missing
 
  []
 
