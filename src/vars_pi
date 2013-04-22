@@ -1,0 +1,18 @@
+
+TARGET = gsportx
+OBJECTS = $(OBJECTS1) xdriver.o
+CC = g++
+CCOPTS = -O2 -Wall -fomit-frame-pointer -march=armv6
+OPTS = -DGSPORT_LITTLE_ENDIAN 
+SUFFIX =
+NAME = gsportx
+LDFLAGS =
+LDOPTS =
+LD = $(CC)
+EXTRA_LIBS = -lXext
+EXTRA_SPECIALS =
+
+AS = cc
+PERL = perl
+
+XOPTS = -I/usr/X11R6/include

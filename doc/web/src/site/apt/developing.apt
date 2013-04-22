@@ -96,6 +96,30 @@ to the correct place.
 by runnning the command: <<<gsportx -audio 1>>>.  It sounds horrible, but sounds do
 come out.
 
+* Raspberry Pi
+
+ The following packages need to be installed:
+
+  * xfonts-base
+
+  * libX11-dev
+
+  * libext-dev
+
+  []
+
+ Add a line with the value <<<snd-pcm-oss>>> to the <<</etc/modules>>> file and reboot to enable sound.
+
+ Use the <<<vars_pi>>> file for compilation:
+
+-------------
+cd into the src/ directory
+rm vars; ln -s vars_pi vars
+make
+---------
+
+ The resulting executable is called <<<gsportx>>>.
+
 * Solaris SPARC
 
  Use the <<<vars_solaris>>> file:
