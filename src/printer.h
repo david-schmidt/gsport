@@ -47,6 +47,8 @@
 #include <png.h>
 #endif
 
+#include <stdio.h>
+
 #ifdef HAVE_SDL
 #include "SDL.h"
 
