@@ -98,17 +98,27 @@ come out.
 
 * Raspberry Pi
 
- The following packages need to be installed:
+ At first, you may want to update/upgrade your base OS:
 
-  * xfonts-base:  <<<sudo apt-get xfonts-base install>>>
+  * <<<sudo apt-get update>>>
 
-  * libX11-dev:  <<<sudo apt-get libX11-dev install>>>
-
-  * libxext-dev:  <<<sudo apt-get libxext-dev install>>>
+  * <<<sudo apt-get upgrade>>>
 
   []
 
- Add a line with the value <<<snd-pcm-oss>>> to the <<</etc/modules>>> file and reboot to enable sound.
+ Then, add a line with the value <<<snd-pcm-oss>>> to the <<</etc/modules>>> file and reboot to enable sound.
+ Change the permissions to the resulting device <<</dev/pcm>>> (after rebooting): <<<sudo chmod 666 /dev/pcm>>>
+
+ Depending on the version of your OS, the following packages may need to be installed:
+
+  * xfonts-base:  <<<sudo apt-get install xfonts-base>>>
+
+  * libX11-dev:  <<<sudo apt-get install libX11-dev>>>
+
+  * libxext-dev:  <<<sudo apt-get install libxext-dev>>>
+
+  []
+
 
  Use the <<<vars_pi>>> file for compilation:
 
