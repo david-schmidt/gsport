@@ -100,11 +100,11 @@ come out.
 
  The following packages need to be installed:
 
-  * xfonts-base:  <<<sudo apt-get xfonts-base>>>
+  * xfonts-base:  <<<sudo apt-get xfonts-base install>>>
 
-  * libX11-dev:  <<<sudo apt-get libX11-dev>>>
+  * libX11-dev:  <<<sudo apt-get libX11-dev install>>>
 
-  * libxext-dev:  <<<sudo apt-get libxext-dev>>>
+  * libxext-dev:  <<<sudo apt-get libxext-dev install>>>
 
   []
 
