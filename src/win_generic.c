@@ -47,14 +47,10 @@ int g_screen_mdepth = 0;
 extern void quitEmulator();
 
 int	g_use_shmem = 1;
-int	g_has_focus = 0;
-int	g_auto_repeat_on = -1;
 
 extern Kimage g_mainwin_kimage;
 
-//HDC	g_main_dc;	// OG dc cannot be a global
 HDC	g_main_cdc;
-//int	g_main_height = 0;
 
 int	g_win_capslock_down = 0;
 
@@ -91,11 +87,8 @@ int g_win_button_states = 0;
 int x_calc_ratio(float ratiox, float ratioy);
 
 // KEGS32 specific customisations
-HWND    g_win_toolbar=NULL;
-HWND    g_win_status=NULL;
 int     g_win_status_debug = 1;
 RECT	g_main_window_saved_rect;
-HMENU	g_main_window_menu_saved;
 int	g_win_fullscreen_state = 0;
 
 LPSTR   g_clipboard;
