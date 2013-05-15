@@ -118,6 +118,7 @@ perl make_inst s 16 instable.h &gt; 16inst_s.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">8inst_c.h 16inst_c.h 8inst_s.h 16inst_s.h</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
     </CustomBuild>
+    <ClInclude Include="win_keymap.h" />
     <ClInclude Include="iwm.h" />
     <ClInclude Include="iwm_35_525.h" />
     <ClInclude Include="op_routs.h" />

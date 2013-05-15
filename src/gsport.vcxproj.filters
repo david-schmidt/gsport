@@ -108,6 +108,9 @@
     <ClInclude Include="tfe\protos_tfe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="win_keymap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="adb.c">

@@ -19,12 +19,11 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#define WIN32_LEAN_AND_MEAN	/* Tell windows we want less header gunk */
+#define STRICT			/* Tell Windows we want compile type checks */
+
 #include <windows.h>
-#include <windowsx.h>
 #include <Shlwapi.h>
-#include <mmsystem.h>
-#include <winsock.h>
-//#include <commctrl.h>
 
 #include "winresource.h"
 #include "defc.h"
@@ -42,8 +41,6 @@ extern int  g_win_fullscreen_state;
 int
 win_nonblock_read_stdin(int fd, char *bufptr, int len)
 {
-	
-
 	HANDLE	oshandle;
 	DWORD	dwret;
 	int	ret;
@@ -56,7 +53,6 @@ win_nonblock_read_stdin(int fd, char *bufptr, int len)
 		ret = read(fd, bufptr, len);
 	}
 	return ret;
-
 }
 
 void get_cwd(LPTSTR buffer, int size)
@@ -114,11 +110,7 @@ void x_toggle_status_lines()
 	}
 }
 
-int WINAPI WinMain (
-	HINSTANCE hInstance,
-    HINSTANCE hPrevInstance,
-    LPSTR lpCmdLine,
-     int nShowCmd)
+int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
 	return main(0,0);
 }
@@ -126,8 +118,6 @@ int WINAPI WinMain (
 int
 main(int argc, char **argv)
 {
-//	InitCommonControls();
-
 	WNDCLASS wndclass;
 	SIZE	size;
 	RECT	rect;
@@ -139,7 +129,7 @@ main(int argc, char **argv)
 	wndclass.hInstance = GetModuleHandle(NULL);
 	wndclass.hIcon = LoadIcon(wndclass.hInstance, MAKEINTRESOURCE(IDC_GSPORT32));
 	wndclass.hCursor = LoadCursor((HINSTANCE) NULL, IDC_ARROW);
-	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH); // OG Added cast
+	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wndclass.lpszMenuName = NULL;
 	wndclass.lpszClassName = "gsport";
 
@@ -172,10 +162,8 @@ main(int argc, char **argv)
 	return ret;
 }
 
-void
-x_check_input_events()
+void x_check_input_events()
 {
-	
 	MSG	msg;
 
 	while(PeekMessage(&msg, g_hwnd_main, 0, 0, PM_NOREMOVE)) {
@@ -188,8 +176,6 @@ x_check_input_events()
 		}
 	}
 }
-
-
 
 void
 x_redraw_status_lines()
@@ -205,24 +191,25 @@ x_redraw_status_lines()
 	margin = 0;
 	if (g_win_status_debug)
 	{
-	HDC localdc = GetDC(g_hwnd_main);	// OG Use on the fly DC
-	oldtextcolor = SetTextColor(localdc, 0);
-	oldbkcolor = SetBkColor(localdc, 0xffffff);
-	for(line = 0; line < MAX_STATUS_LINES; line++) {
-		buf = g_status_ptrs[line];
-		if(buf != 0) {
-			len = strlen(buf);
-			TextOut(localdc, 10, X_A2_WINDOW_HEIGHT +
-				height*line + margin, buf, len);
+		HDC localdc = GetDC(g_hwnd_main);
+		oldtextcolor = SetTextColor(localdc, 0);
+		oldbkcolor = SetBkColor(localdc, 0xffffff);
+		for(line = 0; line < MAX_STATUS_LINES; line++) {
+			buf = g_status_ptrs[line];
+			if(buf != 0) {
+				len = strlen(buf);
+				TextOut(localdc, 10, X_A2_WINDOW_HEIGHT +
+					height*line + margin, buf, len);
+			}
 		}
-	}
-	SetTextColor(localdc, oldtextcolor);
-	SetBkColor(localdc, oldbkcolor);
-	ReleaseDC(g_hwnd_main,localdc);
+		SetTextColor(localdc, oldtextcolor);
+		SetBkColor(localdc, oldbkcolor);
+		ReleaseDC(g_hwnd_main,localdc);
 	}
 }
 
-int x_calc_ratio(float ratiox,float ratioy)
+int
+x_calc_ratio(float ratiox,float ratioy)
 {
 	return 0; // not stretched
 }
