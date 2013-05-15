@@ -26,6 +26,7 @@
 #include <winsock.h>
 //#include <commctrl.h>
 
+#include "winresource.h"
 #include "defc.h"
 #include "protos_windriver.h"
 
@@ -136,7 +137,7 @@ main(int argc, char **argv)
 	wndclass.cbClsExtra = 0;
 	wndclass.cbWndExtra = 0;
 	wndclass.hInstance = GetModuleHandle(NULL);
-	wndclass.hIcon = LoadIcon((HINSTANCE)NULL, IDI_APPLICATION);
+	wndclass.hIcon = LoadIcon(wndclass.hInstance, MAKEINTRESOURCE(IDC_GSPORT32));
 	wndclass.hCursor = LoadCursor((HINSTANCE) NULL, IDC_ARROW);
 	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH); // OG Added cast
 	wndclass.lpszMenuName = NULL;

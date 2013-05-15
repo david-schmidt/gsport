@@ -181,6 +181,9 @@ perl make_size c size_tab.h &gt; size_c.h</Command>
     <ClCompile Include="win_console.c" />
     <ClCompile Include="win_generic.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="win32.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
