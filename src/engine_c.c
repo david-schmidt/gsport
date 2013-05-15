@@ -22,6 +22,10 @@
 #include "defc.h"
 #include "protos_engine_c.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 #if 0
 # define LOG_PC
 /* define FCYCS_PTR_FCYCLES_ROUND_SLOW to get accurate 1MHz write to slow mem*/
@@ -796,15 +800,19 @@ get_itimer()
 	asm volatile ("rdtsc;movl %%eax,%0" : "=r"(ret) : : "%eax","%edx");
 
 	return ret;
-#else
-# if defined(__POWERPC__) && defined(__GNUC__)
+#elif defined(__POWERPC__) && defined(__GNUC__)
 	register word32 ret;
 
 	asm volatile ("mftb %0" : "=r"(ret));
 	return ret;
-# else
+#elif defined(_WIN32)
+	LARGE_INTEGER count;
+	if (::QueryPerformanceCounter(&count))
+		return count.LowPart;
+	else
+		return 0;
+#else
 	return 0;
-# endif
 #endif
 }
 
