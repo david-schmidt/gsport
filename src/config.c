@@ -92,6 +92,9 @@ extern char* g_printer_font_courier;
 extern char* g_printer_font_script;
 extern char* g_printer_font_ocra;
 extern int g_printer_timeout;
+#ifdef _WIN32
+extern int  g_win_status_debug_request;
+#endif
 
 extern int g_screen_index[];
 extern word32 g_full_refresh_needed;
@@ -284,7 +287,12 @@ Cfg_menu g_cfg_main_menu[] = {
 { "Ethernet Card Configuration", g_cfg_ethernet_menu, 0, 0, CFGTYPE_MENU },
 { "Parallel Card Configuration", g_cfg_parallel_menu, 0, 0, CFGTYPE_MENU },
 { "Virtual Printer Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
+#ifndef _WIN32
 { "Force X-windows display depth", KNMP(g_force_depth), CFGTYPE_INT },
+#endif
+#ifdef _WIN32
+{ "Debug status lines,0,Hide,1,Show", KNMP(g_win_status_debug_request), CFGTYPE_INT },
+#endif
 { "Auto-update configuration file,0,Manual,1,Immediately",
 		KNMP(g_config_gsport_auto_update), CFGTYPE_INT },
 { "Speed,0,Unlimited,1,1.0MHz,2,2.8MHz,3,8.0MHz (Zip)",

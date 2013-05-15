@@ -39,12 +39,12 @@ extern int g_pause;	// OG Added Pause
 
 extern int g_warp_pointer;
 extern int g_screen_depth;
-extern int g_force_depth;
 int g_screen_mdepth = 0;
 
 // OG replaced g_quit_sim_now by quitEmulator
 // extern int g_quit_sim_now;
 extern void quitEmulator();
+extern void x_toggle_status_lines();
 
 int	g_use_shmem = 1;
 
@@ -57,22 +57,9 @@ int	g_win_capslock_down = 0;
 extern word32 g_palette_8to1624[256];
 extern word32 g_a2palette_8to1624[256];
 
-extern word32 g_full_refresh_needed;
-
-extern int g_border_sides_refresh_needed;
-extern int g_border_special_refresh_needed;
-extern int g_status_refresh_needed;
-
 extern   int  g_lores_colors[];	
-extern int g_cur_a2_stat;
-
-extern int g_a2vid_palette;
 
 extern int g_installed_full_superhires_colormap;
-
-extern int g_screen_redraw_skip_amt;
-
-extern word32 g_a2_screen_buffer_changed;
 
 HWND	g_hwnd_main;
 BITMAPINFO *g_bmapinfo_ptr = 0;
@@ -87,7 +74,8 @@ int g_win_button_states = 0;
 int x_calc_ratio(float ratiox, float ratioy);
 
 // KEGS32 specific customisations
-int     g_win_status_debug = 1;
+int     g_win_status_debug = 1;			// Current visibility of status lines.
+int		g_win_status_debug_request = 1; // Desired visibility of status lines.
 RECT	g_main_window_saved_rect;
 int	g_win_fullscreen_state = 0;
 
@@ -557,6 +545,10 @@ check_input_events()
 	for(i=0;i<nb_win32_key;i++)
 		win_event_key(NULL,win32_keys[i].raw_vk ,win32_keys[i].down,win32_keys[i].repeat ,	win32_keys[i].flags );
 	nb_win32_key=0;
+
+	if (g_win_status_debug_request != g_win_status_debug)
+		x_toggle_status_lines();
+
 }
 
 
