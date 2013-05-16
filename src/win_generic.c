@@ -44,6 +44,7 @@ extern int g_config_control_panel;
 
 extern void quitEmulator();
 extern void x_toggle_status_lines();
+extern void x_show_console(int show);
 extern void x_check_input_events();
 
 int	g_win_capslock_down = 0;
@@ -58,8 +59,10 @@ BITMAPINFO *g_bmapinfo_ptr = 0;
 volatile BITMAPINFOHEADER *g_bmaphdr_ptr = 0;
 
 // KEGS32 specific customisations
-int     g_win_status_debug = 1;			// Current visibility of status lines.
-int		g_win_status_debug_request = 1; // Desired visibility of status lines.
+int		g_win_status_debug = 1;			// Current visibility of status lines.
+int		g_win_status_debug_request = 1;	// Desired visibility of status lines.
+int		g_win_show_console = 0;			// Current visibility of console.
+int		g_win_show_console_request = 1;	// Desired visibility of console.
 RECT	g_main_window_saved_rect;
 int	g_win_fullscreen_state = 0;
 
@@ -373,7 +376,11 @@ check_input_events()
 
 	if (g_win_status_debug_request != g_win_status_debug)
 		x_toggle_status_lines();
-
+	if (g_win_show_console_request != g_win_show_console)
+	{
+		g_win_show_console = g_win_show_console_request;
+		x_show_console(g_win_show_console_request);
+	}
 }
 
 void

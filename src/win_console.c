@@ -110,6 +110,16 @@ void x_toggle_status_lines()
 	}
 }
 
+void x_show_console(int show)
+{
+	HWND hWnd = ::GetConsoleWindow();
+	if (hWnd)
+		::ShowWindow(hWnd, show ? SW_SHOW : SW_HIDE);
+
+	if (g_hwnd_main)
+		::SetFocus(g_hwnd_main);
+}
+
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
 	return main(0,0);
@@ -118,6 +128,10 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 int
 main(int argc, char **argv)
 {
+	// Hide the console initially to reduce window flashing.  We'll show the console later if needed.
+	x_show_console(0);
+
+	// Register the window class.
 	WNDCLASS wndclass;
 	SIZE	size;
 	RECT	rect;
@@ -133,7 +147,6 @@ main(int argc, char **argv)
 	wndclass.lpszMenuName = NULL;
 	wndclass.lpszClassName = "gsport";
 
-	// Register the window
 	if(!RegisterClass(&wndclass)) {
 		printf("Registering window failed\n");
 		exit(1);

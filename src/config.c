@@ -93,7 +93,8 @@ extern char* g_printer_font_script;
 extern char* g_printer_font_ocra;
 extern int g_printer_timeout;
 #ifdef _WIN32
-extern int  g_win_status_debug_request;
+extern int g_win_show_console_request;
+extern int g_win_status_debug_request;
 #endif
 
 extern int g_screen_index[];
@@ -278,6 +279,15 @@ Cfg_menu g_cfg_printer_menu[] = {
 { 0, 0, 0, 0, 0 },
 };
 
+Cfg_menu g_cfg_debug_menu[] = {
+{ "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
+{ "Status lines,0,Hide,1,Show", KNMP(g_win_status_debug_request), CFGTYPE_INT },
+{ "Console,0,Hide,1,Show", KNMP(g_win_show_console_request), CFGTYPE_INT },
+{ "", 0, 0, 0, 0 },
+{ "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
+{ 0, 0, 0, 0, 0 },
+};
+
 Cfg_menu g_cfg_main_menu[] = {
 { "GSport Configuration", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { "Disk Configuration", g_cfg_disk_menu, 0, 0, CFGTYPE_MENU },
@@ -291,7 +301,7 @@ Cfg_menu g_cfg_main_menu[] = {
 { "Force X-windows display depth", KNMP(g_force_depth), CFGTYPE_INT },
 #endif
 #ifdef _WIN32
-{ "Debug status lines,0,Hide,1,Show", KNMP(g_win_status_debug_request), CFGTYPE_INT },
+{ "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
 #endif
 { "Auto-update configuration file,0,Manual,1,Immediately",
 		KNMP(g_config_gsport_auto_update), CFGTYPE_INT },
