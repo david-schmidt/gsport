@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 - 2012 by GSport contributors
+ Copyright (C) 2010 - 2013 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -112,12 +112,12 @@ void x_toggle_status_lines()
 
 void x_show_console(int show)
 {
-	HWND hWnd = ::GetConsoleWindow();
+	HWND hWnd = GetConsoleWindow();
 	if (hWnd)
-		::ShowWindow(hWnd, show ? SW_SHOW : SW_HIDE);
+		ShowWindow(hWnd, show ? SW_SHOW : SW_HIDE);
 
 	if (g_hwnd_main)
-		::SetFocus(g_hwnd_main);
+		SetFocus(g_hwnd_main);
 }
 
 int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)

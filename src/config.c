@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 - 2012 by GSport contributors
+ Copyright (C) 2010 - 2013 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -92,7 +92,7 @@ extern char* g_printer_font_courier;
 extern char* g_printer_font_script;
 extern char* g_printer_font_ocra;
 extern int g_printer_timeout;
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 extern int g_win_show_console_request;
 extern int g_win_status_debug_request;
 #endif
@@ -279,7 +279,7 @@ Cfg_menu g_cfg_printer_menu[] = {
 { 0, 0, 0, 0, 0 },
 };
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 Cfg_menu g_cfg_debug_menu[] = {
 { "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
 { "Status lines,0,Hide,1,Show", KNMP(g_win_status_debug_request), CFGTYPE_INT },
@@ -302,7 +302,7 @@ Cfg_menu g_cfg_main_menu[] = {
 #ifndef _WIN32
 { "Force X-windows display depth", KNMP(g_force_depth), CFGTYPE_INT },
 #endif
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
 { "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
 #endif
 { "Auto-update configuration file,0,Manual,1,Immediately",
@@ -582,7 +582,7 @@ cfg_get_tfe_name()
 	}
 	else
 	{
-		#ifdef _WIN32
+		#if defined(_WIN32) || defined(__CYGWIN__)
 		cfg_printf("ERROR: Install/Enable WinPcap for Ethernet Support!!");	
 		#else
 		cfg_printf("ERROR: Install/Enable LibPcap for Ethernet Support!!");	
