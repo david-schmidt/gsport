@@ -279,6 +279,7 @@ Cfg_menu g_cfg_printer_menu[] = {
 { 0, 0, 0, 0, 0 },
 };
 
+#ifdef _WIN32
 Cfg_menu g_cfg_debug_menu[] = {
 { "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
 { "Status lines,0,Hide,1,Show", KNMP(g_win_status_debug_request), CFGTYPE_INT },
@@ -287,6 +288,7 @@ Cfg_menu g_cfg_debug_menu[] = {
 { "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { 0, 0, 0, 0, 0 },
 };
+#endif
 
 Cfg_menu g_cfg_main_menu[] = {
 { "GSport Configuration", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
