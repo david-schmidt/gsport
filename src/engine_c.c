@@ -807,7 +807,7 @@ get_itimer()
 	return ret;
 #elif defined(_WIN32)
 	LARGE_INTEGER count;
-	if (::QueryPerformanceCounter(&count))
+	if (QueryPerformanceCounter(&count))
 		return count.LowPart;
 	else
 		return 0;
