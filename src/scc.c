@@ -95,6 +95,9 @@ scc_init()
 	}
 
 	scc_reset();
+	// Initialize ports right away - enable incoming data before PR#x
+	scc_port_init(0);
+	scc_port_init(1);
 }
 
 void
