@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2013 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -39,7 +39,7 @@ extern int g_paddle_buttons;
 extern int g_paddle_val[];
 
 
-const char *g_joystick_dev = "/dev/js0";	/* default joystick dev file */
+const char *g_joystick_dev = "/dev/input/js0";	/* default joystick dev file */
 #define MAX_JOY_NAME	128
 
 int	g_joystick_native_fd = -1;
@@ -128,9 +128,10 @@ joystick_update(double dcycs)
 		}
 	}
 
-	if(i > 0) {
+//	if(i > 0) {
+//	Note from Dave Schmenk: paddle_update_trigger_dcycles(dcycs) always has to be called to keep the triggers current.
 		paddle_update_trigger_dcycs(dcycs);
-	}
+//	}
 }
 
 void

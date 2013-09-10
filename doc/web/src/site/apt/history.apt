@@ -22,6 +22,9 @@ GSport Release History
 
  * Fixed crash when parallel.rom is missing
 
+ * Fix for real joysticks: unless the joystick is moving, gsport
+   sets the values to zero. 
+
  []
 
 
