@@ -448,9 +448,21 @@ void check_input_events(void)
 	    if (ev.type == EV_REL)
 	    {
 		if (ev.code == REL_X)
+		{
 		    g_mouse_raw_x += ev.value;
+		    if (g_mouse_raw_x < 0)
+			g_mouse_raw_x = 0;
+		    if (g_mouse_raw_x > 639)
+			g_mouse_raw_x = 639;
+		}
 		else // REL_Y
+		{
 		    g_mouse_raw_y += ev.value;
+		    if (g_mouse_raw_y < 0)
+			g_mouse_raw_y = 0;
+		    if (g_mouse_raw_y > 399)
+			g_mouse_raw_y = 399;
+		}
 		g_inputstate |= UPDATE_INPUT_MOUSE;
 	    }
 	    else if (ev.type == EV_KEY)
@@ -496,4 +508,5 @@ int main(int argc,char *argv[])
 	exit(-1);
     gsportmain(argc, argv);
     xdriver_end();
+    return 0;
 }
