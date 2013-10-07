@@ -433,6 +433,13 @@ int x_calc_ratio(float x, float y)
 {
     return 1;
 }
+void clipboard_paste(void)
+{
+}
+int clipboard_get_char(void)
+{
+    return 0;
+}
 /*
  * Input handling
  */
@@ -472,8 +479,9 @@ void check_input_events(void)
 		    if ((ev.code == KEY_F10) && SHIFT_DOWN)
 		    {
 			//quitEmulator();
+			iwm_shut();
 			xdriver_end();
-			exit(0);
+			my_exit(1);
 		    }
 		    if (keycode_to_a2code[ev.code] >= 0)
 			adb_physical_key_update(keycode_to_a2code[ev.code], !ev.value);

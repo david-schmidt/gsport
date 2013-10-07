@@ -64,6 +64,13 @@ gsportx: $(OBJECTS) compile_time.o
 	mv gsportx ..
 	cp -f ../config.template ../config.txt 
 
+# Linux framebuffer builds:
+gsportfb: $(OBJECTS) compile_time.o
+	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS)
+	echo $(OBJECTS)
+	mv gsportfb ..
+	cp -f ../config.template ../config.txt 
+
 # Mingw32 (native windows) builds:
 gsport.exe: $(OBJECTS) compile_time.o
 	g++ $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32 -lshell32
