@@ -36,7 +36,7 @@
 #include <pcap.h>
 #endif
 
-#include "..\defc.h"
+#include "../defc.h"
 #include "tfesupp.h"
 #include "protos_tfe.h"
 #include "types.h"
@@ -48,7 +48,7 @@
 /* #define TFE_DEBUG_WARN_REG 1 */   /* warn about invalid register accesses */
 /* #define TFE_DEBUG_WARN_RXTX 1 */  /* warn about invalid rx or tx conditions */
 
-/** #define TFE_DEBUG_INIT 1  **/
+/** #define TFE_DEBUG_INIT 1 **/
 /** #define TFE_DEBUG_LOAD 1  **/          /* enable to see tfe port reads */
 /** #define TFE_DEBUG_STORE 1 **/          /* enable to see tfe port writes */
 /** #define TFE_DEBUG_REGISTERS 1 **/      /* enable to see CS8900a register I/O */

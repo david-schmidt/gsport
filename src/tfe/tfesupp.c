@@ -39,11 +39,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#ifdef WIN32 
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
 #include <commdlg.h>
-
+#endif
 #include "tfesupp.h"
 
 

@@ -50,4 +50,5 @@ extern int util_string_set(char **str, const char *new_value);
 
 extern unsigned long crc32_buf(const char *buffer, unsigned int len);
 
+#define log_message(level,...) fprintf(stderr,__VA_ARGS__)
 #endif

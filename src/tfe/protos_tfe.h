@@ -23,6 +23,10 @@
 #ifndef _PROTOS_TFE_H
 #define _PROTOS_TFE_H
 
+#ifndef FALSE
+#define FALSE 0
+#define TRUE !FALSE
+#endif
 extern int tfe_enabled;
 
 void tfe_init(void);

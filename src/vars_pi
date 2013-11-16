@@ -1,15 +1,15 @@
-
 TARGET = gsportx
-OBJECTS = $(OBJECTS1) xdriver.o
+TFEOBJ = tfe/tfe.o arch/unix/tfearch.o tfe/tfesupp.o
+OBJECTS = $(OBJECTS1) $(TFEOBJ) xdriver.o
 CC = g++
 CCOPTS = -O2 -Wall -fomit-frame-pointer -march=armv6
-OPTS = -DGSPORT_LITTLE_ENDIAN 
+OPTS = -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE
 SUFFIX =
 NAME = gsportx
 LDFLAGS =
 LDOPTS =
 LD = $(CC)
-EXTRA_LIBS = -lXext
+EXTRA_LIBS = -lXext -lpcap
 EXTRA_SPECIALS =
 
 AS = cc
