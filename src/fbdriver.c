@@ -36,6 +36,7 @@
 #include "defc.h"
 
 void quitEmulator();
+extern int g_screen_depth;
 extern word32 g_palette_8to1624[256];
 extern word32 g_a2palette_8to1624[256];
 extern word32 g_a2_screen_buffer_changed;
@@ -55,6 +56,16 @@ extern int g_a2vid_palette;
 extern int g_installed_full_superhires_colormap;
 extern int g_mouse_raw_x;
 extern int g_mouse_raw_y;
+extern word32 g_red_mask;
+extern word32 g_green_mask;
+extern word32 g_blue_mask;
+extern int g_red_left_shift;
+extern int g_green_left_shift;
+extern int g_blue_left_shift;
+extern int g_red_right_shift;
+extern int g_green_right_shift;
+extern int g_blue_right_shift;
+extern Kimage g_mainwin_kimage;
 
 int keycode_to_a2code[128] = 
 {
@@ -191,8 +202,7 @@ struct termios org_tio;
 struct fb_var_screeninfo orig_vinfo;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
-int    g_use_shmem     = 1;
-int    g_screen_mdepth = 8;
+int    pix_size, g_screen_mdepth, g_use_shmem = 1;
 #define	MOUSE_LBTN_DOWN		0x01
 #define	MOUSE_MBTN_DOWN		0x02
 #define	MOUSE_RBTN_DOWN		0x04
@@ -268,7 +278,7 @@ void dev_video_init(void)
     // Store for reset(copy vinfo to vinfo_orig)
     memcpy(&orig_vinfo, &vinfo, sizeof(struct fb_var_screeninfo));
     // Change variable info
-    vinfo.bits_per_pixel = 8;
+    //vinfo.bits_per_pixel = 8;
     // Change resolution
     vinfo.xres = 640;
     vinfo.yres = 400;
@@ -298,11 +308,32 @@ void dev_video_init(void)
 	ioctl(termfd, KDSETMODE, KD_TEXT);
 	exit (-1);
     }
+    g_screen_depth = vinfo.bits_per_pixel;
+    g_screen_mdepth = g_screen_depth;
+    if (g_screen_depth > 8)
+	g_screen_mdepth = 16;
+    if (g_screen_depth > 16)
+	g_screen_mdepth = 32;
+    pix_size = g_screen_mdepth / 8;
+    if (vinfo.bits_per_pixel > 8)
+    {
+	g_red_mask          = (1 << vinfo.red.length)   - 1;
+	g_green_mask        = (1 << vinfo.green.length) - 1;
+ 	g_blue_mask         = (1 << vinfo.blue.length)  - 1;
+	g_red_left_shift    = vinfo.red.offset;
+	g_green_left_shift  = vinfo.green.offset;
+	g_blue_left_shift   = vinfo.blue.offset;	
+	g_red_right_shift   = 8 - vinfo.red.length;
+	g_green_right_shift = 8 - vinfo.green.length;
+	g_blue_right_shift  = 8 - vinfo.blue.length;
+    }
     video_get_kimages();
+    if (g_screen_depth > 8)
+	video_get_kimage(&g_mainwin_kimage, 0, g_screen_depth, g_screen_mdepth);
     for (i = 0; i < 256; i++)
     {
-	video_update_color_raw(i, g_lores_colors[i & 0xf]);
-	g_a2palette_8to1624[i] = g_palette_8to1624[i];
+        video_update_color_raw(i, g_lores_colors[i & 0xf]);
+        g_a2palette_8to1624[i] = g_palette_8to1624[i];
     }
     fclose(stdin);
     freopen("gsport.log", "w+", stdout);
@@ -376,7 +407,7 @@ void show_xcolor_array(void)
  */
 void x_get_kimage(Kimage *kimage_ptr)
 {
-    kimage_ptr->data_ptr = (byte *)malloc(kimage_ptr->width_req * kimage_ptr->height);
+    kimage_ptr->data_ptr = (byte *)malloc(kimage_ptr->width_req * kimage_ptr->height * kimage_ptr->mdepth / 8);
 }
 void x_release_kimage(Kimage* kimage_ptr)
 {
@@ -390,13 +421,14 @@ void x_push_kimage(Kimage *kimage_ptr, int destx, int desty, int srcx, int srcy,
     byte *src_ptr, *dst_ptr;
 
     // Copy sub-image to framebuffer
-    dst_ptr = (byte *)fb_ptr       + desty * finfo.line_length    + destx;
-    src_ptr = kimage_ptr->data_ptr + srcy * kimage_ptr->width_act + srcx;
+    dst_ptr = (byte *)fb_ptr       + desty * finfo.line_length    + destx * pix_size;
+    src_ptr = kimage_ptr->data_ptr + (srcy * kimage_ptr->width_act + srcx) * pix_size;
+    width *= pix_size;
     while (height--)
     {
 	memcpy(dst_ptr, src_ptr, width);
 	dst_ptr += finfo.line_length;
-	src_ptr += kimage_ptr->width_act;
+	src_ptr += kimage_ptr->width_act * pix_size;
     }
 }
 void x_push_done(void)
