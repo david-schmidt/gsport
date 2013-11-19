@@ -70,6 +70,8 @@ XFontStruct *g_text_FontSt;
 Colormap g_a2_colormap = 0;
 Colormap g_default_colormap = 0;
 int	g_needs_cmap = 0;
+int	g_win_status_debug = 0;			// Current visibility of status lines.
+int g_win_status_debug_request = 0;	// Desired visibility of status lines.
 
 extern word32 g_red_mask;
 extern word32 g_green_mask;
@@ -253,7 +255,7 @@ int a2_key_to_xsym[][3] = {
 int
 main(int argc, char **argv)
 {
-	return gsportmain(argc, argv);
+        return gsportmain(argc, argv);
 }
 
 void
@@ -519,8 +521,10 @@ dev_video_init()
 	create_win_list = CWEventMask | CWBackingStore | CWCursor;
 	create_win_list |= CWColormap | CWBorderPixel | CWBackPixel;
 
-	base_height = X_A2_WINDOW_HEIGHT + (MAX_STATUS_LINES * 13);
-
+	base_height = X_A2_WINDOW_HEIGHT;
+        if (g_win_status_debug)
+                base_height += MAX_STATUS_LINES * 13;
+        
 	g_a2_win = XCreateWindow(g_display, RootWindow(g_display, screen_num),
 		0, 0, BASE_WINDOW_WIDTH, base_height,
 		0, g_screen_depth, InputOutput, g_vis,
@@ -916,6 +920,31 @@ get_ximage(Kimage *kimage_ptr)
 }
 
 
+void 
+x_toggle_status_lines()
+{
+    XSizeHints my_winSizeHints;
+    XClassHint my_winClassHint;
+    int base_height = X_A2_WINDOW_HEIGHT;
+    if ((g_win_status_debug = !g_win_status_debug))
+        base_height += MAX_STATUS_LINES * 13;
+    //printf("Resize returns %d\n", XResizeWindow(g_display, g_a2_win, BASE_WINDOW_WIDTH, base_height));
+    my_winSizeHints.flags = PSize | PMinSize | PMaxSize;
+    my_winSizeHints.width = BASE_WINDOW_WIDTH;
+    my_winSizeHints.height = base_height;
+    my_winSizeHints.min_width = BASE_WINDOW_WIDTH;
+    my_winSizeHints.min_height = base_height;
+    my_winSizeHints.max_width = BASE_WINDOW_WIDTH;
+    my_winSizeHints.max_height = base_height;
+    my_winClassHint.res_name = "GSport";
+    my_winClassHint.res_class = "GSport";
+    XSetWMProperties(g_display, g_a2_win, 0, 0, 0,
+                     0, &my_winSizeHints, 0, &my_winClassHint);
+    XMapRaised(g_display, g_a2_win);
+    XFlush(g_display);
+    x_redraw_status_lines();
+}
+
 void
 x_redraw_status_lines()
 {
@@ -925,32 +954,34 @@ x_redraw_status_lines()
 	int	margin;
 	word32	white, black;
 
-	height = g_text_FontSt->ascent + g_text_FontSt->descent;
-	margin = g_text_FontSt->ascent;
-
-	white = (g_a2vid_palette << 4) + 0xf;
-	black = (g_a2vid_palette << 4) + 0x0;
-	if(g_screen_depth != 8) {
-		white = (2 << (g_screen_depth - 1)) - 1;
-		black = 0;
-	}
-	XSetForeground(g_display, g_a2_winGC, white);
-	XSetBackground(g_display, g_a2_winGC, black);
-
-	for(line = 0; line < MAX_STATUS_LINES; line++) {
-		buf = g_status_ptrs[line];
-		if(buf == 0) {
-			/* skip it */
-			continue;
-		}
-		XDrawImageString(g_display, g_a2_win, g_a2_winGC, 0,
-			X_A2_WINDOW_HEIGHT + height*line + margin,
-			buf, strlen(buf));
-	}
-
-	XFlush(g_display);
+    if (g_win_status_debug)
+    {
+        height = g_text_FontSt->ascent + g_text_FontSt->descent;
+        margin = g_text_FontSt->ascent;
+        
+        white = (g_a2vid_palette << 4) + 0xf;
+        black = (g_a2vid_palette << 4) + 0x0;
+        if(g_screen_depth != 8) {
+            white = (2 << (g_screen_depth - 1)) - 1;
+            black = 0;
+        }
+        XSetForeground(g_display, g_a2_winGC, white);
+        XSetBackground(g_display, g_a2_winGC, black);
+        
+        for(line = 0; line < MAX_STATUS_LINES; line++) {
+            buf = g_status_ptrs[line];
+            if(buf == 0) {
+                /* skip it */
+                continue;
+            }
+            XDrawImageString(g_display, g_a2_win, g_a2_winGC, 0,
+                             X_A2_WINDOW_HEIGHT + height*line + margin,
+                             buf, strlen(buf));
+        }
+        
+        XFlush(g_display);
+    }
 }
-
 
 
 void

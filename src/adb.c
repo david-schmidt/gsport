@@ -1777,7 +1777,7 @@ adb_physical_key_update(int a2code, int is_up)
 			break;
 		case 0x0a: /* F10 - change a2vid paletter */
 			if (SHIFT_DOWN) {
-#if defined(WIN32) || defined(__CYGWIN__)
+#ifdef TOGGLE_STATUS
 				extern void x_toggle_status_lines();
 				x_toggle_status_lines();
 #endif
