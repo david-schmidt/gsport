@@ -449,6 +449,9 @@ int x_show_alert(int is_fatal, const char *str)
     clear_fatal_logs();
     return 0;
 }
+void x_toggle_status_lines(void)
+{
+}
 void x_redraw_status_lines(void)
 {
 }
