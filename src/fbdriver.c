@@ -508,6 +508,7 @@ void check_input_events(void)
 	    {
 		if (ev.code < 128)
 		{
+#if 0
 		    if ((ev.code == KEY_F10) && SHIFT_DOWN)
 		    {
 			//quitEmulator();
@@ -515,8 +516,9 @@ void check_input_events(void)
 			xdriver_end();
 			my_exit(1);
 		    }
+#endif
 		    if (keycode_to_a2code[ev.code] >= 0)
-			adb_physical_key_update(keycode_to_a2code[ev.code], !ev.value);
+                adb_physical_key_update(keycode_to_a2code[ev.code], !ev.value);
 		}
 		else if (ev.code == BTN_LEFT)
 		{

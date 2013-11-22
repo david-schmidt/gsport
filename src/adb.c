@@ -1714,7 +1714,7 @@ adb_physical_key_update(int a2code, int is_up)
 		case 0x0c: /* F12 - remap to reset */
 			a2code = 0x7f;
 			special = 0;
-			break;
+                        break;
 		default:
 			break;
 		}
@@ -1738,7 +1738,7 @@ adb_physical_key_update(int a2code, int is_up)
 // OG Disabled special keys (but warp)
 #ifndef ACTIVEGS
 		case 0x04: /* F4 - emulator config panel */
-			cfg_toggle_config_panel();
+                        cfg_toggle_config_panel();
 			break;
 		case 0x05: /* F5 - emulator clipboard paste */
 			clipboard_paste();
@@ -1778,8 +1778,18 @@ adb_physical_key_update(int a2code, int is_up)
 		case 0x0a: /* F10 - change a2vid paletter */
 			if (SHIFT_DOWN) {
 #ifdef TOGGLE_STATUS
+                            if (CMD_DOWN)
+                            {
+                                printf("Quit!\n");
+                                iwm_shut();
+                                xdriver_end();
+                                my_exit(1);
+                            }
+                            else
+                            {
 				extern void x_toggle_status_lines();
 				x_toggle_status_lines();
+                            }
 #endif
 			} else {
 				change_a2vid_palette((g_a2vid_palette + 1) & 0xf);
