@@ -1782,7 +1782,6 @@ adb_physical_key_update(int a2code, int is_up)
                             {
                                 printf("Quit!\n");
                                 iwm_shut();
-                                xdriver_end();
                                 my_exit(1);
                             }
                             else
