@@ -66,6 +66,7 @@ Display *g_display = 0;
 Visual	*g_vis = 0;
 Window g_a2_win;
 GC g_a2_winGC;
+Atom    WM_DELETE_WINDOW;
 XFontStruct *g_text_FontSt;
 Colormap g_a2_colormap = 0;
 Colormap g_default_colormap = 0;
@@ -592,6 +593,9 @@ dev_video_init()
 
 	XSetWMProperties(g_display, g_a2_win, &my_winText, &my_winText, 0,
 		0, &my_winSizeHints, 0, &my_winClassHint);
+    
+        WM_DELETE_WINDOW = XInternAtom(g_display, "WM_DELETE_WINDOW", False);
+        XSetWMProtocols(g_display, g_a2_win, &WM_DELETE_WINDOW, 1);
 	XMapRaised(g_display, g_a2_win);
 
 	XSync(g_display, False);
@@ -1125,6 +1129,13 @@ check_input_events()
 				(word32)ev.xcolormap.colormap,
 				ev.xcolormap.c_new, ev.xcolormap.state);
 			break;
+                case ClientMessage:
+                        if (ev.xclient.data.l[0] == (long)WM_DELETE_WINDOW)
+                        {
+                                iwm_shut();
+                                my_exit(1);
+                        }
+                        break;
 		default:
 			printf("X event 0x%08x is unknown!\n",
 				ev.type);
