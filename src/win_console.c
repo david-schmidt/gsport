@@ -41,18 +41,20 @@ extern int  g_win_fullscreen_state;
 int
 win_nonblock_read_stdin(int fd, char *bufptr, int len)
 {
-	HANDLE	oshandle;
-	DWORD	dwret;
-	int	ret;
-
-	errno = EAGAIN;
-	oshandle = (HANDLE)_get_osfhandle(fd);	// get stdin handle
-	dwret = WaitForSingleObject(oshandle, 1);	// wait 1msec for data
-	ret = -1;
-	if(dwret == WAIT_OBJECT_0) {
-		ret = read(fd, bufptr, len);
+	DWORD charsRead = 0;
+	ReadConsole(GetStdHandle(STD_INPUT_HANDLE), bufptr, len, &charsRead, NULL);
+	
+	if (charsRead == 0)
+	{
+		errno = EAGAIN;
+		return -1;
 	}
-	return ret;
+	else
+	{
+		DWORD charsWritten = 0;
+		WriteConsole(GetStdHandle(STD_OUTPUT_HANDLE), bufptr, charsRead, &charsWritten, NULL);
+		return charsRead;
+	}
 }
 
 void get_cwd(LPTSTR buffer, int size)
@@ -166,6 +168,14 @@ main(int argc, char **argv)
 	printf("...rect is: %ld, %ld, %ld, %ld\n", rect.left, rect.top,
 		rect.right, rect.bottom);
 	
+	// Enable non-blocking, character-at-a-time console I/O.
+	// win_nonblock_read_stdin() expects this behavior.
+	DWORD mode;
+	GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &mode);
+	mode &= ~ENABLE_LINE_INPUT;
+	SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), mode);
+
+
 	gsportinit(hwnd);
 	int ret =  gsportmain(argc, argv);
 	

@@ -392,6 +392,7 @@ do_debug_intfc()
 				show_regs();
 				break;
 			case '\n':
+			case '\r':
 				*line_ptr = 0;
 				if(old_mode == 's') {
 					do_blank();
@@ -720,7 +721,7 @@ read_line(char *buf, int len)
 			break;
 		}
 		space_left -= ret;
-		if(buf[ret-1] == 0x0a) {
+		if(buf[ret-1] == '\r' || buf[ret-1] == '\n') {
 			break;
 		}
 		buf = &buf[ret];
