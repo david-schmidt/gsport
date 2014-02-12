@@ -125,7 +125,7 @@ int	g_ignore_halts = 1;
 int	g_code_red = 0;
 int	g_code_yellow = 0;
 int	g_use_alib = 0;
-int	g_raw_serial = 1;
+int	g_serial_type[2];
 int	g_iw2_emul = 0;
 int	g_serial_out_masking = 0;
 int	g_serial_modem[2] = { 0, 1 };
@@ -241,7 +241,6 @@ void sim65816_initglobals()
 	g_code_red = 0;
 	g_code_yellow = 0;
 	g_use_alib = 0;
-	g_raw_serial = 1;
 	g_iw2_emul = 0;
 	g_serial_out_masking = 0;
 	//g_serial_modem[2] = { 0, 1 };

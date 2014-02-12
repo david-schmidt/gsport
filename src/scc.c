@@ -28,7 +28,7 @@
 extern int Verbose;
 extern int g_code_yellow;
 extern double g_cur_dcycs;
-extern int g_raw_serial;
+extern int g_serial_type[];
 extern int g_serial_out_masking;
 extern int g_irq_pending;
 
@@ -327,13 +327,19 @@ scc_port_init(int port)
 	int	state;
 
 	state = 0;
-	if(g_raw_serial) {
-#ifdef MAC
-		state = scc_serial_mac_init(port);
-#endif
-#ifdef _WIN32
-		state = scc_serial_win_init(port);
-#endif
+	switch (g_serial_type[port]) {
+	case 0:
+		break;
+	case 1:
+		#ifdef MAC
+			state = scc_serial_mac_init(port);
+		#endif
+		#ifdef _WIN32
+			state = scc_serial_win_init(port);
+		#endif
+		break;
+	default:
+		break;
 	}
 
 	if(state <= 0) {

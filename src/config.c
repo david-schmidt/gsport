@@ -62,7 +62,7 @@ extern word32 g_adb_repeat_vbl;
 extern int halt_sim;
 extern int g_limit_speed;
 extern int g_force_depth;
-extern int g_raw_serial;
+extern int g_serial_type[];
 extern int g_serial_out_masking;
 extern int g_serial_modem[];
 extern word32 g_mem_size_base;
@@ -215,8 +215,10 @@ Cfg_menu g_cfg_rom_menu[] = {
 
 Cfg_menu g_cfg_serial_menu[] = {
 { "Serial Port Configuration", g_cfg_serial_menu, 0, 0, CFGTYPE_MENU },
-{ "Serial Ports,0,Only use sockets 6501-6502,1,Use real ports if avail",
-		KNMP(g_raw_serial), CFGTYPE_INT },
+{ "Port 0 (slot 1),0,Only use socket 6501,1,Use real port if avail",
+		KNMP(g_serial_type[0]), CFGTYPE_INT },
+{ "Port 1 (slot 2),0,Only use socket 6502,1,Use real port if avail",
+		KNMP(g_serial_type[1]), CFGTYPE_INT },
 { "Serial Output,0,Send full 8-bit data,1,Mask off high bit",
 		KNMP(g_serial_out_masking), CFGTYPE_INT },
 { "Modem on port 0 (slot 1),0,Simple socket emulation mode,1,Modem with "
