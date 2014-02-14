@@ -12,6 +12,9 @@ GSport Release History
 
  * Added clipboard text paste capability (OSX, Windows)
 
+ * Emulated serial ports are individually configurable as either
+   IP or passthrough to real hardware ports
+
  []
 
  Bug fixes:
