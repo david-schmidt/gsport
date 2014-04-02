@@ -288,6 +288,11 @@ void scc_socket_modem_connect(int port, double dcycs);
 void scc_socket_modem_do_ring(int port, double dcycs);
 void scc_socket_do_answer(int port, double dcycs);
 
+/* scc_imagewriter.c*/
+int scc_imagewriter_init(int port);
+void scc_imagewriter_fill_readbuf(int port, int space_left, double dcycs);
+void scc_imagewriter_empty_writebuf(int port, double dcycs);
+void imagewriter_update();
 
 /* scc_windriver.c */
 

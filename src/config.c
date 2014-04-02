@@ -92,6 +92,15 @@ extern char* g_printer_font_courier;
 extern char* g_printer_font_script;
 extern char* g_printer_font_ocra;
 extern int g_printer_timeout;
+
+extern int g_imagewriter;
+extern int g_imagewriter_dpi;
+extern char* g_imagewriter_output;
+extern int g_imagewriter_multipage;
+extern int g_imagewriter_timeout;
+extern char* g_imagewriter_fixed_font;
+extern char* g_imagewriter_prop_font;
+
 #if defined(_WIN32) || defined(__CYGWIN__)
 extern int g_win_show_console_request;
 extern int g_win_status_debug_request;
@@ -215,9 +224,9 @@ Cfg_menu g_cfg_rom_menu[] = {
 
 Cfg_menu g_cfg_serial_menu[] = {
 { "Serial Port Configuration", g_cfg_serial_menu, 0, 0, CFGTYPE_MENU },
-{ "Port 0 (slot 1),0,Only use socket 6501,1,Use real port if avail",
+{ "Port 0 (slot 1),0,Only use socket 6501,1,Use real port if avail,2,Virtual Imagewriter",
 		KNMP(g_serial_type[0]), CFGTYPE_INT },
-{ "Port 1 (slot 2),0,Only use socket 6502,1,Use real port if avail",
+{ "Port 1 (slot 2),0,Only use socket 6502,1,Use real port if avail,2,Virtual Imagewriter",
 		KNMP(g_serial_type[1]), CFGTYPE_INT },
 { "Serial Output,0,Send full 8-bit data,1,Mask off high bit",
 		KNMP(g_serial_out_masking), CFGTYPE_INT },
@@ -255,7 +264,7 @@ Cfg_menu g_cfg_ethernet_menu[] = {
 };
 
 Cfg_menu g_cfg_printer_menu[] = {
-{ "Virtual Printer Configuration", g_cfg_ethernet_menu, 0, 0, CFGTYPE_MENU },
+{ "Virtual Printer Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
 { "Virtual Printer Type,0,Epson LQ",
 		KNMP(g_printer), CFGTYPE_INT },
 { "Printer DPI,60,60x60 dpi,180,180x180 dpi,360,360x360 dpi",
@@ -281,6 +290,30 @@ Cfg_menu g_cfg_printer_menu[] = {
 { 0, 0, 0, 0, 0 },
 };
 
+Cfg_menu g_cfg_imagewriter_menu[] = {
+{ "Virtual Imagewriter Configuration", g_cfg_imagewriter_menu, 0, 0, CFGTYPE_MENU },
+{ "Virtual Printer Type,0,Imagewriter II,1,Imagewriter LQ",
+		KNMP(g_imagewriter), CFGTYPE_INT },
+{ "Printer DPI,360,360x360 dpi (Best for 8-bit software),720,720x720 dpi (Best for GS/OS & IW LQ Modes),1440,1440x1440 dpi",
+		KNMP(g_imagewriter_dpi), CFGTYPE_INT },
+{ "Printer Output Type,bmp,Windows Bitmap,ps,Postscript (B&W),colorps,Postscript (Color),printer,Direct to host printer,text,Text file",
+		KNMP(g_imagewriter_output), CFGTYPE_STR },
+{ "Multipage Files? (PS Only),0,No,1,Yes",
+		KNMP(g_imagewriter_multipage), CFGTYPE_INT },
+{ "Printer Timeout,0,Never,2,2 sec.,15,15 sec.,30,30 sec.,60, 1 min.",
+		KNMP(g_imagewriter_timeout), CFGTYPE_INT },
+{ "", 0, 0, 0, 0 },
+{ "Imagewriter Fonts", 0, 0, 0, 0 },
+{ "-----------------", 0, 0, 0, 0 },
+{ "", 0, 0, 0, 0 },
+{ "Fixed Width Font", KNMP(g_imagewriter_fixed_font), CFGTYPE_FILE },
+{ "", 0, 0, 0, 0 },
+{ "Proporational Font", KNMP(g_imagewriter_prop_font), CFGTYPE_FILE },
+{ "", 0, 0, 0, 0 },
+{ "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
+{ 0, 0, 0, 0, 0 },
+};
+
 #if defined(_WIN32) || defined(__CYGWIN__)
 Cfg_menu g_cfg_debug_menu[] = {
 { "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
@@ -301,6 +334,7 @@ Cfg_menu g_cfg_main_menu[] = {
 { "Ethernet Card Configuration", g_cfg_ethernet_menu, 0, 0, CFGTYPE_MENU },
 { "Parallel Card Configuration", g_cfg_parallel_menu, 0, 0, CFGTYPE_MENU },
 { "Virtual Printer Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
+{ "Virtual Imagewriter Configuration", g_cfg_imagewriter_menu, 0, 0, CFGTYPE_MENU },
 #ifndef _WIN32
 { "Force X-windows display depth", KNMP(g_force_depth), CFGTYPE_INT },
 #endif

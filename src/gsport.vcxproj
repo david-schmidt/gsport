@@ -124,6 +124,8 @@ perl make_inst s 16 instable.h &gt; 16inst_s.h</Command>
     <ClInclude Include="op_routs.h" />
     <ClInclude Include="printer.h" />
     <ClInclude Include="printer_charmaps.h" />
+    <ClInclude Include="imagewriter.h" />
+    <ClInclude Include="iw_charmaps.h" />
     <ClInclude Include="prodos.h" />
     <ClInclude Include="prodos_protos.h" />
     <ClInclude Include="protos.h" />
@@ -170,6 +172,8 @@ perl make_size c size_tab.h &gt; size_c.h</Command>
     <ClCompile Include="paddles.c" />
     <ClCompile Include="parallel.c" />
     <ClCompile Include="printer.cpp" />
+    <ClCompile Include="scc_imagewriter.c" />
+    <ClCompile Include="imagewriter.cpp" />
     <ClCompile Include="scc.c" />
     <ClCompile Include="scc_socket_driver.c" />
     <ClCompile Include="scc_windriver.c" />

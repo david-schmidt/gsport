@@ -3,7 +3,7 @@
 OBJECTS1 = adb.o clock.o config.o dis.o engine_c.o scc.o iwm.o \
 	joystick_driver.o moremem.o paddles.o parallel.o printer.o \
 	sim65816.o smartport.o sound.o sound_driver.o video.o \
-	scc_socket_driver.o
+	scc_socket_driver.o scc_imagewriter.o imagewriter.o
 
 include vars
 
@@ -148,7 +148,9 @@ scc.o: scc.c defc.h defcomm.h iwm.h protos.h scc.h
 scc_socket_driver.o: scc_socket_driver.c defc.h defcomm.h iwm.h protos.h scc.h
 scc_windriver.o: scc_windriver.c defc.h defcomm.h iwm.h protos.h scc.h
 scc_macdriver.o: scc_macdriver.c defc.h defcomm.h iwm.h protos.h scc.h
+scc_imagewriter.o: scc_imagewriter.c defc.h defcomm.h protos.h scc.h
 iwm.o: iwm.c defc.h defcomm.h iwm.h protos.h iwm_35_525.h
+imagewriter.o: imagewriter.cpp
 joystick_driver.o: joystick_driver.c defc.h defcomm.h iwm.h protos.h
 moremem.o: moremem.c defc.h defcomm.h iwm.h protos.h
 paddles.o: paddles.c defc.h defcomm.h iwm.h protos.h

@@ -145,6 +145,14 @@ char* g_printer_font_prestige = "prestige.ttf";
 char* g_printer_font_script = "script.ttf";
 char* g_printer_font_ocra = "ocra.ttf";
 
+int g_imagewriter = 0;
+int g_imagewriter_dpi = 360;
+char* g_imagewriter_output = "bmp";
+int g_imagewriter_multipage = 0;
+int g_imagewriter_timeout = 2;
+char* g_imagewriter_fixed_font = "roman.ttf";
+char* g_imagewriter_prop_font = "roman.ttf";
+
 int	g_config_iwm_vbl_count = 0;
 extern const char g_gsport_version_str[] = "0.2";
 int g_pause=0;	// OG Added pause
@@ -728,6 +736,7 @@ void quitEmulator()
 void my_exit(int ret)
 {
 	end_screen();
+	imagewriter_close();
 	printer_close();
 	printf("exiting (ret=%d)\n",ret);
 	fatalExit(ret);
@@ -2369,6 +2378,10 @@ update_60hz(double dcycs, double dtime_now)
 	if (g_printer_timeout)
 	{
 	printer_update();
+	}
+	if (g_imagewriter_timeout)
+	{
+	imagewriter_update();
 	}
 	paddle_update_buttons();
 }

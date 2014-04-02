@@ -60,6 +60,12 @@
     <ClInclude Include="printer_charmaps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="imagewriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iw_charmaps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="prodos.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -180,6 +186,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="printer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scc_imagewriter.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imagewriter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

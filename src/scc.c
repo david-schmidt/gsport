@@ -50,7 +50,7 @@ extern int g_irq_pending;
 Scc	scc_stat[2];
 
 int g_baud_table[] = {
-	110, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200
+	110, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200 , 230400
 };
 
 int g_scc_overflow = 0;
@@ -74,7 +74,7 @@ scc_init()
 		scc_ptr->rx_event_pending = 0;
 		scc_ptr->tx_event_pending = 0;
 		scc_ptr->char_size = 8;
-		scc_ptr->baud_rate = 9600;
+		scc_ptr->baud_rate = 115200;
 		scc_ptr->telnet_mode = 0;
 		scc_ptr->telnet_iac = 0;
 		scc_ptr->out_char_dcycs = 0.0;
@@ -308,16 +308,23 @@ scc_regen_clocks(int port)
 	scc_ptr->rx_dcycs = rx_dcycs * rx_char_size;
 
 	state = scc_ptr->state;
-	if(state == 2) {
-		/* real serial ports */
+	switch (scc_ptr->state) {
+	case 1: /* socket */
+		scc_socket_change_params(port);
+		break;
+	case 2: /* real serial ports */
 #ifdef MAC
 		scc_serial_mac_change_params(port);
 #endif
 #ifdef _WIN32
 		scc_serial_win_change_params(port);
 #endif
-	} else {
-		scc_socket_change_params(port);
+		break;
+	case 4: /* Imagewriter */
+		scc_ptr->baud_rate = 230400;
+		scc_ptr->tx_dcycs = tx_dcycs * 1.2; //Somehow this speeds up serial transfer without overrunning the buffer
+		scc_ptr->rx_dcycs = rx_dcycs * 1.2;
+		break;
 	}
 }
 
@@ -325,7 +332,6 @@ void
 scc_port_init(int port)
 {
 	int	state;
-
 	state = 0;
 	switch (g_serial_type[port]) {
 	case 0:
@@ -337,6 +343,9 @@ scc_port_init(int port)
 		#ifdef _WIN32
 			state = scc_serial_win_init(port);
 		#endif
+		break;
+	case 2:
+		state = scc_imagewriter_init(port);
 		break;
 	default:
 		break;
@@ -361,15 +370,24 @@ scc_try_to_empty_writebuf(int port, double dcycs)
 
 	scc_ptr->write_called_this_vbl = 1;
 
-	if(state == 2) {
+	switch (state) 
+	{
+	case 2:
 #if defined(MAC)
 		scc_serial_mac_empty_writebuf(port);
 #endif
 #if defined(_WIN32)
 		scc_serial_win_empty_writebuf(port);
 #endif
-	} else if(state == 1) {
+		break;
+	
+	case 1:
 		scc_socket_empty_writebuf(port, dcycs);
+		break;
+
+	case 4:
+		scc_imagewriter_empty_writebuf(port, dcycs);
+		break;
 	}
 }
 
@@ -401,15 +419,24 @@ scc_try_fill_readbuf(int port, double dcycs)
 
 	scc_ptr->read_called_this_vbl = 1;
 
-	if(state == 2) {
+	switch (state)
+	{
+	case 2:
 #if defined(MAC)
 		scc_serial_mac_fill_readbuf(port, space_left, dcycs);
 #endif
 #if defined(_WIN32)
 		scc_serial_win_fill_readbuf(port, space_left, dcycs);
 #endif
-	} else if(state == 1) {
+		break;
+	
+	case 1:
 		scc_socket_fill_readbuf(port, space_left, dcycs);
+		break;
+
+	case 4:
+		scc_imagewriter_fill_readbuf(port, space_left, dcycs);
+		break;
 	}
 }
 

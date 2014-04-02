@@ -14,6 +14,8 @@ GSport Release History
 
  * Emulated serial ports are individually configurable as either
    IP or passthrough to real hardware ports
+   
+ * Added Imagewriter LQ printer emulation
 
  []
 
