@@ -96,7 +96,7 @@ void scc_imagewriter_empty_writebuf(int port, double dcycs)
 	int	len;
 	int	done;
 	//int	ret;
-	DWORD	bytes_written;
+	unsigned long	bytes_written;
 
 	scc_ptr = &(scc_stat[port]);
 	done = 0;

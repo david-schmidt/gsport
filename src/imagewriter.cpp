@@ -410,7 +410,7 @@ void Imagewriter::updateFont()
 		FT_Set_Transform(curFont, &matrix, 0);
 	}
 }
-#endif // HAVE_SDL
+
 
 void Imagewriter::updateSwitch()
 {
@@ -447,6 +447,8 @@ void Imagewriter::slashzero(Bit16u penX, Bit16u penY)
 			blitGlyph(slashFont->glyph->bitmap, penX+3, penY, true);
 		}
 }
+#endif // HAVE_SDL
+
 #ifdef HAVE_SDL
 bool Imagewriter::processCommandChar(Bit8u ch)
 {

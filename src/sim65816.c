@@ -27,6 +27,7 @@
   #include "tfe/protos_tfe.h" 
 #endif
   #include "printer.h"
+  #include "imagewriter.h"
 
 #ifdef UNDER_CE
 #define vsnprintf _vsnprintf
