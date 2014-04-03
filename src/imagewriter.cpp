@@ -2163,7 +2163,7 @@ extern "C" void imagewriter_loop(Bit8u pchar, int port)
 	defaultImagewriter->printChar(pchar);
 }
 
-extern "C" void imagewriter_close(int port)
+extern "C" void imagewriter_close()
 {
 	delete defaultImagewriter;
 	defaultImagewriter = NULL;

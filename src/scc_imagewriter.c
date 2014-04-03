@@ -22,6 +22,7 @@
 
 #include "defc.h"
 #include "scc.h"
+#include "imagewriter.h"
 extern Scc scc_stat[2];
 extern int g_vbl_count;
 
