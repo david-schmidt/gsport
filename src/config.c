@@ -308,7 +308,7 @@ Cfg_menu g_cfg_imagewriter_menu[] = {
 { "", 0, 0, 0, 0 },
 { "Fixed Width Font", KNMP(g_imagewriter_fixed_font), CFGTYPE_FILE },
 { "", 0, 0, 0, 0 },
-{ "Proporational Font", KNMP(g_imagewriter_prop_font), CFGTYPE_FILE },
+{ "Proportional Font", KNMP(g_imagewriter_prop_font), CFGTYPE_FILE },
 { "", 0, 0, 0, 0 },
 { "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { 0, 0, 0, 0, 0 },

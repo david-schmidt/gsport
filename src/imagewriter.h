@@ -303,7 +303,7 @@ extern "C"
 void imagewriter_init(int pdpi, int pwidth, int pheight, char* poutput, bool mpage, int port);
 void imagewriter_loop(Bit8u pchar,int port);
 void imagewriter_close();
-void imagewriter_feed(int port);
+void imagewriter_feed();
 #ifdef __cplusplus
 }
 #endif

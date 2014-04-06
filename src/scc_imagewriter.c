@@ -24,7 +24,7 @@
 #include "scc.h"
 #include "imagewriter.h"
 extern Scc scc_stat[2];
-extern int g_vbl_count;
+word32 g_vbl_count;
 
 extern int g_imagewriter;
 extern int g_imagewriter_dpi;
@@ -32,7 +32,7 @@ extern char* g_imagewriter_output;
 extern int g_imagewriter_multipage;
 extern int g_imagewriter_timeout;
 
-int imagewriter_vbl_count = 0;
+word32 imagewriter_vbl_count = 0;
 int imagewriter_port_block = 0;
 int iw_scc_write = 0;
 
@@ -40,7 +40,7 @@ int scc_imagewriter_init(int port)
 {
 	Scc	*scc_ptr;
 	scc_ptr = &(scc_stat[port]);
-	imagewriter_init(g_imagewriter_dpi,85,110,g_imagewriter_output,g_imagewriter_multipage, port);
+	imagewriter_init(g_imagewriter_dpi,85,110,g_imagewriter_output,g_imagewriter_multipage != 0, port);
 	scc_ptr->state = 4;
 	return 4;
 }

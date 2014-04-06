@@ -2168,7 +2168,7 @@ extern "C" void imagewriter_close()
 	delete defaultImagewriter;
 	defaultImagewriter = NULL;
 }
-extern "C" void imagewriter_feed(int port)
+extern "C" void imagewriter_feed()
 {
 	if(defaultImagewriter == NULL) return;
 	defaultImagewriter->formFeed();
