@@ -108,7 +108,7 @@ typedef signed __int64 Bit64s;
 typedef unsigned long long int Bit64u;
 typedef signed long long int Bit64s;
 #endif
-enum Typeface
+enum IWTypeface
 {
 	fixed = 0,
 	prop = 1
@@ -243,7 +243,7 @@ private:
 	Bit8u curCharTable;					// Currently used char table und charset
 	Bit8u printQuality;					// Print quality (see QUALITY_* constants)
 	Bit8u printRes;						// Graphics resolution
-	Typeface LQtypeFace;				// Typeface used in LQ printing mode
+	IWTypeface LQtypeFace;				// Typeface used in LQ printing mode
 
 	Real64 extraIntraSpace;				// Extra space between two characters (set by program, in inch)
 
