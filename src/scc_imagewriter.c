@@ -24,7 +24,7 @@
 #include "scc.h"
 #include "imagewriter.h"
 extern Scc scc_stat[2];
-word32 g_vbl_count;
+extern word32 g_vbl_count;
 
 extern int g_imagewriter;
 extern int g_imagewriter_dpi;
