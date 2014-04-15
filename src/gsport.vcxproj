@@ -50,12 +50,12 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN_SOUND;GSPORT_LITTLE_ENDIAN;HAVE_TFE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <CompileAs>CompileAsCpp</CompileAs>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN_SOUND;GSPORT_LITTLE_ENDIAN;HAVE_TFE;HAVE_ATBRIDGE;TOGGLE_STATUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <CompileAs>CompileAsC</CompileAs>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <ErrorReporting>Prompt</ErrorReporting>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -64,7 +64,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Winmm.lib;Ws2_32.lib;Shlwapi.lib;$(SolutionDir)$(Configuration)\tfe.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>IPHLPAPI.lib;Winmm.lib;Ws2_32.lib;Shlwapi.lib;$(SolutionDir)$(Configuration)\tfe.lib;;$(SolutionDir)$(Configuration)\atbridge.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
@@ -75,10 +75,10 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN_SOUND;GSPORT_LITTLE_ENDIAN;HAVE_TFE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_CRT_NONSTDC_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN_SOUND;GSPORT_LITTLE_ENDIAN;HAVE_ATBRIDGE;HAVE_TFE;TOGGLE_STATUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <BufferSecurityCheck>false</BufferSecurityCheck>
-      <CompileAs>CompileAsCpp</CompileAs>
+      <CompileAs>CompileAsC</CompileAs>
       <ErrorReporting>Prompt</ErrorReporting>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -87,10 +87,10 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Winmm.lib;Ws2_32.lib;Shlwapi.lib;$(SolutionDir)$(Configuration)\tfe.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>IPHLPAPI.lib;Winmm.lib;Ws2_32.lib;Shlwapi.lib;$(SolutionDir)$(Configuration)\tfe.lib;;$(SolutionDir)$(Configuration)\atbridge.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -118,6 +118,7 @@ perl make_inst s 16 instable.h &gt; 16inst_s.h</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">8inst_c.h 16inst_c.h 8inst_s.h 16inst_s.h</Outputs>
       <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkObjects>
     </CustomBuild>
+    <ClInclude Include="scc_llap.h" />
     <ClInclude Include="win_keymap.h" />
     <ClInclude Include="iwm.h" />
     <ClInclude Include="iwm_35_525.h" />
@@ -171,10 +172,17 @@ perl make_size c size_tab.h &gt; size_c.h</Command>
     <ClCompile Include="moremem.c" />
     <ClCompile Include="paddles.c" />
     <ClCompile Include="parallel.c" />
-    <ClCompile Include="printer.cpp" />
+    <ClCompile Include="printer.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+    </ClCompile>
     <ClCompile Include="scc_imagewriter.c" />
-    <ClCompile Include="imagewriter.cpp" />
+    <ClCompile Include="imagewriter.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
+    </ClCompile>
     <ClCompile Include="scc.c" />
+    <ClCompile Include="scc_llap.c" />
     <ClCompile Include="scc_socket_driver.c" />
     <ClCompile Include="scc_windriver.c" />
     <ClCompile Include="sim65816.c" />

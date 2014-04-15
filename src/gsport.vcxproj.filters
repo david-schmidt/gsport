@@ -117,6 +117,9 @@
     <ClInclude Include="win_keymap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="scc_llap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="adb.c">
@@ -192,6 +195,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="imagewriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scc_llap.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

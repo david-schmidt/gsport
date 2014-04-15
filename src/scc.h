@@ -36,8 +36,9 @@
 
 /* my scc port 0 == channel A, port 1 = channel B */
 
-#define	SCC_INBUF_SIZE		512		/* must be a power of 2 */
-#define	SCC_OUTBUF_SIZE		512		/* must be a power of 2 */
+// LLAP may have packets up to 603 bytes, and the buffers must be large enough to contain a single packet.
+#define	SCC_INBUF_SIZE		1024	/* must be a power of 2 */
+#define	SCC_OUTBUF_SIZE		1024	/* must be a power of 2 */
 
 #define SCC_MODEM_MAX_CMD_STR	128
 
@@ -47,7 +48,7 @@
 
 STRUCT(Scc) {
 	int	port;
-	int	state;
+	int	state /* 0 == disconnected, 1 == real serial port, 2 == socket, 3 == LocalTalk */;
 	int	accfd;
 	SOCKET	sockfd;
 	int	socket_state;
@@ -64,6 +65,7 @@ STRUCT(Scc) {
 
 	int	rx_queue_depth;
 	byte	rx_queue[4];
+	unsigned int lad;
 
 	int	in_rdptr;
 	int	in_wrptr;
@@ -78,7 +80,10 @@ STRUCT(Scc) {
 	int	wantint_rx;
 	int	wantint_tx;
 	int	wantint_zerocnt;
+	int did_int_rx_first;
 	int	dcd;
+	int sdlc_eof;
+	int eom;
 
 	double	br_dcycs;
 	double	tx_dcycs;
@@ -87,6 +92,7 @@ STRUCT(Scc) {
 	int	br_event_pending;
 	int	rx_event_pending;
 	int	tx_event_pending;
+	byte irq_pending;
 
 	int	char_size;
 	int	baud_rate;

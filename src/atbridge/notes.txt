@@ -1,0 +1,61 @@
+AppleTalk Emulation and Bridging for GSport
+Peter Neubauer, March 2014
+
+Introduction
+============
+The Apple IIgs shipped with a fantastic but often overlooked feature -- AppleTalk networking.  AppleTalk is a low-cost, easy-to-maintain network technology that
+enables network booting, file sharing, and printer sharing between your Apple IIgs, Workstation Card equipped Apple IIe, and classic Macintosh machines.  As of
+March 2014, GSport is the first modern emulator with support for AppleTalk.  Now, you can just "drag and drop" files between your machines without thinking about 
+disk images, FTP, or serial cables.  You can develop new software with an emulator and test on real hardware.  You don't need to think much about version control.
+Rather, you can update the file once on your file server, and all of your emulated and real machines have the new file.  You can download the latest Apple II 
+software and immediately run it.
+
+Using It
+========
+First, you need an AppleShare-compatible file server.  A classic Mac or "netatalk" server could provide this function.  For simplicity, I recommend Ivan Drucker's
+A2SERVER (http://appleii.ivanx.com/a2server/), which is a pre-configured and easy-to-use package with "netatalk" and other useful tools.  You may run A2SERVER in
+a VirtualBox virtual machine, on an existing Linux server, or on a Raspberry Pi.
+
+Second, you need GSport 0.3 or later with ROM03 running on a Windows or Linux (x86 or Raspberry Pi) machine.  Start GSport and press F4 to access the configuration
+menu.  If necessary, select a ROM03 image.  Select the "Ethernet Card Configuration" menu option.  Change "AppleTalk Bridging" to "On".  Change "Use Interface 
+Number" to select the network where you have attached your AppleShare server or A2SERVER.  Exit the GSport configuration menu.
+
+Third, party like it is 1989.  Your GS is now connected to the AppleTalk network.  Refer to Apple's documentation included with GS/OS System 5 and 6 for further
+directions.
+
+Internal Overview
+=================
+GSport with AppleTalk networking is functionally equivalent to a real Apple IIgs with a LocalTalk/EtherTalk bridge.  Originally, AppleTalk employed the "LocalTalk"
+physical layer, which requires special hardware not found on modern computers.  GSport converts LocalTalk to EtherTalk, a somewhat more modern physical layer using
+familiar Ethernet cabling.  Internally, GSport emulates the Zilog SCC chip in the IIgs, communicates with unmodified Apple-provided networking software built-in to
+the IIgs and GS/OS, and converts the network traffic to EtherTalk.
+
+Limitations
+===========
+- A wireless network may not work because many wireless adapters drop EtherTalk packets.  Instead, use a wired Ethernet connection.
+
+- AppleTalk bridging has been tested with System 6.0.1 and System 5.0.2 on ROM03.  Booting from a local disk or from the network works.  Other ROM revisions and
+system software may not work.
+
+- The SCC baud rate is incorrect because the SCC does not emulate line coding.  Still, emulated network speed should be close to the 230.4kbps speed of a real
+LocalTalk network.
+
+- The bridge supports Windows using Visual Studio, Cygwin, and Linux (x86 and Raspberry Pi).  Other platforms should be straightforward, but I do not have a suitable
+build environment.
+
+- The bridge requires a router on the network.  The bridge should work in both a routerless and router-filled network.
+
+- The bridge works with simple networks consisting of a single network on a single segment with a single zone.  The bridge should function with all valid network 
+configurations and hardware routers.  Other configurations might not work, and I welcome reports.
+
+- The bridge implements the non-extended method for acquiring the network number.  Interoperability would likely be better using the extended method, but this method
+is much more complex.
+
+Credits
+=======
+Thanks to Gursharan Sidhu, Richard Andrews, and Alan Oppenheimer for creating and documenting AppleTalk.
+Thanks to Kent Dickey and the GSport contributors for GSport and the original SCC emulation.
+Thanks to David Schmenk for testing, encouragement, and Raspberry Pi support.
+Thanks to Ivan Drucker for A2SERVER.
+Thanks to the Gus emulator engineers for showing that AppleTalk emulation is possible.
+Thanks to James Littlejohn for discussions about extending the capabilities of the Apple IIgs.

@@ -249,6 +249,7 @@ void show_scc_state(void);
 void scc_log(int regnum, word32 val, double dcycs);
 void show_scc_log(void);
 word32 scc_read_reg(int port, double dcycs);
+word16 scc_read_lad(int port);
 void scc_write_reg(int port, word32 val, double dcycs);
 void scc_maybe_br_event(int port, double dcycs);
 void scc_evaluate_ints(int port);

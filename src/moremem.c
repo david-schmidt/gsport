@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2014 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -1351,9 +1351,12 @@ io_read(word32 loc, double *cyc_ptr)
 			return 0;
 		case 0x41: /* 0xc041 */
 			return g_c041_val;
+		case 0x44: /* 0xc044 */
+			// SCC LAD A
+			return scc_read_lad(0);
 		case 0x45: /* 0xc045 */
-			halt_printf("Mega II mouse read: c045\n");
-			return 0;
+			// SCC LAD B
+			return scc_read_lad(1);
 		case 0x46: /* 0xc046 */
 			tmp = g_c046_val;
 			g_c046_val = (tmp & 0xbf) + ((tmp & 0x80) >> 1);
@@ -1385,7 +1388,6 @@ io_read(word32 loc, double *cyc_ptr)
 				g_em_emubyte_cnt = 0;
 				return 0;
 			}
-		case 0x44: /* 0xc044 */
 		case 0x48: /* 0xc048 */
 		case 0x49: /* 0xc049 */
 		case 0x4a: /* 0xc04a */
@@ -2033,8 +2035,13 @@ io_write(word32 loc, int val, double *cyc_ptr)
 		/* 0xc040 - 0xc04f */
 		case 0x41: /* c041 */
 			g_c041_val = val & 0x1f;
-			if((val & 0xe7) != 0) {
+			if((val & 0xe6) != 0) {
 				halt_printf("write c041: %02x\n", val);
+			}
+			
+			if (val & C041_EN_MOUSE)
+			{
+				// Enable Mega II mouse
 			}
 
 			if(!(val & C041_EN_VBL_INTS)) {
@@ -2331,7 +2338,8 @@ io_write(word32 loc, int val, double *cyc_ptr)
 		case 0x9c: case 0x9d: case 0x9e: case 0x9f:
 		if (g_parallel)
 		{
-		return parallel_write((word16)loc & 0xf, (byte)val);
+			parallel_write((word16)loc & 0xf, (byte)val);
+			return;
 		}
 		else
 		{
@@ -2379,7 +2387,8 @@ io_write(word32 loc, int val, double *cyc_ptr)
 		case 0xbf:
 			if (tfe_enabled)
 			{
-			return tfe_store((word16)loc & 0xf, (byte)val);
+				tfe_store((word16)loc & 0xf, (byte)val);
+				return;
 			}
 			else
 			{

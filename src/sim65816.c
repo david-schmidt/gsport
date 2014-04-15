@@ -33,12 +33,11 @@
 #define vsnprintf _vsnprintf
 #endif
 
-#if defined(__CYGWIN__)
+#if defined (_WIN32) || defined(__CYGWIN__)
 #define WIN32_LEAN_AND_MEAN	/* Tell windows we want less header gunk */
 #define STRICT			/* Tell Windows we want compile type checks */
 #include <windows.h>		/* Need a definition for LPTSTR in CYGWIN */
-#endif
-#if defined (_WIN32) || defined(__CYGWIN__)
+
 extern void get_cwd(LPTSTR buffer, int size);
 #endif
 

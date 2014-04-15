@@ -26,6 +26,9 @@
 #ifndef UNDER_CE	//OG
 #include <signal.h>
 #endif
+#ifdef __CYGWIN__
+#include <Windows.h>
+#endif
 extern Scc scc_stat[2];
 extern int g_serial_modem[];
 

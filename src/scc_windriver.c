@@ -24,6 +24,11 @@
 #include "defc.h"
 #include "scc.h"
 
+#ifdef __CYGWIN__
+#include <Windows.h>
+#include <NspAPI.h>
+#endif
+
 #ifdef UNDER_CE
 #define vsnprintf _vsnprintf
 #endif

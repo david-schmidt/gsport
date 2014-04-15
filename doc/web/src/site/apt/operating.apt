@@ -494,9 +494,10 @@ you override it with "-audio 1".
 
 * SCC (Serial Port) emulation
 
- GSport emulates the two serial ports on a IIgs as being two Unix sockets.
-Port 1 (printer port) is at socket address 6501, and port 2 (modem)
-is at socket address 6502.
+ You may use the SCC ports as either a LocalTalk networking connection
+or as traditional serial ports.  GSport emulates the two serial ports on
+a IIgs as being two Unix sockets.  Port 1 (printer port) is at socket 
+address 6501, and port 2 (modem) is at socket address 6502.
 
  By default, slot 1 is emulated using a simple receive socket, and slot 2
 emulates a Virtual Modem.

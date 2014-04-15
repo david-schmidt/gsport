@@ -784,7 +784,13 @@ void fixed_memory_ptrs_shut()
 word32
 get_itimer()
 {
-#if defined(__i386) && defined(__GNUC__)
+#if defined(_WIN32)
+	LARGE_INTEGER count;
+	if (QueryPerformanceCounter(&count))
+		return count.LowPart;
+	else
+		return 0;
+#elif defined(__i386) && defined(__GNUC__)
 	/* Here's my bad ia32 asm code to do rdtsc */
 	/* Linux source uses: */
 	/* asm volatile("rdtsc" : "=a"(ret) : : "edx"); */
@@ -805,12 +811,6 @@ get_itimer()
 
 	asm volatile ("mftb %0" : "=r"(ret));
 	return ret;
-#elif defined(_WIN32)
-	LARGE_INTEGER count;
-	if (QueryPerformanceCounter(&count))
-		return count.LowPart;
-	else
-		return 0;
 #else
 	return 0;
 #endif

@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 - 2013 by GSport contributors
+ Copyright (C) 2010 - 2014 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -79,6 +79,10 @@ extern int g_swap_paddles;
 extern int g_invert_paddles;
 extern int g_ethernet;
 extern int g_ethernet_interface;
+extern int g_appletalk_bridging;
+extern int g_appletalk_turbo;
+extern int g_appletalk_diagnostics;
+extern int g_appletalk_network_hint;
 extern int g_parallel;
 extern int g_parallel_out_masking;
 extern int g_printer;
@@ -254,10 +258,18 @@ Cfg_menu g_cfg_parallel_menu[] = {
 
 Cfg_menu g_cfg_ethernet_menu[] = {
 { "Ethernet Card Configuration", g_cfg_ethernet_menu, 0, 0, CFGTYPE_MENU },
+{ "Use Interface Number,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10",
+	KNMP(g_ethernet_interface), CFGTYPE_INT },
+{ "", 0, 0, 0, 0 },
 { "Uthernet Card in Slot 3,0,Off,1,On",
 		KNMP(g_ethernet), CFGTYPE_INT },
-{ "Use Interface Number,0,0,1,1,2,2,3,3,4,4",
-		KNMP(g_ethernet_interface), CFGTYPE_INT },
+#ifdef HAVE_ATBRIDGE
+{ "", 0, 0, 0, 0 },
+{ "AppleTalk Bridging,0,Off,1,On",
+        KNMP(g_appletalk_bridging), CFGTYPE_INT },
+{ "AppleTalk Speed,0,Normal (230.4 kbps),1,Turbo",
+		KNMP(g_appletalk_turbo), CFGTYPE_INT },
+#endif
 { "", 0, 0, 0, 0 },
 { "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { 0, 0, 0, 0, 0 },
@@ -314,11 +326,18 @@ Cfg_menu g_cfg_imagewriter_menu[] = {
 { 0, 0, 0, 0, 0 },
 };
 
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(HAVE_ATBRIDGE) || defined(_WIN32) || defined(__CYGWIN__)
 Cfg_menu g_cfg_debug_menu[] = {
 { "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
+#if defined(_WIN32) || defined(__CYGWIN__)
 { "Status lines,0,Hide,1,Show", KNMP(g_win_status_debug_request), CFGTYPE_INT },
 { "Console,0,Hide,1,Show", KNMP(g_win_show_console_request), CFGTYPE_INT },
+#endif
+#ifdef HAVE_ATBRIDGE
+{ "", 0, 0, 0, 0 },
+{ "Show AppleTalk Diagnostics,0,No,1,Yes", KNMP(g_appletalk_diagnostics), CFGTYPE_INT },
+{ "AppleTalk Network Hint", KNMP(g_appletalk_network_hint), CFGTYPE_INT },
+#endif
 { "", 0, 0, 0, 0 },
 { "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { 0, 0, 0, 0, 0 },
@@ -602,13 +621,13 @@ cfg_get_tfe_name()
 	int i = 0;
 	char *ppname = NULL;
 	char *ppdes = NULL;
-	cfg_htab_vtab(0,9);
+	cfg_htab_vtab(0,10);
 	if (tfe_enumadapter_open())
 	{
 	cfg_printf("Interface List:\n---------------");
 	while(tfe_enumadapter(&ppname,&ppdes))
 	{
-		cfg_htab_vtab(0, 11+i);
+		cfg_htab_vtab(0, 12+i);
 		cfg_printf("%2d: %s",i,ppdes);
 		i++;
 		lib_free(ppname);

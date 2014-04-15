@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 - 2011 by GSport contributors
+ Copyright (C) 2010 - 2014 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -289,12 +289,18 @@ private:
 	Bit8u ASCII85CurCol;				// Columns printed so far in the current lines
 };
 
+#endif
+
 
 //Interfaces to C code
 #ifdef __cplusplus
 extern "C" 
 {
+#else
+#include <stdbool.h>
+typedef unsigned char Bit8u;
 #endif
+
 void printer_init(int pdpi, int pwidth, int pheight, char* poutput, bool mpage);
 void printer_loop(Bit8u pchar);
 void printer_close();
@@ -303,5 +309,4 @@ void printer_feed();
 }
 #endif
 
-#endif
 #endif

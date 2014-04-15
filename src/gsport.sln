@@ -1,12 +1,15 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C++ Express 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Desktop
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gsport", "gsport.vcxproj", "{0B4E527A-DB50-4B5F-9B08-303ABAF7356A}"
 	ProjectSection(ProjectDependencies) = postProject
+		{2C88133A-7CB8-4C03-AF4D-4ECFC6F8500B} = {2C88133A-7CB8-4C03-AF4D-4ECFC6F8500B}
 		{E810477A-E004-4308-A58A-21393213EF89} = {E810477A-E004-4308-A58A-21393213EF89}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tfe", "tfe\tfe.vcxproj", "{E810477A-E004-4308-A58A-21393213EF89}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "atbridge", "atbridge\atbridge.vcxproj", "{2C88133A-7CB8-4C03-AF4D-4ECFC6F8500B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,6 +25,10 @@ Global
 		{E810477A-E004-4308-A58A-21393213EF89}.Debug|Win32.Build.0 = Debug|Win32
 		{E810477A-E004-4308-A58A-21393213EF89}.Release|Win32.ActiveCfg = Release|Win32
 		{E810477A-E004-4308-A58A-21393213EF89}.Release|Win32.Build.0 = Release|Win32
+		{2C88133A-7CB8-4C03-AF4D-4ECFC6F8500B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2C88133A-7CB8-4C03-AF4D-4ECFC6F8500B}.Debug|Win32.Build.0 = Debug|Win32
+		{2C88133A-7CB8-4C03-AF4D-4ECFC6F8500B}.Release|Win32.ActiveCfg = Release|Win32
+		{2C88133A-7CB8-4C03-AF4D-4ECFC6F8500B}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

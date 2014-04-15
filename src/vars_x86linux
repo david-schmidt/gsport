@@ -1,8 +1,7 @@
-
 TARGET = gsportx
-OBJECTS = $(OBJECTS1) xdriver.o
+OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ) xdriver.o
 CC = g++
-CCOPTS = -O2 -Wall -fomit-frame-pointer -march=pentium
+CCOPTS = -O2 -Wall -fomit-frame-pointer -std=gnu99 -march=i686 -DHAVE_TFE -DHAVE_ATBRIDGE -DTOGGLE_STATUS
 OPTS = -DGSPORT_LITTLE_ENDIAN 
 SUFFIX =
 NAME = gsportx
@@ -16,4 +15,3 @@ AS = cc
 PERL = perl
 
 XOPTS = -I/usr/X11R6/include
-

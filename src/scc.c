@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2014 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -20,6 +20,7 @@
 */
 
 #include "defc.h"
+#include "scc_llap.h"
 
 #ifdef UNDER_CE
 #define vsnprintf _vsnprintf
@@ -31,6 +32,9 @@ extern double g_cur_dcycs;
 extern int g_serial_type[];
 extern int g_serial_out_masking;
 extern int g_irq_pending;
+extern int g_c041_val;
+extern int g_appletalk_bridging;
+extern int g_appletalk_turbo;
 
 /* my scc port 0 == channel A = slot 1 = c039/c03b */
 /*        port 1 == channel B = slot 2 = c038/c03a */
@@ -50,7 +54,43 @@ extern int g_irq_pending;
 Scc	scc_stat[2];
 
 int g_baud_table[] = {
-	110, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200 , 230400
+	110, 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400
+};
+
+static char* wr_names[] = {
+	"command", // 0
+	"interrupt and transfer mode", // 1
+	"interrupt vector", // 2
+	"receive params", // 3
+	"misc params", // 4
+	"trasmit params", // 5
+	"sync/addr field", // 6
+	"sync/flag", // 7
+	"transmit", // 8
+	"master interrupt", // 9
+	"trans/recv control", // 10
+	"clock mode", // 11
+	"baud rate (lower)", // 12
+	"baud rate (upper)", // 13
+	"misc control", // 14
+	"ext/status interrupt" // 15
+};
+static char* rr_names[] = {
+	"status",
+	"special condition",
+	"interrupt vector",
+	"pending",
+	"RR4",
+	"RR5",
+	"RR6",
+	"RR7",
+	"receive data",
+	"RR9",
+	"misc status",
+	"time constant (lower)",
+	"time constant (upper)",
+	"RR14",
+	"ext/status interrupt"
 };
 
 int g_scc_overflow = 0;
@@ -95,9 +135,6 @@ scc_init()
 	}
 
 	scc_reset();
-	// Initialize ports right away - enable incoming data before PR#x
-	scc_port_init(0);
-	scc_port_init(1);
 }
 
 void
@@ -114,12 +151,15 @@ scc_reset()
 		scc_ptr->reg_ptr = 0;
 		scc_ptr->in_rdptr = 0;
 		scc_ptr->in_wrptr = 0;
+		scc_ptr->lad = 0;
 		scc_ptr->out_rdptr = 0;
 		scc_ptr->out_wrptr = 0;
 		scc_ptr->dcd = 0;
 		scc_ptr->wantint_rx = 0;
 		scc_ptr->wantint_tx = 0;
 		scc_ptr->wantint_zerocnt = 0;
+		scc_ptr->did_int_rx_first = 0;
+		scc_ptr->irq_pending = 0;
 		scc_ptr->read_called_this_vbl = 0;
 		scc_ptr->write_called_this_vbl = 0;
 		scc_evaluate_ints(i);
@@ -178,6 +218,8 @@ scc_reset_port(int port)
 	scc_ptr->wantint_zerocnt = 0;
 
 	scc_ptr->rx_queue_depth = 0;
+	scc_ptr->sdlc_eof = 0;
+	scc_ptr->eom = 1;
 
 	scc_evaluate_ints(port);
 
@@ -201,7 +243,7 @@ scc_regen_clocks(int port)
 	word32	baud;
 	word32	max_diff;
 	word32	diff;
-	int	state;
+	int sync_mode = 0;
 	int	baud_entries;
 	int	pos;
 	int	i;
@@ -245,8 +287,23 @@ scc_regen_clocks(int port)
 	if(((reg11 >> 3) & 3) == 2) {
 		tx_dcycs = 2.0 * br_dcycs * clock_mult;
 	}
-	if(((reg11 >> 5) & 3) == 2) {
+	switch ((reg11 >> 5) & 3) {
+	case 0:
+		// Receive clock = RTxC pin (not emulated)
+	case 1:
+		// Receive clock = TRxC pin (not emulated)
+		// The real SCC has external pins that could provide the clock.  But, this is not emulated.
+		break;
+	case 3:
+		// Receive clock = DPLL output
+		// Only LocalTalk uses the DPLL receive clock.  We do not, however, emulate the DPLL.
+		// In this case, the receive clock should be about the same as the transmit clock.
+		rx_dcycs = tx_dcycs;
+		break;
+	case 2:
+		// Receive clock = BRG output
 		rx_dcycs = 2.0 * br_dcycs * clock_mult;
+		break;
 	}
 
 	tx_char_size = 8.0;
@@ -265,6 +322,9 @@ scc_regen_clocks(int port)
 	scc_ptr->char_size = (int)tx_char_size;
 
 	switch((scc_ptr->reg[4] >> 2) & 0x3) {
+	case 0: // sync mode (no start or stop bits)
+		sync_mode = 1;
+		break;
 	case 1:	// 1 stop bit
 		tx_char_size += 2.0;	// 1 stop + 1 start bit
 		break;
@@ -276,7 +336,7 @@ scc_regen_clocks(int port)
 		break;
 	}
 
-	if(scc_ptr->reg[4] & 1) {
+	if((scc_ptr->reg[4] & 1) && !sync_mode) {
 		// parity enabled
 		tx_char_size += 1.0;
 	}
@@ -307,7 +367,6 @@ scc_regen_clocks(int port)
 	scc_ptr->tx_dcycs = tx_dcycs * tx_char_size;
 	scc_ptr->rx_dcycs = rx_dcycs * rx_char_size;
 
-	state = scc_ptr->state;
 	switch (scc_ptr->state) {
 	case 1: /* socket */
 		scc_socket_change_params(port);
@@ -320,12 +379,25 @@ scc_regen_clocks(int port)
 		scc_serial_win_change_params(port);
 #endif
 		break;
+	case 3: /* localtalk */
+		if (g_appletalk_turbo)
+		{
+			// If the user has selected AppleTalk "turbo" mode, increase the baud
+			// rate to be as fast as possible, limited primarily by the ability of
+			// the emulated GS to handle data.
+			scc_ptr->baud_rate = 0;
+			scc_ptr->br_dcycs = 1;
+			scc_ptr->tx_dcycs = 1;
+			scc_ptr->rx_dcycs = 1;
+		}
+		break;
 	case 4: /* Imagewriter */
 		scc_ptr->baud_rate = 230400;
 		scc_ptr->tx_dcycs = tx_dcycs * 1.2; //Somehow this speeds up serial transfer without overrunning the buffer
 		scc_ptr->rx_dcycs = rx_dcycs * 1.2;
 		break;
 	}
+
 }
 
 void
@@ -338,10 +410,10 @@ scc_port_init(int port)
 		break;
 	case 1:
 		#ifdef MAC
-			state = scc_serial_mac_init(port);
+		state = scc_serial_mac_init(port);
 		#endif
 		#ifdef _WIN32
-			state = scc_serial_win_init(port);
+		state = scc_serial_win_init(port);
 		#endif
 		break;
 	case 2:
@@ -385,6 +457,10 @@ scc_try_to_empty_writebuf(int port, double dcycs)
 		scc_socket_empty_writebuf(port, dcycs);
 		break;
 
+	case 3:
+		// When we're doing LocalTalk, the write buffer gets emptied at the end of the frame and does not use this function.
+		break;
+
 	case 4:
 		scc_imagewriter_empty_writebuf(port, dcycs);
 		break;
@@ -395,17 +471,18 @@ void
 scc_try_fill_readbuf(int port, double dcycs)
 {
 	Scc	*scc_ptr;
-	int	space_used, space_left;
+	int	space_used_before_rx, space_left;
+	int space_used_after_rx;
 	int	state;
 
 	scc_ptr = &(scc_stat[port]);
 	state = scc_ptr->state;
 
-	space_used = scc_ptr->in_wrptr - scc_ptr->in_rdptr;
-	if(space_used < 0) {
-		space_used += SCC_INBUF_SIZE;
+	space_used_before_rx = scc_ptr->in_wrptr - scc_ptr->in_rdptr;
+	if(space_used_before_rx < 0) {
+		space_used_before_rx += SCC_INBUF_SIZE;
 	}
-	space_left = (7*SCC_INBUF_SIZE/8) - space_used;
+	space_left = (7*SCC_INBUF_SIZE/8) - space_used_before_rx;
 	if(space_left < 1) {
 		/* Buffer is pretty full, don't try to get more */
 		return;
@@ -434,30 +511,64 @@ scc_try_fill_readbuf(int port, double dcycs)
 		scc_socket_fill_readbuf(port, space_left, dcycs);
 		break;
 
+	case 3:
+		// LLAP deals with packets, and we only allow one packet in the read buffer at a time.
+		// If the buffer is empty, try to fill it with another packet.
+		if (g_appletalk_bridging && (space_used_before_rx == 0) && (scc_ptr->rx_queue_depth == 0) && !(scc_ptr->sdlc_eof))
+		{
+			scc_llap_fill_readbuf(port, space_left, dcycs);
+			//scc_maybe_rx_event(port, dcycs);
+			scc_ptr->sdlc_eof = 0;
+		break;
+
 	case 4:
 		scc_imagewriter_fill_readbuf(port, space_left, dcycs);
 		break;
+		}
+		break;
 	}
+
+	// Update the LAD (link activity detector), which LocalTalk uses in the CSMA/CA algorithm.
+	// The real LAD depends on the line coding and data, but the "get bigger when data on RX line"
+	// emulation is good enough since no software depends on the specific value of the LAD counter.
+	// Practically, the emulated LLAP interface never has collisions and the LAD, therefore, is not
+	// useful, but, for sake of correctness and more realisitic timing, emulate the LAD anyway.
+	space_used_after_rx = scc_ptr->in_wrptr - scc_ptr->in_rdptr;
+	if(space_used_after_rx < 0) {
+		space_used_after_rx += SCC_INBUF_SIZE;
+	}
+	scc_ptr->lad += space_used_after_rx - space_used_before_rx;
 }
 
 void
 scc_update(double dcycs)
 {
+	if (g_appletalk_bridging && (scc_stat[0].state == 3 || scc_stat[1].state == 3))
+		scc_llap_update();
+
 	/* called each VBL update */
 	scc_stat[0].write_called_this_vbl = 0;
 	scc_stat[1].write_called_this_vbl = 0;
 	scc_stat[0].read_called_this_vbl = 0;
 	scc_stat[1].read_called_this_vbl = 0;
 
-	scc_try_to_empty_writebuf(0, dcycs);
-	scc_try_to_empty_writebuf(1, dcycs);
 	scc_try_fill_readbuf(0, dcycs);
 	scc_try_fill_readbuf(1, dcycs);
-
-	scc_stat[0].write_called_this_vbl = 0;
-	scc_stat[1].write_called_this_vbl = 0;
 	scc_stat[0].read_called_this_vbl = 0;
 	scc_stat[1].read_called_this_vbl = 0;
+
+	/* LLAP mode only transfers complete packets.  Retain the data in the
+	   transmit and receive buffers until the buffers contain one complete packet */
+	if (scc_stat[0].state != 3)
+	{
+		scc_try_to_empty_writebuf(0, dcycs);
+		scc_stat[0].write_called_this_vbl = 0;
+	}
+	if (scc_stat[1].state != 3)
+	{
+		scc_try_to_empty_writebuf(1, dcycs);
+		scc_stat[1].write_called_this_vbl = 0;
+	}
 }
 
 void
@@ -541,7 +652,7 @@ show_scc_state()
 
 }
 
-#define LEN_SCC_LOG	50
+#define LEN_SCC_LOG	5000
 STRUCT(Scc_log) {
 	int	regnum;
 	word32	val;
@@ -576,6 +687,7 @@ show_scc_log(void)
 	int	regnum;
 	int	pos;
 	int	i;
+	char* name;
 
 	pos = g_scc_log_pos;
 	dcycs = g_cur_dcycs;
@@ -586,12 +698,48 @@ show_scc_log(void)
 			pos = LEN_SCC_LOG - 1;
 		}
 		regnum = g_scc_log[pos].regnum;
-		printf("%d:%d: port:%d wr:%d reg: %d val:%02x at t:%f\n",
+		if (regnum >> 8)
+			name = wr_names[regnum & 0xf];
+		else
+			name = rr_names[regnum & 0xf];
+
+		printf("%d:%d:\tport:%d wr:%d reg: %d (%s)\t\tval:%02x \tat t:%f\n",
 			i, pos, (regnum >> 4) & 0xf, (regnum >> 8),
 			(regnum & 0xf),
+			name, 
 			g_scc_log[pos].val,
-			g_scc_log[pos].dcycs - dcycs);
+			g_scc_log[pos].dcycs /*- dcycs*/);
 	}
+}
+
+word16 scc_read_lad(int port)
+{
+	// The IIgs provides a "LocalTalk link activity detector (LAD)" through repurposing the 
+	// MegaII mouse interface.  Per the IIgs schematic, the MegaII mouse inputs connect via
+	// the MSEX and MSEY lines to the RX lines of the SCC between the SCC and the line drivers.
+	// So, if there's activity on the RX lines, the mouse counters increment.  The firmware
+	// uses this for the "carrier sense" part of the CSMA/CA algorithm.  Typical firmware usage
+	// is to (1) reset the mouse counter, (2) wait a bit, and (3) take action if some activity
+	// is present.  The firmware does not appear to use the specific value of the LAD counter;
+	// rather, the firmware only considers "zero" and "not zero".
+	//
+	// Apple engineers invented the term LAD, and there are references to it in Gus.
+
+	if (port != 0 && port != 1)
+	{
+		halt_printf("Invalid SCC port.\n");
+		return 0;
+	}
+
+	Scc* scc_ptr = &(scc_stat[port]);
+	if (g_c041_val & C041_EN_MOUSE)
+	{
+		unsigned int temp = scc_ptr->lad;
+		scc_ptr->lad = 0;
+		return temp;
+	}
+	else
+		return 0;
 }
 
 word32
@@ -609,7 +757,9 @@ scc_read_reg(int port, double dcycs)
 	switch(regnum) {
 	case 0:
 	case 4:
-		ret = 0x60;	/* 0x44 = no dcd, no cts,0x6c = dcd ok, cts ok*/
+		ret = 0x20;
+		if (scc_ptr->eom)
+			ret |= 0x40;
 		if(scc_ptr->dcd) {
 			ret |= 0x08;
 		}
@@ -629,6 +779,8 @@ scc_read_reg(int port, double dcycs)
 	case 5:
 		/* HACK: residue codes not right */
 		ret = 0x07;	/* all sent */
+		if (scc_ptr->state == 3 && scc_ptr->sdlc_eof)
+			ret |= 0x80;
 		break;
 	case 2:
 	case 6:
@@ -654,7 +806,8 @@ scc_read_reg(int port, double dcycs)
 	case 3:
 	case 7:
 		if(port == 0) {
-			ret = (g_irq_pending & 0x3f);
+			// The interrupt pending register only exists in channel A.
+			ret = (scc_stat[0].irq_pending << 3) | scc_stat[1].irq_pending;
 		} else {
 			ret = 0;
 		}
@@ -685,9 +838,9 @@ scc_read_reg(int port, double dcycs)
 
 	scc_ptr->reg_ptr = 0;
 	scc_printf("Read c03%x, rr%d, ret: %02x\n", 8+port, regnum, ret);
-	if(regnum != 0 && regnum != 3) {
+	//if(regnum != 0 && regnum != 3) {
 		scc_log(SCC_REGNUM(0,port,regnum), ret, dcycs);
-	}
+	//}
 
 	return ret;
 }
@@ -707,23 +860,33 @@ scc_write_reg(int port, word32 val, double dcycs)
 	regnum = scc_ptr->reg_ptr & 0xf;
 	mode = scc_ptr->mode;
 
+	// The SCC has more internal registers than memory locations mapped into the CPU's address space.
+	// To access alternate registers, the CPU writes a register selection code to WR0.  The next write
+	// goes to the selected register.  WR0 also contains several command and reset codes, and it is 
+	// possible to write command, reset, and register selection in a single WR0 write.
 	if(mode == 0) {
-		if((val & 0xf0) == 0) {
-			/* Set reg_ptr */
-			scc_ptr->reg_ptr = val & 0xf;
-			regnum = 0;
+		// WR0 is selected, and this write goes to WR0.
+		// Extract the register selection code, which determines the next register access in conjunction with the "point high" command.
+		scc_ptr->reg_ptr = val & 0x07;
+		if (((val >> 3) & 0x07) == 0x01)
+			scc_ptr->reg_ptr |= 0x08;
+			
+		// But, this write goes to WR0.
+		regnum = 0;
+		if (scc_ptr->reg_ptr)
 			scc_ptr->mode = 1;
-		} else {
-			scc_log(SCC_REGNUM(1,port,0), val, dcycs);
-		}
 	} else {
+		// Some other register is selected, but the next access goes to register 0.
 		scc_ptr->reg_ptr = 0;
 		scc_ptr->mode = 0;
 	}
 
-	if(regnum != 0) {
+	if ((regnum != 0) || // accesses to registers other than WR0
+		((regnum == 0) && (val & 0xf8)) || // accesses to WR0 only for selecting a register
+		((regnum == 0) && ((val & 0x38) == 0x80)) // access to WR0 with a point high register selection
+	   )
+		// To keep the log shorter and easier to read, omit register selection code write to WR0.  Log everything else.
 		scc_log(SCC_REGNUM(1,port,regnum), val, dcycs);
-	}
 
 	changed_bits = (scc_ptr->reg[regnum] ^ val) & 0xff;
 
@@ -732,17 +895,51 @@ scc_write_reg(int port, word32 val, double dcycs)
 	case 0: /* wr0 */
 		tmp1 = (val >> 3) & 0x7;
 		switch(tmp1) {
-		case 0x0:
-		case 0x1:
+		case 0x0: /* null code */
+			break;
+		case 0x1: /* point high */
 			break;
 		case 0x2:	/* reset ext/status ints */
 			/* should clear other ext ints */
 			scc_clr_zerocnt_int(port);
 			break;
+		case 0x3:   /* send abort (sdlc) */
+			halt_printf("Wr c03%x to wr0 of %02x, bad cmd cd:%x!\n", 
+				8+port, val, tmp1);
+			scc_ptr->eom = 1;
+			break;
+		case 0x4:	/* enable int on next rx char */
+			scc_ptr->did_int_rx_first = 0;
+			break;
 		case 0x5:	/* reset tx int pending */
 			scc_clr_tx_int(port);
 			break;
 		case 0x6:	/* reset rr1 bits */
+			// Per Section 5.2.1 of the SCC User's Manual, issuing an Error Reset when
+			// a special condition exists (e.g. EOF) while using "interrupt on first RX"
+			// mode causes loss of the the data with the special condition from the receive
+			// FIFO.  In some cases, the GS relies on this behavior to clear the final CRC
+			// byte from the RX FIFO.
+			//
+			// Based on experimentation, checking for an active first RX interrupt is incorrect.
+			// System 5 fails to operate correctly with this check.  Anyway, skipping this check
+			// seems to correct operation, but more investigation is necessary.
+			if ((scc_ptr->sdlc_eof == 1) /*&& (scc_ptr->did_int_rx_first == 1)*/)
+			{
+				// Remove and discard one byte (the one causing the current special condition) from the RX FIFO.
+				int depth = scc_ptr->rx_queue_depth;
+				if (depth != 0) {
+					for (int i = 1; i < depth; i++) {
+						scc_ptr->rx_queue[i - 1] = scc_ptr->rx_queue[i];
+					}
+					scc_ptr->rx_queue_depth = depth - 1;
+					scc_maybe_rx_event(port, dcycs);
+					scc_maybe_rx_int(port, dcycs);
+				}
+			}
+
+			// Reset emulated error bits.  Note that we don't emulate all the bits.
+			scc_ptr->sdlc_eof = 0;
 			break;
 		case 0x7:	/* reset highest pri int pending */
 			irq_mask = g_irq_pending;
@@ -752,13 +949,15 @@ scc_write_reg(int port, word32 val, double dcycs)
 			}
 			if(irq_mask & IRQ_PENDING_SCC1_RX) {
 				scc_clr_rx_int(port);
+				scc_ptr->irq_pending &= ~IRQ_PENDING_SCC1_RX;
 			} else if(irq_mask & IRQ_PENDING_SCC1_TX) {
 				scc_clr_tx_int(port);
+				scc_ptr->irq_pending &= ~IRQ_PENDING_SCC1_TX;
 			} else if(irq_mask & IRQ_PENDING_SCC1_ZEROCNT) {
 				scc_clr_zerocnt_int(port);
+				scc_ptr->irq_pending &= ~IRQ_PENDING_SCC1_ZEROCNT;
 			}
 			break;
-		case 0x4:	/* enable int on next rx char */
 		default:
 			halt_printf("Wr c03%x to wr0 of %02x, bad cmd cd:%x!\n",
 				8+port, val, tmp1);
@@ -768,13 +967,18 @@ scc_write_reg(int port, word32 val, double dcycs)
 		case 0x0:	/* null code */
 			break;
 		case 0x1:	/* reset rx crc */
+			// Do nothing.  Emulated packets never have CRC errors.
+			break;
 		case 0x2:	/* reset tx crc */
-			printf("Wr c03%x to wr0 of %02x!\n", 8+port, val);
+			// Do nothing.  Emulated packets never have CRC errors.
 			break;
 		case 0x3:	/* reset tx underrun/eom latch */
 			/* if no extern status pending, or being reset now */
 			/*  and tx disabled, ext int with tx underrun */
 			/* ah, just do nothing */
+			//if (!(scc_ptr->reg[5] & 0x08))
+				// First, this command has no effect unless the transmitter is disabled.
+			//scc_ptr->eom = 0;
 			break;
 		}
 		return;
@@ -787,39 +991,85 @@ scc_write_reg(int port, word32 val, double dcycs)
 		scc_ptr->reg[regnum] = val;
 		return;
 	case 3: /* wr3 */
-		if((val & 0x1e) != 0x0) {
+		if((scc_ptr->state != 3) && ((val & 0x0e) != 0x0)) {
 			halt_printf("Wr c03%x to wr3 of %02x!\n", 8+port, val);
 		}
+		old_val = scc_ptr->reg[regnum];
 		scc_ptr->reg[regnum] = val;
+
+		if (!(old_val & 0x01) && (val & 0x01))
+		{
+			// If the receiver transitions from disabled to enabled, try to pull data into the FIFO.
+			scc_try_fill_readbuf(port, dcycs);
+			scc_maybe_rx_event(port, dcycs);
+		}
+		
 		return;
 	case 4: /* wr4 */
-		if((val & 0x30) != 0x00 || (val & 0x0c) == 0) {
+		if((val & 0x30) != 0x00 && (val & 0x30) != 0x20) {
 			halt_printf("Wr c03%x to wr4 of %02x!\n", 8+port, val);
 		}
+
+		if (((val >> 4) & 0x3) == 0x02 /* SDLC */ &&
+			((val >> 2) & 0x3) == 0x00 /* enable sync modes */)
+		{
+			if (g_appletalk_bridging)
+			{
+				// SDLC mode enabled.  Redirect such data to the LocalTalk driver.
+				scc_ptr->state = 3;
+				scc_llap_init();
+				printf("Enabled LocalTalk on port %d.\n", port);
+			}
+			else
+				printf("Attempted to enable LocalTalk on port %d but bridging is disabled.\n", port);
+		}
+
 		scc_ptr->reg[regnum] = val;
 		if(changed_bits) {
 			scc_regen_clocks(port);
 		}
 		return;
 	case 5: /* wr5 */
-		if((val & 0x15) != 0x0) {
+		if((val & 0x10) != 0x0) {
 			halt_printf("Wr c03%x to wr5 of %02x!\n", 8+port, val);
 		}
+
+		// Since we don't emulate the SDLC frame, ignore the CRC polynomial type (bit 2).
+		// Since the emulated link never has CRC errors, silently accept Tx CRC enable.
+		if (g_appletalk_bridging && scc_ptr->state == 3)
+		{
+			if ((scc_ptr->reg[regnum] & 0x08) && !(val & 0x08))
+			{
+				// When the TX enable changes from enabled to disabled, the GS is about to finish a frame.
+				// The GS will wait a bit longer for the hardware to finish sending the abort sequence, but
+				// this is of little concern since we don't have a "real line".
+				scc_llap_empty_writebuf(port, dcycs);
+				//scc_ptr->eom = 1;
+			}
+		}
+
 		scc_ptr->reg[regnum] = val;
 		if(changed_bits & 0x60) {
 			scc_regen_clocks(port);
 		}
 		return;
 	case 6: /* wr6 */
-		if(val != 0) {
+		if (scc_ptr->state == 3) {
+			// In SDLC mode (state 3), WR6 contains the node ID for hardware address filtering.
+			printf("Trying LocalTalk node ID %d.\n", val);
+			scc_llap_set_node(val);
+		}
+		else if(val != 0) {
 			halt_printf("Wr c03%x to wr6 of %02x!\n", 8+port, val);
 		}
+
 		scc_ptr->reg[regnum] = val;
 		return;
 	case 7: /* wr7 */
-		if(val != 0) {
+		if (((scc_ptr->state == 3) && (val != 0x7e)) || (scc_ptr->state != 3))
+			// SDLC requires a sync character of 0x7e, per the SDLC spec.
 			halt_printf("Wr c03%x to wr7 of %02x!\n", 8+port, val);
-		}
+
 		scc_ptr->reg[regnum] = val;
 		return;
 	case 8: /* wr8 */
@@ -848,7 +1098,8 @@ scc_write_reg(int port, word32 val, double dcycs)
 		scc_evaluate_ints(1);
 		return;
 	case 10: /* wr10 */
-		if((val & 0xff) != 0x00) {
+		if(((val & 0xff) != 0x00) &&
+		   ((val & 0xe0) != 0xe0 && scc_ptr->state == 3) /* Allow FM0 */) {
 			printf("Wr c03%x to wr10 of %02x!\n", 8+port, val);
 		}
 		scc_ptr->reg[regnum] = val;
@@ -876,14 +1127,34 @@ scc_write_reg(int port, word32 val, double dcycs)
 		val = val + (old_val & (~0xff));
 		switch((val >> 5) & 0x7) {
 		case 0x0:
+			// Null command.
 		case 0x1:
+			// Enter search mode command.
 		case 0x2:
+			// Reset clock missing command
 		case 0x3:
+			// Disable PLL command.
 			break;
 		
 		case 0x4:	/* DPLL source is BR gen */
 			val |= SCC_R14_DPLL_SOURCE_BRG;
 			break;
+
+		case 0x6:
+			// Set FM mode.
+			//
+			// LocalTalk uses this mode.  
+			// Ignore this command because we don't emulate line conding.
+			if (scc_ptr->state != 3)
+				halt_printf("Wr c03%x to wr14 of %02x, FM mode!\n",
+				8+port, val);
+			val |= SCC_R14_FM_MODE;
+			break;
+
+		case 0x5:
+			// Set source = /RTxC.
+		case 0x7:
+			// Set NRZI mode.
 		default:
 			halt_printf("Wr c03%x to wr14 of %02x, bad dpll cd!\n",
 				8+port, val);
@@ -952,15 +1223,11 @@ scc_evaluate_ints(int port)
 	scc_ptr = &(scc_stat[port]);
 	mie = scc_stat[0].reg[9] & 0x8;			/* Master int en */
 
-	if(!mie) {
-		/* There can be no interrupts if MIE=0 */
-		remove_irq(IRQ_PENDING_SCC1_RX | IRQ_PENDING_SCC1_TX |
-						IRQ_PENDING_SCC1_ZEROCNT |
-			IRQ_PENDING_SCC0_RX | IRQ_PENDING_SCC0_TX |
-						IRQ_PENDING_SCC0_ZEROCNT);
-		return;
-	}
-
+	// The master interrupt enable (MIE) gates assertion of the interrupt line.
+	// Even if the MIE is disabled, the interrupt pending bits still reflect 
+	// what interrupt would occur if MIE was enabled.  Software could poll the 
+	// pending bits, and AppleTalk does exactly this to detect the start of 
+	// a packet.  So, we must always calculate the pending interrupts.
 	irq_add_mask = 0;
 	irq_remove_mask = 0;
 	if(scc_ptr->wantint_rx) {
@@ -977,6 +1244,18 @@ scc_evaluate_ints(int port)
 		irq_add_mask |= IRQ_PENDING_SCC1_ZEROCNT;
 	} else {
 		irq_remove_mask |= IRQ_PENDING_SCC1_ZEROCNT;
+	}
+	scc_stat[port].irq_pending &= ~irq_remove_mask;
+	scc_stat[port].irq_pending |= irq_add_mask;
+
+
+	if(!mie) {
+		/* There can be no interrupts if MIE=0 */
+		remove_irq(IRQ_PENDING_SCC1_RX | IRQ_PENDING_SCC1_TX |
+						IRQ_PENDING_SCC1_ZEROCNT |
+			IRQ_PENDING_SCC0_RX | IRQ_PENDING_SCC0_TX |
+						IRQ_PENDING_SCC0_ZEROCNT);
+		return;
 	}
 	if(port == 0) {
 		/* Port 1 is in bits 0-2 and port 0 is in bits 3-5 */
@@ -1004,6 +1283,11 @@ scc_maybe_rx_event(int port, double dcycs)
 
 	if(scc_ptr->rx_event_pending) {
 		/* one pending already, wait for the event to arrive */
+		return;
+	}
+
+	if (!(scc_ptr->reg[3] & 0x01)) {
+		// If the receiver is disabled, don't transfer data into the RX FIFO.
 		return;
 	}
 
@@ -1045,8 +1329,25 @@ scc_maybe_rx_int(int port, double dcycs)
 		return;
 	}
 	rx_int_mode = (scc_ptr->reg[1] >> 3) & 0x3;
-	if(rx_int_mode == 1 || rx_int_mode == 2) {
+	switch (rx_int_mode)
+	{
+	case 0:
+		break;
+	case 1: /* Rx Int On First Characters or Special Condition */
+		// Based on experimentation, there's a delay in SDLC mode before the RX on first interrupt goes active.
+		// Most likely, this delay is due to the address matching requiring complete reception of the destination address field.
+		if (!scc_ptr->did_int_rx_first && ((scc_ptr->state != 3) || ((scc_ptr->state == 3) && (depth == 2))))
+		{
+			scc_ptr->did_int_rx_first = 1;
+			scc_ptr->wantint_rx = 1;
+		}
+		break;
+	case 2: /* Int On All Rx Characters or Special Condition */
 		scc_ptr->wantint_rx = 1;
+		break;
+	case 3:
+		halt_printf("Unsupported SCC RX interrupt mode 3 (Rx Int On Special Condition Only).");
+		break;
 	}
 	scc_evaluate_ints(port);
 }
@@ -1158,13 +1459,13 @@ scc_add_to_readbufv(int port, double dcycs, const char *fmt, ...)
 {
 	va_list	ap;
 	char	*bufptr;
-	int	ret, len, c;
+	int	len, c;
 	int	i;
 
 	va_start(ap, fmt);
 	bufptr = (char*)malloc(4096);	// OG cast added
 	bufptr[0] = 0;
-	ret = vsnprintf(bufptr, 4090, fmt, ap);
+	vsnprintf(bufptr, 4090, fmt, ap);
 	len = strlen(bufptr);
 	for(i = 0; i < len; i++) {
 		c = bufptr[i];
@@ -1209,7 +1510,8 @@ scc_transmit(int port, word32 val, double dcycs)
 			return;
 		}
 	}
-	if(g_serial_out_masking) {
+	if(g_serial_out_masking && 
+	   (scc_ptr->state != 3 /* never mask LLAP data */)) {
 		val = val & 0x7f;
 	}
 
@@ -1277,11 +1579,23 @@ scc_read_data(int port, double dcycs)
 		scc_ptr->rx_queue_depth = depth - 1;
 		scc_maybe_rx_event(port, dcycs);
 		scc_maybe_rx_int(port, dcycs);
+
+		int buffered_rx = scc_ptr->in_wrptr - scc_ptr->in_rdptr;
+		if(buffered_rx < 0) {
+			buffered_rx += SCC_INBUF_SIZE;
+		}
+		
+		int bytes_left = buffered_rx + scc_ptr->rx_queue_depth;
+		if (scc_ptr->state == 3 /* SDLC mode */ && bytes_left == 1)
+		{
+			// Flag an end of frame.
+			scc_ptr->sdlc_eof = 1;
+		}
+
+		//printf("SCC read %04x: ret %02x, depth:%d, buffered: %d\n", 0xc03b - port, ret, scc_ptr->rx_queue_depth, buffered_rx);
 	}
-
-	scc_printf("SCC read %04x: ret %02x, depth:%d\n", 0xc03b-port, ret,
-			depth);
-
+	
+	scc_printf("SCC read %04x: ret %02x, depth:%d\n", 0xc03b-port, ret, depth);
 	scc_log(SCC_REGNUM(0,port,8), ret, dcycs);
 
 	return ret;
@@ -1303,7 +1617,11 @@ scc_write_data(int port, word32 val, double dcycs)
 	} else {
 		scc_transmit(port, val, dcycs);
 	}
-	scc_try_to_empty_writebuf(port, dcycs);
+	if (scc_ptr->state != 3) {
+		// If we're doing LLAP, empty the writebuf at the end of the packet.
+		// Otherwise, empty as soon as possible.
+		scc_try_to_empty_writebuf(port, dcycs);
+	}
 
 	scc_maybe_tx_event(port, dcycs);
 }

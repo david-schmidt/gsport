@@ -17,6 +17,9 @@ GSport Release History
    
  * Added Imagewriter LQ printer emulation
 
+ * Added AppleTalk networking emulation with bridging to EtherTalk.
+   Related, there are improvements and bug fixes to the SCC emulation.
+
  []
 
  Bug fixes:

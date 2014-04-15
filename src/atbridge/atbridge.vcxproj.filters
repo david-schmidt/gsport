@@ -15,40 +15,55 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tfesupp.h">
+    <ClInclude Include="llap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="types.h">
+    <ClInclude Include="atbridge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\arch\win32\bittypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\arch\win32\bpf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\arch\win32\dirent-win32.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\arch\win32\ip6_misc.h">
+    <ClInclude Include="elap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\arch\win32\pcap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\arch\win32\pcap-stdinc.h">
+    <ClInclude Include="port.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="aarp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="elap_defs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="atalk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pcap_delay.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tfe.c">
+    <ClCompile Include="llap.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tfesupp.c">
+    <ClCompile Include="atbridge.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tfearch.c">
+    <ClCompile Include="elap.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="port.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="aarp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pcap_delay.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="notes.txt" />
   </ItemGroup>
 </Project>

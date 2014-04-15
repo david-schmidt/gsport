@@ -3,7 +3,10 @@
 OBJECTS1 = adb.o clock.o config.o dis.o engine_c.o scc.o iwm.o \
 	joystick_driver.o moremem.o paddles.o parallel.o printer.o \
 	sim65816.o smartport.o sound.o sound_driver.o video.o \
-	scc_socket_driver.o scc_imagewriter.o imagewriter.o
+	scc_socket_driver.o imagewriter.o scc_imagewriter.o scc_llap.o
+ATOBJ = atbridge/aarp.o atbridge/atbridge.o atbridge/elap.o atbridge/llap.o atbridge/port.o 
+PCAPOBJ = atbridge/pcap_delay.o
+TFEOBJ = tfe/tfe.o tfe/tfearch.o tfe/tfesupp.o
 
 include vars
 
@@ -139,12 +142,19 @@ compile_time.o: $(OBJECTS)
 
 # dependency stuff
 adb.o: adb.c adb.h defc.h defcomm.h iwm.h protos.h
+atbridge/aarp.o: defc.h atbridge/atbridge.h atbridge/port.h atbridge/elap.h atbridge/aarp.h atbridge/elap_defs.h
+atbridge/atbridge.o: defc.h atbridge/atbridge.h atbridge/port.h atbridge/elap.h atbridge/llap.h atbridge/aarp.h
+atbridge/elap.o: defc.h atbridge/atbridge.h atbridge/port.h atbridge/elap.h atbridge/aarp.h atbridge/elap_defs.h atbridge/pcap_delay.h
+atbridge/llap.o: defc.h atbridge/atbridge.h atbridge/port.h atbridge/llap.h
+atbridge/port.o: atbridge/atalk.h atbridge/port.h
+atbridge/pcap_delay.o: atbridge/pcap_delay.h
 engine_c.o: engine_c.c defc.h defcomm.h iwm.h protos.h protos_engine_c.h size_c.h op_routs.h defs_instr.h 8inst_c.h 16inst_c.h
 clock.o: clock.c defc.h defcomm.h iwm.h protos.h
 compile_time.o: compile_time.c
 config.o: config.c defc.h defcomm.h iwm.h protos.h config.h
 dis.o: dis.c defc.h defcomm.h iwm.h protos.h disas.h
 scc.o: scc.c defc.h defcomm.h iwm.h protos.h scc.h
+scc_llap.o: atbridge/atbridge.h atbridge/llap.h defc.h scc.h
 scc_socket_driver.o: scc_socket_driver.c defc.h defcomm.h iwm.h protos.h scc.h
 scc_windriver.o: scc_windriver.c defc.h defcomm.h iwm.h protos.h scc.h
 scc_macdriver.o: scc_macdriver.c defc.h defcomm.h iwm.h protos.h scc.h
@@ -162,9 +172,8 @@ sound.o: sound.c defc.h defcomm.h iwm.h protos.h sound.h
 sound_driver.o: sound_driver.c defc.h defcomm.h iwm.h protos.h sound.h
 video.o: video.c defc.h defcomm.h iwm.h protos.h superhires.h gsportfont.h
 tfe.o: tfe/tfe.c tfe/tfe.h tfe/tfe_protos.h
-tfearch.o:arch/win32/tfearch.c tfe/tfearch.h tfe/tfe_protos.h
+tfearch.o: tfe/tfearch.c tfe/tfearch.h tfe/tfe_protos.h
 tfesupp.o: tfe/tfesupp.c tfe/tfesupp.h tfe/tfe_protos.h
-uilib.o: tfe/uilib.c tfe/uilib.h tfe/tfe_protos.h
 macdriver.o: macdriver.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
 macdriver_console.o: macdriver_console.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
 macdriver_generic.o: macdriver_generic.c defc.h defcomm.h iwm.h protos.h protos_macdriver.h
