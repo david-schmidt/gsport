@@ -1,13 +1,13 @@
 TARGET = gsportx
 OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ) xdriver.o
-CC = g++
+CC = gcc
 CCOPTS = -O2 -Wall -fomit-frame-pointer -std=gnu99 -march=i686 -DHAVE_TFE -DHAVE_ATBRIDGE -DTOGGLE_STATUS
 OPTS = -DGSPORT_LITTLE_ENDIAN 
 SUFFIX =
 NAME = gsportx
 LDFLAGS =
 LDOPTS =
-LD = $(CC)
+LD = g++
 EXTRA_LIBS = -lXext
 EXTRA_SPECIALS =
 

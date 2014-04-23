@@ -20,13 +20,13 @@ PERL = perl
 all: $(TARGET)
 
 clean:
-	- rm $(OBJECTS)
-	- rm $(TARGET)
-	- rm compile_time.o
-	- rm 8inst_c.h
-	- rm 16inst_c.h
-	- rm -r ../GSport.app
-	- rm -r ../GSportDmg
+	- rm -f $(OBJECTS)
+	- rm -f $(TARGET)
+	- rm -f compile_time.o
+	- rm -f 8inst_c.h
+	- rm -f 16inst_c.h
+	- rm -rf ../GSport.app
+	- rm -rf ../GSportDmg
 
 specials: 8inst_s 16inst_s 8size 16size 8inst_c 16inst_c size_c size_s
 
@@ -62,14 +62,14 @@ gsportmac: $(OBJECTS) compile_time.o
 
 # Linux for X builds:
 gsportx: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11
+	$(LD) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11
 	echo $(OBJECTS)
 	mv gsportx ..
 	cp -f ../config.template ../config.txt 
 
 # Linux framebuffer builds:
 gsportfb: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS)
+	$(LD) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS)
 	echo $(OBJECTS)
 	mv gsportfb ..
 	cp -f ../config.template ../config.txt 

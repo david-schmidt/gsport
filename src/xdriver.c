@@ -682,7 +682,7 @@ x_try_find_visual(int depth, int screen_num, XVisualInfo **visual_list_ptr)
 			(word32)visualList[i].visualid,
 			visualList[i].screen,
 			visualList[i].depth,
-			visualList[i].c_class);
+			visualList[i].class);
 		printf("	red: %08lx, green: %08lx, blue: %08lx\n",
 			visualList[i].red_mask,
 			visualList[i].green_mask,
@@ -690,8 +690,8 @@ x_try_find_visual(int depth, int screen_num, XVisualInfo **visual_list_ptr)
 		printf("	cmap size: %d, bits_per_rgb: %d\n",
 			visualList[i].colormap_size,
 			visualList[i].bits_per_rgb);
-		match8 = (visualList[i].c_class == PseudoColor);
-		match24 = (visualList[i].c_class == TrueColor);
+		match8 = (visualList[i].class == PseudoColor);
+		match24 = (visualList[i].class == TrueColor);
 		if((depth == 8) && match8) {
 			visual_chosen = i;
 			Max_color_size = visualList[i].colormap_size;
@@ -1127,7 +1127,7 @@ check_input_events()
 				(word32)(ev.xcolormap.window));
 			vid_printf("colormap: %08x, new: %d, state: %d\n",
 				(word32)ev.xcolormap.colormap,
-				ev.xcolormap.c_new, ev.xcolormap.state);
+				ev.xcolormap.new, ev.xcolormap.state);
 			break;
                 case ClientMessage:
                         if (ev.xclient.data.l[0] == (long)WM_DELETE_WINDOW)
