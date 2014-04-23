@@ -357,7 +357,7 @@ Cfg_menu g_cfg_main_menu[] = {
 #ifndef _WIN32
 { "Force X-windows display depth", KNMP(g_force_depth), CFGTYPE_INT },
 #endif
-#if defined(_WIN32) || defined(__CYGWIN__)
+#if defined(HAVE_ATBRIDGE) || defined(_WIN32) || defined(__CYGWIN__)
 { "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
 #endif
 { "Auto-update configuration file,0,Manual,1,Immediately",
