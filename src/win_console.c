@@ -36,6 +36,7 @@ extern HWND g_hwnd_main;
 
 extern char *g_status_ptrs[MAX_STATUS_LINES];
 extern int  g_win_status_debug;
+extern int  g_win_status_debug_request;
 extern int  g_win_fullscreen_state;
 
 int
@@ -105,6 +106,7 @@ void x_toggle_status_lines()
 	if (!g_win_fullscreen_state)
 	{
 		g_win_status_debug = !g_win_status_debug;
+		g_win_status_debug_request = g_win_status_debug;
 
 		get_default_window_size(&size);
 		SetWindowPos(g_hwnd_main, NULL, 0, 0, size.cx, size.cy, SWP_NOMOVE | SWP_NOZORDER);
