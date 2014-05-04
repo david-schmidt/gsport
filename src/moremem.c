@@ -1270,7 +1270,7 @@ io_read(word32 loc, double *cyc_ptr)
 		/* 0xc020 - 0xc02f */
 		case 0x20: /* 0xc020 */
 			/* Click cassette port */
-			return 0x00;
+			return float_bus(dcycs);
 		case 0x21: /* 0xc021 */
 			/* Not documented, but let's return COLOR_C021 */
 			return IOR(g_cur_a2_stat & ALL_STAT_COLOR_C021);
@@ -1310,7 +1310,8 @@ io_read(word32 loc, double *cyc_ptr)
 		/* 0xc030 - 0xc03f */
 		case 0x30: /* 0xc030 */
 			/* click speaker */
-			return doc_read_c030(dcycs);
+			doc_read_c030(dcycs);
+			return float_bus(dcycs);
 		case 0x31: /* 0xc031 */
 			/* 3.5" control */
 			return g_c031_disk35;
