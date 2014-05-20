@@ -1420,11 +1420,13 @@ void Imagewriter::setupBitImage(Bit8u dens, Bit16u numCols) {
 		bitGraph.vertDens = 72;
 		bitGraph.adjacent = true;
 		bitGraph.bytesColumn = 1;
+		break;
 	case 6:
 		bitGraph.horizDens = 144;
 		bitGraph.vertDens = 72;
 		bitGraph.adjacent = true;
 		bitGraph.bytesColumn = 1;
+		break;
 	case 7:
 		bitGraph.horizDens = 160;
 		bitGraph.vertDens = 72;
@@ -1467,11 +1469,13 @@ void Imagewriter::setupBitImage(Bit8u dens, Bit16u numCols) {
 		bitGraph.vertDens = 216;
 		bitGraph.adjacent = true;
 		bitGraph.bytesColumn = 3;
+		break;
 	case 14:
 		bitGraph.horizDens = 288;
 		bitGraph.vertDens = 216;
 		bitGraph.adjacent = true;
 		bitGraph.bytesColumn = 3;
+		break;
 	case 15:
 		bitGraph.horizDens = 320;
 		bitGraph.vertDens = 216;
