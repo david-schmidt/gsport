@@ -1,26 +1,56 @@
 AppleTalk Emulation and Bridging for GSport
 Peter Neubauer, March 2014
 
+Overview
+========
+GSport now emulates the AppleTalk networking hardware found in the real Apple IIgs and bridges the networking packets to EtherTalk v2.  GSport supports file
+sharing, printer sharing, and network booting features using Apple's original AppleTalk software, such as that shipped with GS/OS 6.0.1.  Note that the
+original AppleTalk software is not directly compatible with modern software, and you will need a compatible file server, such as netatalk or A2SERVER.
+
 Introduction
 ============
 The Apple IIgs shipped with a fantastic but often overlooked feature -- AppleTalk networking.  AppleTalk is a low-cost, easy-to-maintain network technology that
 enables network booting, file sharing, and printer sharing between your Apple IIgs, Workstation Card equipped Apple IIe, and classic Macintosh machines.  As of
 March 2014, GSport is the first modern emulator with support for AppleTalk.  Now, you can just "drag and drop" files between your machines without thinking about 
-disk images, FTP, or serial cables.  You can develop new software with an emulator and test on real hardware.  You don't need to think much about version control.
-Rather, you can update the file once on your file server, and all of your emulated and real machines have the new file.  You can download the latest Apple II 
-software and immediately run it.
+disk images, FTP, or serial cables.  You can develop new software with an emulator and quickly test on real hardware.  You don't need to think much about version
+control.  Rather, you can update the file once on your file server, and all of your emulated and real machines have the new file.  You can download the latest 
+Apple II software and immediately run it.
+
+Beware that Apple changed the meaning of the word "AppleTalk."  Originally, AppleTalk implied a physical layer using 3-pin MiniDIN shielded cables connected in a
+bus topology.  As other physical layers such as Ethernet and TokenTalk became more affordable, Apple defined new terms.  The term AppleTalk no longer implied 
+MiniDIN cabling.  Rather, AppleTalk became the overall term for Apple's approach to networking.  LocalTalk refers to AppleTalk using the original MiniDIN physical
+and link layers.  EtherTalk refers to AppleTalk using the Ethernet link and physical layers.  TokenTalk refers to AppleTalk using the TokenRing link and physical
+layers.  As the Internet became popular, Apple revised their approach to networking to use TCP/IP for the network and transport layers.  The "Internet modernized"
+AppleTalk (AppleTalk IP) replaces many key services of the older AppleTalk and is incompatible with the previous incarnation of AppleTalk.  The IIgs only supports
+AppleTalk using LocalTalk.  The GSport emulation converts LocalTalk to EtherTalk but does *not* support AppleTalk over IP.
 
 Using It
 ========
-First, you need an AppleShare-compatible file server.  A classic Mac or "netatalk" server could provide this function.  For simplicity, I recommend Ivan Drucker's
+First, you need an AppleShare-compatible server.  A classic Mac or "netatalk" server could provide this function.  For simplicity, I recommend Ivan Drucker's
 A2SERVER (http://appleii.ivanx.com/a2server/), which is a pre-configured and easy-to-use package with "netatalk" and other useful tools.  You may run A2SERVER in
-a VirtualBox virtual machine, on an existing Linux server, or on a Raspberry Pi.
+a VirtualBox virtual machine, on an existing Linux server, or on a Raspberry Pi.  File and print sharing functions built-in to modern computers are not directly
+compatible.
 
 Second, you need GSport 0.3 or later with ROM03 running on a Windows or Linux (x86 or Raspberry Pi) machine.  Start GSport and press F4 to access the configuration
 menu.  If necessary, select a ROM03 image.  Select the "Ethernet Card Configuration" menu option.  Change "AppleTalk Bridging" to "On".  Change "Use Interface 
 Number" to select the network where you have attached your AppleShare server or A2SERVER.  Exit the GSport configuration menu.
 
-Third, party like it is 1989.  Your GS is now connected to the AppleTalk network.  Refer to Apple's documentation included with GS/OS System 5 and 6 for further
+You may run GSport and netatalk (or A2SERVER) on the same machine:
+
+On Windows:
+1.  Configure A2SERVER in a VirtualBox virtual machine.  The A2SERVER project provides a pre-configured virtual machine as well as manual installation directions.
+2.  Install the "Microsoft Loopback Adapter" following directions from Microsoft.  
+    See http://blogs.msdn.com/b/ukvsts/archive/2009/02/27/adding-the-ms-loopback-adapter-on-windows-7.aspx and 
+	http://technet.microsoft.com/en-us/library/cc708322%28v=ws.10%29.aspx.
+3.  In the VirtualBox Manager, open "Settings" for the A2SERVER virtual machine.  Select the "Network" section.  Change the "Attached to" option to "Bridged Adapter"
+    and "Name" to "Microsoft Loopback Adapter".  Under the "Advanced" sub-section, make sure "Promiscious Mode" is "Allow All".
+4.  Restart A2SERVER.
+5.  Restart GSport.  Under the "Ethernet Card Configuration" menu, change "User Interface Number" to select the "MS LoopBack Driver".
+
+On Linux:
+[Directions are forthcoming.]
+
+Finally, party like it is 1989.  Your GS is now connected to the AppleTalk network.  Refer to Apple's documentation included with GS/OS System 5 and 6 for further
 directions.
 
 Internal Overview
@@ -32,21 +62,25 @@ the IIgs and GS/OS, and converts the network traffic to EtherTalk.
 
 Limitations
 ===========
+- The IIgs hardware and GSport only support AppleTalk using LocalTalk.  Neither are compatible with file or print sharing functions in modern computers.  Instead,
+run a compatible network server, such as A2SERVER, Netatalk 2.x, or AppleShare.
+
 - A wireless network may not work because many wireless adapters drop EtherTalk packets.  Instead, use a wired Ethernet connection.
 
 - AppleTalk bridging has been tested with System 6.0.1 and System 5.0.2 on ROM03.  Booting from a local disk or from the network works.  Other ROM revisions and
 system software may not work.
 
-- The SCC baud rate is incorrect because the SCC does not emulate line coding.  Still, emulated network speed should be close to the 230.4kbps speed of a real
+- The SCC baud rate is incorrect because the GSport does not emulate line coding.  Still, emulated network speed should be close to the 230.4kbps speed of a real
 LocalTalk network.
 
 - The bridge supports Windows using Visual Studio, Cygwin, and Linux (x86 and Raspberry Pi).  Other platforms should be straightforward, but I do not have a suitable
 build environment.
 
-- The bridge requires a router on the network.  The bridge should work in both a routerless and router-filled network.
+- The bridge requires an AppleTalk router on the network.  The bridge should work in both a routerless and router-filled network, and future revisions will remove
+this limitation.
 
 - The bridge works with simple networks consisting of a single network on a single segment with a single zone.  The bridge should function with all valid network 
-configurations and hardware routers.  Other configurations might not work, and I welcome reports.
+configurations and hardware routers, and future revisions will remove this limitation.  Other configurations might not work, and I welcome reports.
 
 - The bridge implements the non-extended method for acquiring the network number.  Interoperability would likely be better using the extended method, but this method
 is much more complex.
