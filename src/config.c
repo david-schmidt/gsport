@@ -326,9 +326,8 @@ Cfg_menu g_cfg_imagewriter_menu[] = {
 { 0, 0, 0, 0, 0 },
 };
 
-#if defined(HAVE_ATBRIDGE) || defined(_WIN32) || defined(__CYGWIN__)
-Cfg_menu g_cfg_debug_menu[] = {
-{ "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
+Cfg_menu g_cfg_devel_menu[] = {
+{ "Developer Options", g_cfg_devel_menu, 0, 0, CFGTYPE_MENU },
 #if defined(_WIN32) || defined(__CYGWIN__)
 { "Status lines,0,Hide,1,Show", KNMP(g_win_status_debug_request), CFGTYPE_INT },
 { "Console,0,Hide,1,Show", KNMP(g_win_show_console_request), CFGTYPE_INT },
@@ -339,10 +338,17 @@ Cfg_menu g_cfg_debug_menu[] = {
 { "AppleTalk Network Hint", KNMP(g_appletalk_network_hint), CFGTYPE_INT },
 #endif
 { "", 0, 0, 0, 0 },
+#ifndef _WIN32
+{ "Force X-windows display depth", KNMP(g_force_depth), CFGTYPE_INT },
+#endif
+{ "Code Red Halts,0,Do not stop on bad accesses,1,Enter debugger on bad accesses", KNMP(g_user_halt_bad), CFGTYPE_INT },
+{ "3200 Color Enable,0,Auto (Full if fast enough),1,Full (Update every line),8,Off (Update video every 8 lines)", KNMP(g_video_line_update_interval), CFGTYPE_INT },
+{ "Keyboard and mouse poll rate,0,60 times per second,1,240 times per second", KNMP(g_video_extra_check_inputs), CFGTYPE_INT },
+{ "Enable Text Page 2 Shadow,0,Disabled on ROM 01 (matches real hardware),1,Enabled on ROM 01 and 03", KNMP(g_user_page2_shadow), CFGTYPE_INT },
+{ "", 0, 0, 0, 0 },
 { "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { 0, 0, 0, 0, 0 },
 };
-#endif
 
 Cfg_menu g_cfg_main_menu[] = {
 { "GSport Configuration", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
@@ -354,12 +360,7 @@ Cfg_menu g_cfg_main_menu[] = {
 { "Parallel Card Configuration", g_cfg_parallel_menu, 0, 0, CFGTYPE_MENU },
 { "Virtual Printer Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
 { "Virtual Imagewriter Configuration", g_cfg_imagewriter_menu, 0, 0, CFGTYPE_MENU },
-#ifndef _WIN32
-{ "Force X-windows display depth", KNMP(g_force_depth), CFGTYPE_INT },
-#endif
-#if defined(HAVE_ATBRIDGE) || defined(_WIN32) || defined(__CYGWIN__)
-{ "Debugging Options", g_cfg_debug_menu, 0, 0, CFGTYPE_MENU },
-#endif
+{ "Debugging Options", g_cfg_devel_menu, 0, 0, CFGTYPE_MENU },
 { "Auto-update configuration file,0,Manual,1,Immediately",
 		KNMP(g_config_gsport_auto_update), CFGTYPE_INT },
 { "Speed,0,Unlimited,1,1.0MHz,2,2.8MHz,3,8.0MHz (Zip)",
@@ -367,16 +368,6 @@ Cfg_menu g_cfg_main_menu[] = {
 { "Expansion Mem Size,0,0MB,0x100000,1MB,0x200000,2MB,0x300000,3MB,"
 	"0x400000,4MB,0x600000,6MB,0x800000,8MB,0xa00000,10MB,0xc00000,12MB,"
 	"0xe00000,14MB", KNMP(g_mem_size_exp), CFGTYPE_INT },
-{ "3200 Color Enable,0,Auto (Full if fast enough),1,Full (Update every line),"
-	"8,Off (Update video every 8 lines)",
-		KNMP(g_video_line_update_interval), CFGTYPE_INT },
-{ "Keyboard and mouse poll rate,0,60 times per second,1,240 times per second",
-		KNMP(g_video_extra_check_inputs), CFGTYPE_INT },
-{ "Code Red Halts,0,Do not stop on bad accesses,1,Enter debugger on bad "
-		"accesses", KNMP(g_user_halt_bad), CFGTYPE_INT },
-{ "Enable Text Page 2 Shadow,0,Disabled on ROM 01 (matches real hardware),"
-	"1,Enabled on ROM 01 and 03",
-		KNMP(g_user_page2_shadow), CFGTYPE_INT },
 { "Dump text screen to file", (void *)cfg_text_screen_dump, 0, 0, CFGTYPE_FUNC},
 { "", 0, 0, 0, 0 },
 { "Save changes to configuration file", (void *)config_write_config_gsport_file, 0, 0, 
@@ -621,13 +612,13 @@ cfg_get_tfe_name()
 	int i = 0;
 	char *ppname = NULL;
 	char *ppdes = NULL;
-	cfg_htab_vtab(0,10);
+	cfg_htab_vtab(0,11);
 	if (tfe_enumadapter_open())
 	{
 	cfg_printf("Interface List:\n---------------");
 	while(tfe_enumadapter(&ppname,&ppdes))
 	{
-		cfg_htab_vtab(0, 12+i);
+		cfg_htab_vtab(0, 13+i);
 		cfg_printf("%2d: %s",i,ppdes);
 		i++;
 		lib_free(ppname);
