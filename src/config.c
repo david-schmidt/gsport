@@ -360,7 +360,7 @@ Cfg_menu g_cfg_main_menu[] = {
 { "Parallel Card Configuration", g_cfg_parallel_menu, 0, 0, CFGTYPE_MENU },
 { "Virtual Printer Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
 { "Virtual Imagewriter Configuration", g_cfg_imagewriter_menu, 0, 0, CFGTYPE_MENU },
-{ "Debugging Options", g_cfg_devel_menu, 0, 0, CFGTYPE_MENU },
+{ "Developer Options", g_cfg_devel_menu, 0, 0, CFGTYPE_MENU },
 { "Auto-update configuration file,0,Manual,1,Immediately",
 		KNMP(g_config_gsport_auto_update), CFGTYPE_INT },
 { "Speed,0,Unlimited,1,1.0MHz,2,2.8MHz,3,8.0MHz (Zip)",
