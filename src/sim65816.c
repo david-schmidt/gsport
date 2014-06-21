@@ -150,8 +150,8 @@ int g_imagewriter_dpi = 360;
 char* g_imagewriter_output = "bmp";
 int g_imagewriter_multipage = 0;
 int g_imagewriter_timeout = 2;
-char* g_imagewriter_fixed_font = "roman.ttf";
-char* g_imagewriter_prop_font = "roman.ttf";
+char* g_imagewriter_fixed_font = "lib/letgothl.ttf";
+char* g_imagewriter_prop_font = "lib/letgothl.ttf";
 
 int	g_config_iwm_vbl_count = 0;
 extern const char g_gsport_version_str[] = "0.31";
