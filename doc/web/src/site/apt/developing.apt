@@ -6,7 +6,7 @@
 
 Developing GSport
 
- Information, mosly concerning building, about various platforms:
+ Information, mostly concerning building, about various platforms:
 
 * General Build Instructions
 
@@ -206,13 +206,13 @@ make
 
 *-----:------:------:------+
 || <<Platform>> || <<Ethernet>> || <<Drag/Drop Disks>> || <<Clipboard Paste>>
-*-----:------:------+
+*-----:------:------:------+
  Linux     |  No  | No  | No  |
-*-----:------:------+
+*-----:------:------:------+
  Macintosh |  No  | No  | Yes |
-*-----:------:------+
+*-----:------:------:------+
  Windows   |  Yes | Yes | Yes |
-*-----:------:------+
+*-----:------:------:------+
 
 []
 
