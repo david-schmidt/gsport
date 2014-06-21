@@ -39,7 +39,7 @@ Hit the "F4" key and see below for how to tell GSport what disk images to use.
 Tip: Hitting "F8" locks the mouse in the window (and hides the host cursor)
 until you hit "F8" again.
 
- See the the {{{developing.html}developing}} page for information about developing GSport and compiliing it for yourself.
+ See the the {{{./developing.html}developing}} page for information about developing GSport and compiliing it for yourself.
 
 * Configuration Panel
 

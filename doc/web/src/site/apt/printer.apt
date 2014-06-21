@@ -9,11 +9,11 @@ GSport Emulated Printer
  There are several different ways of using the virtual printer output.
 Common scenarios are detailed below:
 
- * Windows {{{printer.html#Bitmap}Bitmap or Postscript}} (B&W) - when you want a graphical file saved on the host computer
+ * Windows {{{./printer.html#Bitmap}Bitmap or Postscript}} (B&W) - when you want a graphical file saved on the host computer
 
- * Direct to {{{printer.html#Host}host printer}} - when you want a real, paper-based copy immediately (or, a Postscript file with an appropriate printer driver)   
+ * Direct to {{{./printer.html#Host}host printer}} - when you want a real, paper-based copy immediately (or, a Postscript file with an appropriate printer driver)   
 
- * {{{printer.html#Text}Text File}} - when you want a file of plain text saved on the host computer 
+ * {{{./printer.html#Text}Text File}} - when you want a file of plain text saved on the host computer 
 
  []
 

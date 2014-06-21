@@ -234,6 +234,6 @@ make
 
  * You'll probably want a monospaced TrueType font file easily accessible to add as part of the GSport configuration
 
- * Run through the emulated printer {{{printer.html}configuration}} steps
+ * Run through the emulated printer {{{./printer.html}configuration}} steps
 
  []
