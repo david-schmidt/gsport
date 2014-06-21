@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 - 2013 by GSport contributors
+ Copyright (C) 2010 - 2014 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -154,7 +154,7 @@ char* g_imagewriter_fixed_font = "roman.ttf";
 char* g_imagewriter_prop_font = "roman.ttf";
 
 int	g_config_iwm_vbl_count = 0;
-extern const char g_gsport_version_str[] = "0.2";
+extern const char g_gsport_version_str[] = "0.31";
 int g_pause=0;	// OG Added pause
 
 #define START_DCYCS	(0.0)
