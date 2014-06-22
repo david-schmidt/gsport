@@ -6,9 +6,11 @@
 
 GSport Release History
 
-* Unreleased - in SVN now
+* Version 0.31 - 6/22/2014
 
  New functionality:
+
+ * Added {{{./appletalk.html}AppleTalk}} networking emulation with bridging to EtherTalk
 
  * Added clipboard text paste capability (OSX, Windows)
 
@@ -16,9 +18,6 @@ GSport Release History
    IP or passthrough to real hardware ports
    
  * Added Imagewriter LQ printer emulation
-
- * Added {{{./appletalk.html}AppleTalk}} networking emulation with bridging to EtherTalk.
-   Related, there are improvements and bug fixes to the SCC emulation.
 
  []
 
@@ -31,7 +30,7 @@ GSport Release History
  * Fixed crash when parallel.rom is missing
 
  * Fix for real joysticks: unless the joystick is moving, gsport
-   sets the values to zero. 
+   sets the values to zero
 
  []
 
