@@ -29,9 +29,6 @@
     <ClCompile Include="pcap_delay.c" />
     <ClCompile Include="port.c" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="notes.txt" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2C88133A-7CB8-4C03-AF4D-4ECFC6F8500B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
