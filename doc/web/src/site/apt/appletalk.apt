@@ -49,11 +49,11 @@ Number" to select the network where you have attached your AppleShare server or 
 	{{{http://technet.microsoft.com/en-us/library/cc708322%28v=ws.10%29.aspx}http://technet.microsoft.com/en-us/library/cc708322%28v=ws.10%29.aspx}}.
 
   [[]] In the VirtualBox Manager, open "Settings" for the A2SERVER virtual machine.  Select the "Network" section.  Change the "Attached to" option to "Bridged Adapter"
-    and "Name" to "Microsoft Loopback Adapter".  Under the "Advanced" sub-section, make sure "Promiscious Mode" is "Allow All".
+    and "Name" to "Microsoft Loopback Adapter".  Under the "Advanced" sub-section, make sure "Promiscuous Mode" is "Allow All".
 
   [[]] Restart A2SERVER.
 
-  [[]] Restart GSport.  Under the "Ethernet Card Configuration" menu, change "User Interface Number" to select the "MS LoopBack Driver".
+  [[]] Restart GSport.  Under the "Ethernet Card Configuration" menu, change "Use Interface Number" to select the "MS LoopBack Driver".
 
  On Linux:
 
