@@ -1,13 +1,16 @@
  -----
- GSport Printer
+ GSport Printers
  -----
  David Schmidt (david__schmidt at users dot souceforge dot net)
  -----
 
-GSport Emulated Printer
+GSport Emulated Printers
 
- There are several different ways of using the virtual printer output.
-Common scenarios are detailed below:
+ There are two classes of printers emulated by GSport: an Epson LQ connected by a virtual serial card in slot 1,
+ and an Apple Imagewriter LQ or Imagewriter II attached to serial port 1.
+ Set up for common printing scenarios is detailed below:
+
+ * Emulated {{{./printer.html#Imagewriter}Imagewriter LQ/II}} - when you want to emulate an Imagewriter LQ or Imagewriter II specifically in slot 1
 
  * Windows {{{./printer.html#Bitmap}Bitmap or Postscript}} (B&W) - when you want a graphical file saved on the host computer
 
@@ -30,6 +33,41 @@ Most applications are good about sending form feeds at page end, so this issue d
 Printing emulation won't work if no fonts at all are defined. 
 Any other mono-spaced TrueType font you have may also be used.
 
+* Emulated {Imagewriter} LQ/II
+
+ In GSport's internal control panel:
+ 
+ [[]] Under "Serial Port Configuration" set Port 0 to "Virtual Imagewriter"
+
+[images/printerI1.png]
+
+ [[]] Under "Virtual Imagewriter Configuration" you need to configure fonts. GSport comes with a fixed width font installed and pre-configured. Set any proportional font you wish to use. If you plan on using native Windows printer output or Postscript, set Multipage Files to "Yes". The default printer timeout of 2 seconds is fine if you are running the machine in 8Mhz or unlimited speed modes. Set it higher if you are running at 1Mhz or 2.8Mhz since the printer may time out while the computer is "thinking" during print jobs.
+
+[images/printerI2.png]
+
+ []
+
+ Printer DPI should be set to at least 720x720dpi for Imagewriter LQ resolution output (mostly GS/OS). Use 1440x1440dpi if you have a high resolution inkjet printer and plan on printing pure text documents. It also minimizes scaling artifacts when printing graphics.
+
+ Printer Type just changes the self ID string sent by the printer when the "ESC-?" command is sent. This is used by the driver included in GS/OS to determine what type of printer is connected and whether a color ribbon is installed. Set it to Imagewriter LQ in most cases.
+
+ <<Save your settings and restart GSport to apply your configuration changes!>>
+ (This will likely be fixed in a future release.)
+
+ In the native IIgs control panel:
+
+ [[]] Under "Slots", Slot 1 should be set to "Printer Port"
+
+ [[]] Under "Printer Port" leave everything at its default setting, but set baud rate to 19200. It is highly recommended that you install the QuickPort CDA and set the port speed to "57600". Since we are using the SCC emulation, the speed that data is transferred to the virtual printer is limited by the baud rate set by the emulated environment.
+
+ []
+
+ 8-bit and non-Printer Manager IIgs applications (like Printshop GS) should work without a problem after configuring them to print to an Imagewriter connected to slot 1. When printing text in programs like Appleworks, be sure to set page margins. By default, the emulator starts printing at the upper left hand corner of the virtual "page".
+
+ GS/OS requires configuration in the "DC Printer" control panel. Make sure you install the printer drivers from your GS/OS disk set. Set the port to "Printer" and type to "Imagewriter.LQ". If you have Harmonie, use its "Printer57.6" port driver as it greatly speeds up printing (the built in port driver appears to be hard coded to 19200 baud max). Do not use its "Printer.HAR" port driver as it sends junk text to the printer for some reason. Harmonie's "IWriterLQ.HAR" and "Imagewriter.HAR" drivers have been tested and are fully compatible with the printer emulator. They do not query the printer with ESC-?, so the setting of Printer Type in the GSport control panel doesn't matter with these. Both Harmonie and Pointless are highly recommended for the best quality output in GS/OS.
+
+ The printer emulator supports all Imagewriter II and LQ functions documented in Apple's official reference manuals. Mousetext and custom character definitions are NOT supported. This is consistent with a real Imagewriter LQ. Only the Imagewriter II supported those functions. 
+ 
 * Windows {Bitmap} or Postscript
 
  To set up GSport to write .BMP or .PS files for each "page" produced, apply the following settings:
