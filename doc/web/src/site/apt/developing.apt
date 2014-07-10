@@ -117,6 +117,8 @@ come out.
 
   * libxext-dev:  <<<sudo apt-get install libxext-dev>>>
 
+  * libpcap-dev:  <<<sudo apt-get install libpcap-dev>>>
+
   []
 
 
