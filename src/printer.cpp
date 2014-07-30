@@ -1901,7 +1901,7 @@ SDL_FreeSurface(image);*/
 			// Print header
 			fprintf(psfile, "%%!PS-Adobe-3.0\n");
 			fprintf(psfile, "%%%%Pages: (atend)\n");
-			fprintf(psfile, "%%%%BoundingBox: 0 0 %i %i\n", (Bit16u)(defaultPageWidth*74), (Bit16u)(defaultPageHeight*74));
+			fprintf(psfile, "%%%%BoundingBox: 0 0 %i %i\n", (Bit16u)(defaultPageWidth*72), (Bit16u)(defaultPageHeight*72));
 			fprintf(psfile, "%%%%Creator: GSport Virtual Printer\n");
 			fprintf(psfile, "%%%%DocumentData: Clean7Bit\n");
 			fprintf(psfile, "%%%%LanguageLevel: 2\n");
@@ -1910,7 +1910,7 @@ SDL_FreeSurface(image);*/
 		}
 
 		fprintf(psfile, "%%%%Page: %i %i\n", multiPageCounter, multiPageCounter);
-		fprintf(psfile, "%i %i scale\n", (Bit16u)(defaultPageWidth*74), (Bit16u)(defaultPageHeight*74));
+		fprintf(psfile, "%i %i scale\n", (Bit16u)(defaultPageWidth*72), (Bit16u)(defaultPageHeight*72));
 		fprintf(psfile, "%i %i 8 [%i 0 0 -%i 0 %i]\n", page->w, page->h, page->w, page->h, page->h);
 		fprintf(psfile, "currentfile\n");
 		fprintf(psfile, "/ASCII85Decode filter\n");

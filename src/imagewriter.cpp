@@ -1803,10 +1803,7 @@ SDL_FreeSurface(image);*/
 	else if (strcasecmp(output, "colorps") == 0)
 	{
 		FILE* psfile = NULL;
-		Uint8 r, g, b;
-		int x, y;
-		int cur_line_len = 0;
-		int plane;
+		
 		// Continue postscript file?
 		if (outputHandle != NULL)
 			psfile = (FILE*)outputHandle;
@@ -1822,71 +1819,95 @@ SDL_FreeSurface(image);*/
 			psfile = fopen(fname, "wb");
 			if (!psfile) 
 			{
-				printf("PRINTER: Can't open file %s for printer output", fname);
+				//LOG(LOG_MISC,LOG_ERROR)("PRINTER: Can't open file %s for printer output", fname);
 				return;
 			}
 
 			// Print header
-			fprintf(psfile, "%%!PS-Adobe-2.0 EPSF-2.0\n");
+			fprintf(psfile, "%%!PS-Adobe-3.0\n");
 			fprintf(psfile, "%%%%Pages: (atend)\n");
-			fprintf(psfile, "%%%%BoundingBox: 0 0 %i %i\n", (Bit16u)(defaultPageWidth*74), (Bit16u)(defaultPageHeight*74));
+			fprintf(psfile, "%%%%BoundingBox: 0 0 %i %i\n", (Bit16u)(defaultPageWidth*72), (Bit16u)(defaultPageHeight*72));
 			fprintf(psfile, "%%%%Creator: GSport Virtual Printer\n");
+			fprintf(psfile, "%%%%DocumentData: Clean7Bit\n");
 			fprintf(psfile, "%%%%LanguageLevel: 2\n");
 			fprintf(psfile, "%%%%EndComments\n");
 			multiPageCounter = 1;
 		}
 
+		fprintf(psfile, "%%%%Page: %i %i\n", multiPageCounter, multiPageCounter);
+		fprintf(psfile, "%i %i scale\n", (Bit16u)(defaultPageWidth*72), (Bit16u)(defaultPageHeight*72));
+		fprintf(psfile, "%i %i 8 [%i 0 0 -%i 0 %i]\n", page->w, page->h, page->w, page->h, page->h);
+		fprintf(psfile, "currentfile\n");
+		fprintf(psfile, "/ASCII85Decode filter\n");
+		fprintf(psfile, "/RunLengthDecode filter\n");
+		fprintf(psfile, "false 3\n");
+		fprintf(psfile, "colorimage\n");
 
+		SDL_LockSurface(page);
+		Bit8u * templine;
+		templine = (Bit8u*) malloc(page->w*3);
+		Bit32u x = 0;
+		Bit32u numy = page->h;
+		Bit32u numx = page->w;
+		Bit32u numpix = page->w*3;
+		Bit32u pix = 0;
+		Bit32u currDot = 0;
+		Bit32u y = 0;
+		Bit32u plane = 0;
+		Bit8u r, g, b;
+		ASCII85BufferPos = ASCII85CurCol = 0;
+		for (y=0; y < numy;y++)
+		{
+			currDot = 0;
+			for (x = 0; x < numx; x++)
+			{
+				SDL_GetRGB(getxyPixel(x,y), page->format, &r, &g, &b);
+				templine[currDot] = ~r; currDot++;
+				templine[currDot] = ~g; currDot++;
+				templine[currDot] = ~b; currDot++;
+			}
+			// Compress data using RLE
+			pix = 0;
+			while (pix < numpix)
+			{
+			if ((pix < numpix-2) && (templine[pix] == templine[pix+1]) && (templine[pix] == templine[pix+2]))
+			{
+				// Found three or more pixels with the same color
+				Bit8u sameCount = 3;
+				Bit8u col = templine[pix];
+				while (sameCount < 128 && sameCount+pix < numpix && col == templine[pix+sameCount])
+					sameCount++;
 
-  fprintf(psfile, "%%%%Page: %i %i\n", multiPageCounter, multiPageCounter);
+				fprintASCII85(psfile, 257-sameCount);
+				fprintASCII85(psfile, 255-col);
 
-  fprintf(psfile, "<< /PageSize [ %d %d ] /ImagingBBox null >> setpagedevice\n",
-              (Bit16u)(defaultPageWidth*74), (Bit16u)(defaultPageHeight*74));
-/* Define a 'readstring' routine and 'picstr' routines for RGB: */
+				// Skip ahead
+				pix += sameCount;
+			}
+			else
+			{
+				// Find end of heterogenous area
+				Bit8u diffCount = 1;
+				while (diffCount < 128 && diffCount+pix < numpix && 
+					(
+						   (diffCount+pix < numpix-2)
+						|| (templine[pix+diffCount] != templine[pix+diffCount+1])
+						|| (templine[pix+diffCount] != templine[pix+diffCount+2])
+					))
+					diffCount++;
 
-fprintf(psfile, "/readstring {\n");
-fprintf(psfile, "  currentfile exch readhexstring pop\n");
-fprintf(psfile, "} bind def\n");
-
-fprintf(psfile, "/rpicstr %d string def\n", page->w);
-fprintf(psfile, "/gpicstr %d string def\n", page->w);
-fprintf(psfile, "/bpicstr %d string def\n", page->w);
-fprintf(psfile, "%%%%EndProlog\n");
-  fprintf(psfile, "gsave\n");
-  fprintf(psfile, "%i %i scale\n", (Bit16u)(defaultPageWidth*74), (Bit16u)(defaultPageHeight*74));
-
-  fprintf(psfile, "%d %d 8\n", page->w, page->h);
-  fprintf(psfile, "%i %i 8 [%i 0 0 -%i 0 %i]\n", page->w, page->h, page->w, page->h, page->h);
-
-  fprintf(psfile, "{ rpicstr readstring }\n");
-  fprintf(psfile, "{ gpicstr readstring }\n");
-  fprintf(psfile, "{ bpicstr readstring }\n");
-
-  fprintf(psfile, "true 3\n");
-  fprintf(psfile, "colorimage\n");
-
-  for (y = 0; y < page->h; y++)
-  {
-    for (plane = 0; plane < 3; plane++)
-    {
-      for (x = 0; x < page->w; x++)
-      {
-        SDL_GetRGB(getxyPixel(x,y), page->format, &r, &g, &b);
-        fprintf(psfile, "%02x", (plane == 0 ? r : (plane == 1 ? g : b)));
-
-        cur_line_len++;
-        if (cur_line_len >= 30)
-        {
-          fprintf(psfile, "\n");
-          cur_line_len = 0;
-        }
-      }
-    }
-  }
-  fprintf(psfile, "\n");
-  fprintf(psfile, "grestore\n");
+				fprintASCII85(psfile, diffCount-1);
+				for (Bit8u i=0; i<diffCount; i++)
+					fprintASCII85(psfile, 255-templine[pix++]);
+			}
+			}
+		}
+		// Write EOD for RLE and ASCII85
+		fprintASCII85(psfile, 128);
+		fprintASCII85(psfile, 256);
 
 		SDL_UnlockSurface(page);
+		free(templine);
 
 		fprintf(psfile, "showpage\n");
 
@@ -1930,7 +1951,7 @@ fprintf(psfile, "%%%%EndProlog\n");
 			// Print header
 			fprintf(psfile, "%%!PS-Adobe-3.0\n");
 			fprintf(psfile, "%%%%Pages: (atend)\n");
-			fprintf(psfile, "%%%%BoundingBox: 0 0 %i %i\n", (Bit16u)(defaultPageWidth*74), (Bit16u)(defaultPageHeight*74));
+			fprintf(psfile, "%%%%BoundingBox: 0 0 %i %i\n", (Bit16u)(defaultPageWidth*72), (Bit16u)(defaultPageHeight*72));
 			fprintf(psfile, "%%%%Creator: GSport Virtual Printer\n");
 			fprintf(psfile, "%%%%DocumentData: Clean7Bit\n");
 			fprintf(psfile, "%%%%LanguageLevel: 2\n");
@@ -1939,7 +1960,7 @@ fprintf(psfile, "%%%%EndProlog\n");
 		}
 
 		fprintf(psfile, "%%%%Page: %i %i\n", multiPageCounter, multiPageCounter);
-		fprintf(psfile, "%i %i scale\n", (Bit16u)(defaultPageWidth*74), (Bit16u)(defaultPageHeight*74));
+		fprintf(psfile, "%i %i scale\n", (Bit16u)(defaultPageWidth*72), (Bit16u)(defaultPageHeight*72));
 		fprintf(psfile, "%i %i 8 [%i 0 0 -%i 0 %i]\n", page->w, page->h, page->w, page->h, page->h);
 		fprintf(psfile, "currentfile\n");
 		fprintf(psfile, "/ASCII85Decode filter\n");
