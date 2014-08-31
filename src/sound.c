@@ -1187,7 +1187,6 @@ doc_sound_end(int osc, int can_repeat, double eff_dsamps, double dsamps)
 		remove_event_doc(osc);
 	}
 	rptr->event = 0;
-	rptr->cur_acc = 0;		/* reset internal accumulator*/
 
 	/* check to make sure osc is running */
 	if(ctl & 0x01) {
@@ -1226,7 +1225,9 @@ doc_sound_end(int osc, int can_repeat, double eff_dsamps, double dsamps)
 		start_sound(osc, eff_dsamps, dsamps);
 
 		return;
-	} else if((mode == 3) || (omode == 3)) {
+	}
+	rptr->cur_acc = 0;		/* reset internal accumulator*/
+	if((mode == 3) || (omode == 3)) {
 		/* swap mode (even if we're one_shot and partner is swap)! */
 		/* unless we're one-shot and we hit a 0-byte--then */
 		/* Olivier Goguel says just stop */
