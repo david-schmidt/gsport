@@ -392,7 +392,7 @@ scc_regen_clocks(int port)
 		}
 		break;
 	case 4: /* Imagewriter */
-		scc_ptr->baud_rate = 230400;
+		scc_ptr->baud_rate = 0;
 		scc_ptr->tx_dcycs = tx_dcycs * 1.2; //Somehow this speeds up serial transfer without overrunning the buffer
 		scc_ptr->rx_dcycs = rx_dcycs * 1.2;
 		break;
