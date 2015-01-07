@@ -294,12 +294,17 @@ private:
 	Bit8u ASCII85CurCol;				// Columns printed so far in the current lines
 };
 
+#endif
 
 //Interfaces to C code
 #ifdef __cplusplus
 extern "C" 
 {
+#else
+#include <stdbool.h>
+typedef unsigned char Bit8u;
 #endif
+
 void imagewriter_init(int pdpi, int pwidth, int pheight, char* poutput, bool mpage, int port);
 void imagewriter_loop(Bit8u pchar,int port);
 void imagewriter_close();
@@ -308,5 +313,4 @@ void imagewriter_feed();
 }
 #endif
 
-#endif
 #endif
