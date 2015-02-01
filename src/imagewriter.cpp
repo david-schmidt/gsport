@@ -1508,7 +1508,7 @@ void Imagewriter::printBitGraph(Bit8u ch)
 	Bitu pixsizeY=1;
 	if(bitGraph.adjacent) {
 		pixsizeX = dpi/bitGraph.horizDens > 0? dpi/bitGraph.horizDens : 1;
-		if(dpi%bitGraph.horizDens)
+		if(dpi%bitGraph.horizDens && bitGraph.horizDens < dpi)
 		{
 			if(PIXX%(bitGraph.horizDens*8) || (PIXX == 0)) //Primative scaling function
 			{
