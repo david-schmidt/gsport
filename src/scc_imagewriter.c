@@ -40,7 +40,7 @@ int scc_imagewriter_init(int port)
 {
 	Scc	*scc_ptr;
 	scc_ptr = &(scc_stat[port]);
-	imagewriter_init(g_imagewriter_dpi,85,110,g_imagewriter_output,g_imagewriter_multipage != 0, port);
+	imagewriter_init(g_imagewriter_dpi,612,792,g_imagewriter_output,g_imagewriter_multipage != 0, port);
 	scc_ptr->state = 4;
 	return 4;
 }

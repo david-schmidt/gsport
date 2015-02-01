@@ -116,8 +116,8 @@ Imagewriter::Imagewriter(Bit16u dpi, Bit16u width, Bit16u height, char* output, 
 		this->multipageOutput = multipageOutput;
 		this->port = port;
 
-		defaultPageWidth = (Real64)width/(Real64)10;
-		defaultPageHeight = (Real64)height/(Real64)10;
+		defaultPageWidth = (Real64)width/(Real64)72;
+		defaultPageHeight = (Real64)height/(Real64)72;
 
 		// Create page
 		page = SDL_CreateRGBSurface(
@@ -1628,6 +1628,8 @@ SDL_FreeSurface(image);*/
 
 		Bit16u physW = GetDeviceCaps(printerDC, PHYSICALWIDTH);
 		Bit16u physH = GetDeviceCaps(printerDC, PHYSICALHEIGHT);
+		Bit16u offsetW = GetDeviceCaps(printerDC, PHYSICALOFFSETX);
+		Bit16u offsetH = GetDeviceCaps(printerDC, PHYSICALOFFSETY);
 
 		Real64 scaleW, scaleH;
 
@@ -1695,7 +1697,7 @@ SDL_FreeSurface(image);*/
             memcpy (Pixels, page->pixels,
 		    BitmapInfo->bmiHeader.biSizeImage);
             Prev = SelectObject (memHDC, bitmap);
-			StretchBlt(printerDC, 0, 0, physW, physH, memHDC, 0, 0, page->w, page->h, SRCCOPY);
+			StretchBlt(printerDC, -offsetW, -offsetH, physW, physH, memHDC, 0, 0, page->w, page->h, SRCCOPY);
             SelectObject (memHDC,Prev);
             DeleteObject (bitmap);
           }
