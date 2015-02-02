@@ -573,56 +573,35 @@ iwm525_phase_change(int drive, int phase)
 {
 	Disk	*dsk;
 	int	qtr_track;
-	int	last_phase;
-	int	phase_up;
-	int	phase_down;
 	int	delta;
 
-	phase_up = (phase - 1) & 3;
-	phase_down = (phase + 1) & 3;
-
 	dsk = &(iwm.drive525[drive]);
-	last_phase = dsk->last_phase;
 
 	qtr_track = dsk->cur_qtr_track;
+	int half_track = qtr_track >> 1;
 
 	delta = 0;
-	if(last_phase == phase_up) {
-		delta = 2;
-		last_phase = phase;
-	} else if(last_phase == phase_down) {
-		delta = -2;
-		last_phase = phase;
-	}
+	if (iwm.iwm_phase[(half_track + 1) & 3])
+		delta += 2;
+	if (iwm.iwm_phase[(half_track + 3) & 3])
+		delta -= 2;
 
 	qtr_track += delta;
 	if(qtr_track < 0) {
-		printf("GRIND...GRIND...GRIND\n");
+		printf("GRIND...");
 		qtr_track = 0;
-		last_phase = 0;
 	}
 	if(qtr_track > 4*34) {
 		printf("Disk arm moved past track 34, moving it back\n");
 		qtr_track = 4*34;
-		last_phase = 0;
 	}
 
 	iwm_move_to_track(dsk, qtr_track);
 
-	dsk->last_phase = last_phase;
-
-	iwm_printf("Moving drive to qtr track: %04x (trk:%d.%02d), %d, %d, %d, "
+	iwm_printf("Moving drive to qtr track: %04x (trk:%d.%02d), %d, %d, "
 		"%d %d %d %d\n", qtr_track, qtr_track>>2, 25*(qtr_track & 3),
-		phase, delta, last_phase, iwm.iwm_phase[0],
+		phase, delta, iwm.iwm_phase[0],
 		iwm.iwm_phase[1], iwm.iwm_phase[2], iwm.iwm_phase[3]);
-
-	/* sanity check stepping algorithm */
-	if((qtr_track & 7) == 0) {
-		/* check for just access phase 0 */
-		if(last_phase != 0 ) {
-			halt_printf("last_phase: %d!\n", last_phase);
-		}
-	}
 }
 
 int
