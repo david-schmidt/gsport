@@ -160,6 +160,7 @@ void config_init(void);
 void cfg_exit(void);
 void cfg_toggle_config_panel(void);
 void cfg_text_screen_dump(void);
+void cfg_iwreset(void);
 void cfg_get_tfe_name(void);
 void cfg_inspect_maybe_insert_file(char *filename, int should_boot);
 int cfg_guess_image_size(char *filename);

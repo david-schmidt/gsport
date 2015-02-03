@@ -22,6 +22,7 @@
 #include "defc.h"
 #include <stdarg.h>
 #include "config.h"
+#include "imagewriter.h"
 #if defined(__OS2__)
 #include "arch\os2\src\dirport.h"
 #elif defined(_MSC_VER)
@@ -322,6 +323,9 @@ Cfg_menu g_cfg_imagewriter_menu[] = {
 { "", 0, 0, 0, 0 },
 { "Proportional Font", KNMP(g_imagewriter_prop_font), CFGTYPE_FILE },
 { "", 0, 0, 0, 0 },
+{ "", 0, 0, 0, 0 },
+{ "Apply Changes", (void *)cfg_iwreset, 0, 0, CFGTYPE_FUNC },
+{ "", 0, 0, 0, 0 },
 { "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { 0, 0, 0, 0, 0 },
 };
@@ -604,7 +608,14 @@ cfg_text_screen_dump()
 	}
 	fclose(ofile);
 }
-
+void
+cfg_iwreset()
+{
+		imagewriter_feed();
+		imagewriter_close();
+		imagewriter_init(g_imagewriter_dpi,612,792,g_imagewriter_output,g_imagewriter_multipage, 0);
+		return;
+}
 #ifdef HAVE_TFE
 void 
 cfg_get_tfe_name()
@@ -3333,6 +3344,7 @@ config_control_panel()
 				case CFGTYPE_FUNC:
 					fn_ptr = (void (*)())ptr;
 					(*fn_ptr)();
+					adb_all_keys_up(); //Needed otherwise menu function will continue to repeat until we move selection up or down
 					break;
 				case CFGTYPE_FILE:
 					g_cfg_slotdrive = 0xfff;
