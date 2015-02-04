@@ -246,7 +246,7 @@ void Imagewriter::resetPrinter()
 		ESCCmd = 0;
 		numParam = neededParam = 0;
 		topMargin = 0.0;
-		leftMargin = 0.0;
+		leftMargin = 0.25; //Most all Apple II software including GS/OS assume a 1/4 inch margin on an Imagewriter
 		rightMargin = pageWidth = defaultPageWidth;
 		bottomMargin = pageHeight = defaultPageHeight;
 		lineSpacing = (Real64)1/6;
@@ -1628,21 +1628,16 @@ SDL_FreeSurface(image);*/
 
 		Bit16u physW = GetDeviceCaps(printerDC, PHYSICALWIDTH);
 		Bit16u physH = GetDeviceCaps(printerDC, PHYSICALHEIGHT);
-		Bit16u offsetW = GetDeviceCaps(printerDC, PHYSICALOFFSETX);
-		Bit16u offsetH = GetDeviceCaps(printerDC, PHYSICALOFFSETY);
-
-		Real64 scaleW, scaleH;
-
-		if (page->w > physW) 
-	        scaleW = (Real64)page->w / (Real64)physW;
-	    else 
-			scaleW = (Real64)physW / (Real64)page->w; 
- 
-		if (page->h > physH) 
-	        scaleH = (Real64)page->h / (Real64)physH;
-	    else 
-			scaleH = (Real64)physH / (Real64)page->h; 
-
+		Bit16u printeroffsetW = GetDeviceCaps(printerDC, PHYSICALOFFSETX);  //printer x offset in actual pixels
+		Bit16u printeroffsetH = GetDeviceCaps(printerDC, PHYSICALOFFSETY); //printer y offset in actual pixels
+		Bit16u deviceDPIW = GetDeviceCaps(printerDC, LOGPIXELSX);
+		Bit16u deviceDPIH = GetDeviceCaps(printerDC, LOGPIXELSY);
+		Real64 physoffsetW = (Real64)printeroffsetW/deviceDPIW; //printer x offset in inches
+		Real64 physoffsetH = (Real64)printeroffsetH/deviceDPIH; //printer y offset in inches
+		Bit16u dpiW = page->w/defaultPageWidth; //Get currently set DPI of the emulated printer in an indirect way
+		Bit16u dpiH = page->h/defaultPageHeight;
+		Real64 soffsetW = physoffsetW*dpiW; //virtual page x offset in actual pixels
+		Real64 soffsetH = physoffsetH*dpiH; //virtual page y offset in actual pixels
 		HDC memHDC = CreateCompatibleDC(printerDC);
 		BITMAPINFO *BitmapInfo;
 		HBITMAP bitmap;
@@ -1697,7 +1692,7 @@ SDL_FreeSurface(image);*/
             memcpy (Pixels, page->pixels,
 		    BitmapInfo->bmiHeader.biSizeImage);
             Prev = SelectObject (memHDC, bitmap);
-			StretchBlt(printerDC, -offsetW, -offsetH, physW, physH, memHDC, 0, 0, page->w, page->h, SRCCOPY);
+			StretchBlt(printerDC, 0, 0, physW, physH, memHDC, soffsetW, soffsetH, page->w, page->h, SRCCOPY);
             SelectObject (memHDC,Prev);
             DeleteObject (bitmap);
           }
