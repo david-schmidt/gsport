@@ -147,7 +147,7 @@ main(int argc, char **argv)
 	wndclass.hInstance = GetModuleHandle(NULL);
 	wndclass.hIcon = LoadIcon(wndclass.hInstance, MAKEINTRESOURCE(IDC_GSPORT32));
 	wndclass.hCursor = LoadCursor((HINSTANCE) NULL, IDC_ARROW);
-	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	wndclass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wndclass.lpszMenuName = NULL;
 	wndclass.lpszClassName = "gsport";
 

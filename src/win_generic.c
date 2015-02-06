@@ -64,7 +64,17 @@ int		g_win_status_debug_request = 1;	// Desired visibility of status lines.
 int		g_win_show_console = 0;			// Current visibility of console.
 int		g_win_show_console_request = 1;	// Desired visibility of console.
 RECT	g_main_window_saved_rect;
-int	g_win_fullscreen_state = 0;
+int		g_main_window_saved_style;
+int		g_main_window_saved_exstyle;
+int		g_win_fullscreen_state = 0;
+#if 0 // enable non-integral full-screen scaling
+	#define FULLSCREEN_SCALE_TYPE float
+#else
+	#define FULLSCREEN_SCALE_TYPE int
+#endif
+FULLSCREEN_SCALE_TYPE	g_win_fullscreen_scale = 1;
+int		g_win_fullscreen_offsetx = 0;
+int		g_win_fullscreen_offsety = 0;
 
 LPSTR   g_clipboard;
 size_t  g_clipboard_pos;
@@ -581,29 +591,22 @@ x_push_kimage(Kimage *kimage_ptr, int destx, int desty, int srcx, int srcy,
 	int width, int height)
 {
 	void	*bitm_old;
-	POINT	point;
-
-	point.x = 0;
-	point.y = 0;
-	ClientToScreen(g_hwnd_main, &point);
 
 	HDC localdc = GetDC(g_hwnd_main);
-	HDC localcdc = g_main_cdc; //CreateCompatibleDC(g_main_dc);
+	HDC localcdc = g_main_cdc;
 
 	bitm_old = SelectObject(localcdc, kimage_ptr->dev_handle);
 
-	float ratiox = 0.0, ratioy = 0.0;
-	int isStretched = x_calc_ratio(ratiox,ratioy);
-	if (!isStretched)
-		BitBlt(localdc, destx, desty, width, height,	localcdc, srcx, srcy, SRCCOPY);
+	if (g_win_fullscreen_scale == 1)
+		BitBlt(localdc, destx + g_win_fullscreen_offsetx, desty + g_win_fullscreen_offsety, width, height, localcdc, srcx, srcy, SRCCOPY);
 	else
 	{
-		float xdest = (destx)*ratiox;
-		float ydest = (desty)*ratioy;
-		float wdest = (width)*ratiox;
-		float hdest = (height)*ratioy;
+		FULLSCREEN_SCALE_TYPE xdest = destx * g_win_fullscreen_scale + g_win_fullscreen_offsetx;
+		FULLSCREEN_SCALE_TYPE ydest = desty * g_win_fullscreen_scale + g_win_fullscreen_offsety;
+		FULLSCREEN_SCALE_TYPE wdest = width * g_win_fullscreen_scale;
+		FULLSCREEN_SCALE_TYPE hdest = height * g_win_fullscreen_scale;
 
-		BOOL err=StretchBlt(localdc,(int)xdest,(int)ydest,(int)wdest,(int)hdest,localcdc, srcx, srcy,width,height, SRCCOPY);
+		StretchBlt(localdc, (int)xdest, (int)ydest, (int)wdest, (int)hdest, localcdc, srcx, srcy, width, height, SRCCOPY);
 	}
 
 	SelectObject(localcdc, bitm_old);
@@ -638,56 +641,51 @@ x_hide_pointer(int do_hide)
 void
 x_full_screen(int do_full)
 {
-	DEVMODE dmScreenSettings;
-	int style;
+	MONITORINFO monitor_info;
+	FULLSCREEN_SCALE_TYPE width, height, scalex, scaley;
+	int top, left;
 
 	g_win_status_debug = 1 - do_full;
 	if (do_full && !g_win_fullscreen_state) {
-		GetWindowRect(g_hwnd_main,&g_main_window_saved_rect);
-		dmScreenSettings.dmSize=sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth	= 800;
-		dmScreenSettings.dmPelsHeight	= 600;
-		dmScreenSettings.dmBitsPerPel	= 24;	
-		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|
-									  DM_PELSHEIGHT;
-			
-			if (ChangeDisplaySettings(&dmScreenSettings, 2) 
-			!=DISP_CHANGE_SUCCESSFUL) {
-			// If 24-bit palette does not work, try 32-bit            
-			dmScreenSettings.dmBitsPerPel	= 32;	
-				if (ChangeDisplaySettings(&dmScreenSettings, 2)) {
-				printf (
-				"-- Unable to switch to fullscreen mode\n");
-							printf (
-				"-- No 24-bit or 32-bit mode for fullscreen\n");
-							dmScreenSettings.dmBitsPerPel=-1;
-			}
-		}
+		g_main_window_saved_style = GetWindowLong(g_hwnd_main, GWL_STYLE);
+		g_main_window_saved_exstyle = GetWindowLong(g_hwnd_main, GWL_EXSTYLE);
+		GetWindowRect(g_hwnd_main, &g_main_window_saved_rect);
+		SetWindowLong(g_hwnd_main, GWL_STYLE, g_main_window_saved_style & ~(WS_CAPTION | WS_THICKFRAME));
+		SetWindowLong(g_hwnd_main, GWL_EXSTYLE, g_main_window_saved_exstyle & ~(WS_EX_DLGMODALFRAME | WS_EX_WINDOWEDGE | WS_EX_CLIENTEDGE | WS_EX_STATICEDGE));
 
-		if (dmScreenSettings.dmBitsPerPel >0) {
-			g_win_fullscreen_state=!g_win_fullscreen_state;
-			GetWindowRect(g_hwnd_main,&g_main_window_saved_rect);
-			ChangeDisplaySettings(&dmScreenSettings, 4); 
-			style=GetWindowLong(g_hwnd_main,GWL_STYLE);
-				style &= ~WS_CAPTION;
-			SetWindowLong(g_hwnd_main,GWL_STYLE,style);
-			SetMenu(g_hwnd_main,NULL);
-			SetWindowPos(g_hwnd_main,HWND_TOPMOST,0,0,
-				GetSystemMetrics(SM_CXSCREEN),
-				GetSystemMetrics(SM_CYSCREEN),
-				SWP_SHOWWINDOW);
-		}
+		monitor_info.cbSize = sizeof(monitor_info);
+		GetMonitorInfo(MonitorFromWindow(g_hwnd_main, MONITOR_DEFAULTTONEAREST), &monitor_info);
+		left = monitor_info.rcMonitor.left;
+		top = monitor_info.rcMonitor.top;
+		width = (FULLSCREEN_SCALE_TYPE)(monitor_info.rcMonitor.right - monitor_info.rcMonitor.left);
+		height = (FULLSCREEN_SCALE_TYPE)(monitor_info.rcMonitor.bottom - monitor_info.rcMonitor.top);
+		scalex = width / X_A2_WINDOW_WIDTH;
+		scaley = height / X_A2_WINDOW_HEIGHT;
+		g_win_fullscreen_scale = (scalex <= scaley) ? scalex : scaley;
+		g_win_fullscreen_offsetx = ((int)width - (int)(g_win_fullscreen_scale * X_A2_WINDOW_WIDTH)) / 2;
+		g_win_fullscreen_offsety = ((int)height - (int)(g_win_fullscreen_scale * X_A2_WINDOW_HEIGHT)) / 2;
+		SetWindowPos(g_hwnd_main, NULL, left, top, (int)width, (int)height, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+
+		g_win_fullscreen_state = 1;
+		RedrawWindow(g_hwnd_main, NULL, NULL, RDW_INVALIDATE);
+
+
 	} else {
 		if (g_win_fullscreen_state) {
-			ChangeDisplaySettings(NULL,0);
-			style=GetWindowLong(g_hwnd_main,GWL_STYLE);
-			style |= WS_CAPTION;
-			SetWindowLong(g_hwnd_main,GWL_STYLE,style);
-			SetWindowPos(g_hwnd_main, HWND_TOPMOST,
-				g_main_window_saved_rect.top, g_main_window_saved_rect.left, 
-				g_main_window_saved_rect.right - g_main_window_saved_rect.left, g_main_window_saved_rect.bottom - g_main_window_saved_rect.top,
-							 SWP_SHOWWINDOW);
-			g_win_fullscreen_state=!g_win_fullscreen_state;
+			g_win_fullscreen_offsetx = 0;
+			g_win_fullscreen_offsety = 0;
+			g_win_fullscreen_scale = 1;
+			SetWindowLong(g_hwnd_main, GWL_STYLE, g_main_window_saved_style);
+			SetWindowLong(g_hwnd_main, GWL_EXSTYLE, g_main_window_saved_exstyle);
+			SetWindowPos(g_hwnd_main, NULL,
+				g_main_window_saved_rect.left,
+				g_main_window_saved_rect.top,
+				g_main_window_saved_rect.right - g_main_window_saved_rect.left,
+				g_main_window_saved_rect.bottom - g_main_window_saved_rect.top,
+				SWP_SHOWWINDOW);
+
+			g_win_fullscreen_state = 0;
+			RedrawWindow(g_hwnd_main, NULL, NULL, RDW_INVALIDATE);
 		}
 	}
 	return;
