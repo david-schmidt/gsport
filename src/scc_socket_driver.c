@@ -23,6 +23,8 @@
 
 #include "defc.h"
 #include "scc.h"
+#include <string.h>
+#include <stdlib.h>
 #ifndef UNDER_CE	//OG
 #include <signal.h>
 #endif
@@ -74,6 +76,19 @@ scc_socket_init(int port)
 	scc_ptr->host_aux1 = sizeof(struct sockaddr_in);
 	scc_ptr->host_handle = malloc(scc_ptr->host_aux1);
 	/* Real init will be done when bytes need to be read/write from skt */
+}
+
+static int
+scc_socket_close_handle(SOCKET sockfd)
+{
+	if (sockfd != -1)
+	{
+#if defined(_WIN32) || defined (__OS2__)
+		return closesocket(sockfd); // NW: a Windows socket handle is not a file descriptor
+#else
+		return close(sockfd);
+#endif
+	}
 }
 
 void
@@ -143,7 +158,7 @@ scc_socket_maybe_open_incoming(int port, double dcycs)
 		/* else ret to bind was < 0 */
 		printf("bind ret: %d, errno: %d\n", ret, errno);
 		inc++;
-		close(sockfd);
+		scc_socket_close_handle(sockfd);
 		printf("Trying next port: %d\n", 6501 + port + inc);
 		if(inc >= 10) {
 			printf("Too many retries, quitting\n");
@@ -203,6 +218,19 @@ scc_socket_open_outgoing(int port, double dcycs)
 	memset(&sa_in, 0, sizeof(sa_in));
 	sa_in.sin_family = AF_INET;
 	sa_in.sin_port = htons(23);
+	/* ARO: inspect the ATDT command to see if there is a decimal port number declared & if so, use it */
+	/* Format: ATDT<host>,<port> */
+	/* Example ATDT192.168.1.21,4001 */
+	char *comma_ptr = strchr(&scc_ptr->modem_cmd_str[0], ',');
+	if (comma_ptr != NULL)
+	{
+		USHORT port = (USHORT)strtol(comma_ptr + 1, NULL, 10);
+		*comma_ptr = '\0'; /* null terminate the hostname string at the position of the comma */
+		if (port >= 1 && port < 65536) /* Only use the valid number if it is within bounds */
+		{
+			sa_in.sin_port = htons(port);
+		}
+	}
 	hostentptr = gethostbyname((const char*)&scc_ptr->modem_cmd_str[0]);	// OG Added Cast
 	if(hostentptr == 0) {
 #if defined(_WIN32) || defined (__OS2__)
@@ -212,7 +240,7 @@ scc_socket_open_outgoing(int port, double dcycs)
 		fatal_printf("Lookup host %s failed, herrno: %d\n",
 					&scc_ptr->modem_cmd_str[0], h_errno);
 #endif
-		close(sockfd);
+		scc_socket_close_handle(sockfd);
 		scc_socket_close(port, 1, dcycs);
 		x_show_alert(0, 0);
 		return;
@@ -225,7 +253,7 @@ scc_socket_open_outgoing(int port, double dcycs)
 	ret = connect(sockfd, (struct sockaddr *)&sa_in, sizeof(sa_in));
 	if(ret < 0) {
 		printf("connect ret: %d, errno: %d\n", ret, errno);
-		close(sockfd);
+		scc_socket_close_handle(sockfd);
 		scc_socket_close(port, 1, dcycs);
 		return;
 	}
@@ -303,12 +331,12 @@ scc_socket_close(int port, int full_close, double dcycs)
 	rdwrfd = scc_ptr->rdwrfd;
 	if(rdwrfd >= 0) {
 		printf("socket_close: rdwrfd=%d, closing\n", rdwrfd);
-		close(rdwrfd);
+		scc_socket_close_handle(rdwrfd);
 	}
 	sockfd = scc_ptr->sockfd;
 	if(sockfd != -1) {
 		printf("socket_close: sockfd=%d, closing\n", sockfd);
-		close(sockfd);
+		scc_socket_close_handle(sockfd);
 	}
 
 	scc_ptr->modem_cmd_len = 0;
