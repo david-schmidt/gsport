@@ -89,6 +89,7 @@ scc_socket_close_handle(SOCKET sockfd)
 		return close(sockfd);
 #endif
 	}
+	return 0;
 }
 
 void
@@ -329,7 +330,7 @@ scc_socket_close(int port, int full_close, double dcycs)
 	printf("In scc_socket_close, %d, %d, %f\n", port, full_close, dcycs);
 
 	rdwrfd = scc_ptr->rdwrfd;
-	if(rdwrfd >= 0) {
+	if(rdwrfd != -1) {
 		printf("socket_close: rdwrfd=%d, closing\n", rdwrfd);
 		scc_socket_close_handle(rdwrfd);
 	}
