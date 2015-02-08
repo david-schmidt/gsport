@@ -58,3 +58,19 @@ static const Bit16u intCharSets[8][10] =
 	{0x00a3, 0x00e0, 0x00b0, 0x00e7, 0x00a7, 0x0060, 0x00e9, 0x00f9, 0x00e8, 0x00a8}, // France
 	{0x00a3, 0x00a7, 0x00a1, 0x00d1, 0x00bf, 0x0060, 0x00b0, 0x00f1, 0x00e7, 0x007e}, // Spanish
 };
+
+/*
+Paper size definitions. Units are Postscript points (1/72in).
+This list is based on the options available in the GS/OS
+Imagewriter LQ driver.
+*/
+static const Bit16u paperSizes[7][2] =
+{
+	{612, 792}, //US Letter 8.5 x 11in
+	{612, 1008}, //US Legal 8.5 x 14in
+	{595, 842}, //ISO A4 210 x 297mm
+	{499, 709}, //ISO B5 176 x 250mm
+	{1071, 792}, //Wide Fanfold 14 x 11in
+	{792, 1224}, //Ledger/Tabloid 11 x 17in
+	{842, 1191}, // ISO A3 297 x 420mm
+};

@@ -31,6 +31,8 @@ extern int g_imagewriter_dpi;
 extern char* g_imagewriter_output;
 extern int g_imagewriter_multipage;
 extern int g_imagewriter_timeout;
+extern int g_imagewriter_paper;
+extern int g_imagewriter_banner;
 
 word32 imagewriter_vbl_count = 0;
 int imagewriter_port_block = 0;
@@ -40,7 +42,7 @@ int scc_imagewriter_init(int port)
 {
 	Scc	*scc_ptr;
 	scc_ptr = &(scc_stat[port]);
-	imagewriter_init(g_imagewriter_dpi,612,792,g_imagewriter_output,g_imagewriter_multipage != 0, port);
+	imagewriter_init(g_imagewriter_dpi,g_imagewriter_paper,g_imagewriter_banner,g_imagewriter_output,g_imagewriter_multipage);
 	scc_ptr->state = 4;
 	return 4;
 }
@@ -122,7 +124,7 @@ void scc_imagewriter_empty_writebuf(int port, double dcycs)
 		}
 		bytes_written = 1;
 		imagewriter_port_block = 1;
-		imagewriter_loop(scc_ptr->out_buf[rdptr],port);
+		imagewriter_loop(scc_ptr->out_buf[rdptr]);
 		imagewriter_vbl_count = g_vbl_count+(g_imagewriter_timeout*60);
 		imagewriter_port_block = 0;
 		//printf("Write Imagewriter ret: %d, bytes_written:%d, len:%d\n", ret,

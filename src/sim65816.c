@@ -152,6 +152,8 @@ int g_imagewriter_multipage = 0;
 int g_imagewriter_timeout = 2;
 char* g_imagewriter_fixed_font = "lib/letgothl.ttf";
 char* g_imagewriter_prop_font = "lib/letgothl.ttf";
+int g_imagewriter_paper = 0;
+int g_imagewriter_banner = 0;
 
 int	g_config_iwm_vbl_count = 0;
 extern const char g_gsport_version_str[] = "0.31";

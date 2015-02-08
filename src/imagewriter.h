@@ -123,7 +123,7 @@ typedef struct {
 class Imagewriter {
 public:
 
-	Imagewriter (Bit16u dpi, Bit16u width, Bit16u height, char* output, bool multipageOutput, int port);
+	Imagewriter (Bit16u dpi, Bit16u paperSize, Bit16u bannerSize, char* output, bool multipageOutput);
 	virtual ~Imagewriter();
 
 	// Process one character sent to virtual printer
@@ -305,8 +305,8 @@ extern "C"
 typedef unsigned char Bit8u;
 #endif
 
-void imagewriter_init(int pdpi, int pwidth, int pheight, char* poutput, bool mpage, int port);
-void imagewriter_loop(Bit8u pchar,int port);
+void imagewriter_init(int pdpi, int ppaper, int banner, char* poutput, bool mpage);
+void imagewriter_loop(Bit8u pchar);
 void imagewriter_close();
 void imagewriter_feed();
 #ifdef __cplusplus

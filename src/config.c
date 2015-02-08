@@ -105,6 +105,8 @@ extern int g_imagewriter_multipage;
 extern int g_imagewriter_timeout;
 extern char* g_imagewriter_fixed_font;
 extern char* g_imagewriter_prop_font;
+extern int g_imagewriter_paper;
+extern int g_imagewriter_banner;
 
 #if defined(_WIN32) || defined(__CYGWIN__)
 extern int g_win_show_console_request;
@@ -307,8 +309,12 @@ Cfg_menu g_cfg_imagewriter_menu[] = {
 { "Virtual Imagewriter Configuration", g_cfg_imagewriter_menu, 0, 0, CFGTYPE_MENU },
 { "Virtual Printer Type,0,Imagewriter II,1,Imagewriter LQ",
 		KNMP(g_imagewriter), CFGTYPE_INT },
+{ "Paper Size,0,US Letter (8.5x11in),1,US Legal (8.5x14in),2,ISO A4 (210 x 297mm),3,ISO B5 (176 x 250mm),4,Wide Fanfold (14 x 11in),5,Ledger (11 x 17in),6,ISO A3 (297 x 420mm)",
+		KNMP(g_imagewriter_paper), CFGTYPE_INT },
 { "Printer DPI,360,360x360 dpi (Best for 8-bit software),720,720x720 dpi (Best for GS/OS & IW LQ Modes),1440,1440x1440 dpi",
 		KNMP(g_imagewriter_dpi), CFGTYPE_INT },
+{ "Banner Printing (Limited To 144x144 dpi Output),0,Banner Printing Off,3,3 Pages Long,4,4 Pages Long,5,5 Pages Long,6,6 Pages Long,7,7 Pages Long,8,8 Pages Long,9,9 Pages Long,10,10 Pages Long",
+		KNMP(g_imagewriter_banner), CFGTYPE_INT },
 { "Printer Output Type,bmp,Windows Bitmap,ps,Postscript (B&W),colorps,Postscript (Color),printer,Direct to host printer,text,Text file",
 		KNMP(g_imagewriter_output), CFGTYPE_STR },
 { "Multipage Files? (PS Only),0,No,1,Yes",
@@ -613,7 +619,7 @@ cfg_iwreset()
 {
 		imagewriter_feed();
 		imagewriter_close();
-		imagewriter_init(g_imagewriter_dpi,612,792,g_imagewriter_output,g_imagewriter_multipage, 0);
+		imagewriter_init(g_imagewriter_dpi,g_imagewriter_paper,g_imagewriter_banner, g_imagewriter_output,g_imagewriter_multipage);
 		return;
 }
 #ifdef HAVE_TFE

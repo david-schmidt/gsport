@@ -101,7 +101,7 @@ void Imagewriter::FillPalette(Bit8u redmax, Bit8u greenmax, Bit8u bluemax, Bit8u
 }
 #endif // HAVE_SDL
 
-Imagewriter::Imagewriter(Bit16u dpi, Bit16u width, Bit16u height, char* output, bool multipageOutput, int port) 
+Imagewriter::Imagewriter(Bit16u dpi, Bit16u paperSize, Bit16u bannerSize, char* output, bool multipageOutput)
 {
 #ifdef HAVE_SDL
 	if (FT_Init_FreeType(&FTlib))
@@ -111,14 +111,22 @@ Imagewriter::Imagewriter(Bit16u dpi, Bit16u width, Bit16u height, char* output, 
 	else
 	{
 		SDL_Init(SDL_INIT_EVERYTHING);
-		this->dpi = dpi;
 		this->output = output;
 		this->multipageOutput = multipageOutput;
 		this->port = port;
 
-		defaultPageWidth = (Real64)width/(Real64)72;
-		defaultPageHeight = (Real64)height/(Real64)72;
-
+		if (bannerSize)
+		{
+			defaultPageWidth = ((Real64)paperSizes[0][0]/(Real64)72);
+			defaultPageHeight = (((Real64)paperSizes[0][1]*bannerSize)/(Real64)72);
+			dpi = 144;
+		}
+		else
+		{
+			defaultPageWidth = ((Real64)paperSizes[paperSize][0]/(Real64)72);
+			defaultPageHeight = ((Real64)paperSizes[paperSize][1]/(Real64)72);
+		}
+		this->dpi = dpi;
 		// Create page
 		page = SDL_CreateRGBSurface(
 						SDL_SWSURFACE, 
@@ -1626,8 +1634,8 @@ SDL_FreeSurface(image);*/
 	{
 #if defined (WIN32)
 
-		Bit16u physW = GetDeviceCaps(printerDC, PHYSICALWIDTH);
-		Bit16u physH = GetDeviceCaps(printerDC, PHYSICALHEIGHT);
+		Bit32u physW = GetDeviceCaps(printerDC, PHYSICALWIDTH);
+		Bit32u physH = GetDeviceCaps(printerDC, PHYSICALHEIGHT);
 		Bit16u printeroffsetW = GetDeviceCaps(printerDC, PHYSICALOFFSETX);  //printer x offset in actual pixels
 		Bit16u printeroffsetH = GetDeviceCaps(printerDC, PHYSICALOFFSETY); //printer y offset in actual pixels
 		Bit16u deviceDPIW = GetDeviceCaps(printerDC, LOGPIXELSX);
@@ -2174,12 +2182,12 @@ Bit8u Imagewriter::getPixel(Bit32u num) {
 //Interfaces to C code
 
 
-extern "C" void imagewriter_init(int pdpi, int pwidth, int pheight, char* poutput, bool mpage, int port)
+extern "C" void imagewriter_init(int pdpi, int ppaper, int banner, char* poutput, bool mpage)
 {
 	if (defaultImagewriter != NULL) return; //if Imagewriter on this port is initialized, reuse it
-	defaultImagewriter = new Imagewriter(pdpi, pwidth,pheight, poutput, mpage, port);
+	defaultImagewriter = new Imagewriter(pdpi, ppaper, banner, poutput, mpage);
 }
-extern "C" void imagewriter_loop(Bit8u pchar, int port)
+extern "C" void imagewriter_loop(Bit8u pchar)
 {
     if (defaultImagewriter == NULL) return;
 	defaultImagewriter->printChar(pchar);
