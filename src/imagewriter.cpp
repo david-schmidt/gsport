@@ -202,6 +202,7 @@ Imagewriter::Imagewriter(Bit16u dpi, Bit16u paperSize, Bit16u bannerSize, char* 
 #if defined (WIN32)
 			// Show Print dialog to obtain a printer device context
 
+			ShowCursor(1);
 			PRINTDLG pd;
 			pd.lStructSize = sizeof(PRINTDLG); 
 			pd.hDevMode = (HANDLE) NULL; 
@@ -225,6 +226,7 @@ Imagewriter::Imagewriter(Bit16u dpi, Bit16u paperSize, Bit16u bannerSize, char* 
 			PrintDlg(&pd);
 			// TODO: what if user presses cancel?
 			printerDC = pd.hDC;
+			ShowCursor(0);
 #endif // WIN32
 		}
 	}
