@@ -187,6 +187,7 @@ scc_socket_open_outgoing(int port, double dcycs)
 	int	on;
 	int	ret;
 	SOCKET	sockfd;
+	USHORT port_number = 23;
 
 	scc_ptr = &(scc_stat[port]);
 
@@ -218,20 +219,23 @@ scc_socket_open_outgoing(int port, double dcycs)
 
 	memset(&sa_in, 0, sizeof(sa_in));
 	sa_in.sin_family = AF_INET;
-	sa_in.sin_port = htons(23);
 	/* ARO: inspect the ATDT command to see if there is a decimal port number declared & if so, use it */
 	/* Format: ATDT<host>,<port> */
 	/* Example ATDT192.168.1.21,4001 */
 	char *comma_ptr = strchr(&scc_ptr->modem_cmd_str[0], ',');
-	if (comma_ptr != NULL)
-	{
-		USHORT port = (USHORT)strtol(comma_ptr + 1, NULL, 10);
+	if (comma_ptr != NULL) {
+		long custom_port = strtol(comma_ptr + 1, NULL, 10);
 		*comma_ptr = '\0'; /* null terminate the hostname string at the position of the comma */
-		if (port >= 1 && port < 65536) /* Only use the valid number if it is within bounds */
-		{
-			sa_in.sin_port = htons(port);
+		if (custom_port >= 1 && custom_port <= 65535) {
+			port_number = (USHORT)custom_port;
+		} else {
+			printf("Specified port out of range: %ld\n", custom_port);
+			scc_socket_close_handle(sockfd);
+			scc_socket_close(port, 1, dcycs);
+			return;
 		}
 	}
+	sa_in.sin_port = htons(port_number);
 	hostentptr = gethostbyname((const char*)&scc_ptr->modem_cmd_str[0]);	// OG Added Cast
 	if(hostentptr == 0) {
 #if defined(_WIN32) || defined (__OS2__)
@@ -263,8 +267,8 @@ scc_socket_open_outgoing(int port, double dcycs)
 	scc_ptr->socket_state = 1;	/* talk to socket */
 	scc_ptr->socket_num_rings = 0;
 
-	printf("SCC port %d is now outgoing to %s\n", port,
-						&scc_ptr->modem_cmd_str[0]);
+	printf("SCC port %d is now outgoing to %s on TCP port %d\n", port,
+						&scc_ptr->modem_cmd_str[0], port_number);
 
 	scc_ptr->sockfd = sockfd;
 	scc_ptr->state = 1;		/* successful socket */
