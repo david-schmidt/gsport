@@ -40,6 +40,7 @@ extern int h_errno;
 #define socklen_t int
 #endif
 int g_wsastartup_called = 0;
+typedef unsigned short USHORT;
 
 /* Usage: scc_socket_init() called to init socket mode */
 /*  At all times, we try to have a listen running on the incoming socket */
