@@ -346,8 +346,8 @@ void gsportinit(HWND _hwnd)
 	g_hwnd_main = _hwnd;
 	
 	HDC localdc = GetDC(g_hwnd_main);
-	SetTextColor(localdc, 0);
-	SetBkColor(localdc, 0xFFFFFF);
+	SetTextColor(localdc, RGB(0, 0, 0));
+	SetBkColor(localdc, RGB(255, 255, 255));
 
 	g_main_cdc = CreateCompatibleDC(localdc);
 	ReleaseDC(g_hwnd_main,localdc);

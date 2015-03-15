@@ -217,8 +217,8 @@ x_redraw_status_lines()
 	if (g_win_status_debug)
 	{
 		HDC localdc = GetDC(g_hwnd_main);
-		oldtextcolor = SetTextColor(localdc, 0);
-		oldbkcolor = SetBkColor(localdc, 0xffffff);
+		oldtextcolor = SetTextColor(localdc, RGB(255, 255, 255));
+		oldbkcolor = SetBkColor(localdc, RGB(0, 0, 0));
 		for(line = 0; line < MAX_STATUS_LINES; line++) {
 			buf = g_status_ptrs[line];
 			if(buf != 0) {
