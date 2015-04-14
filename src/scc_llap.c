@@ -55,6 +55,8 @@ void scc_llap_update()
 	{
 		atbridge_process();
 
+		// Save the AppleTalk network number.  Since the network number does not
+		// change very often, this will slightly improve startup time.
 		if (g_appletalk_network_hint != atbridge_get_net())
 		{
 			g_appletalk_network_hint = atbridge_get_net();
@@ -84,6 +86,9 @@ void scc_llap_fill_readbuf(int port, int space_left, double dcycs)
 	}
 
 	free(data);
+
+	// Normally, the bridge updates from the 60 Hz loop, but that alone bottlenecks network throughput.
+	scc_llap_update();
 }
 
 /** Transfer one packet from the SCC to the AppleTalk bridge. **/
@@ -131,6 +136,9 @@ void scc_llap_empty_writebuf(int port, double dcycs)
 	// The timing will be a bit off from the real hardware since we're not 
 	// emulating the sending hardware timing and CRC generation.
 	scc_ptr->eom = 1;
+
+	// Normally, the bridge updates from the 60 Hz loop, but that alone bottlenecks network throughput.
+	scc_llap_update();
 }
 
 #else
