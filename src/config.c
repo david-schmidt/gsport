@@ -151,6 +151,7 @@ int	g_cfg_curs_x = 0;
 int	g_cfg_curs_y = 0;
 int	g_cfg_curs_inv = 0;
 int	g_cfg_curs_mousetext = 0;
+int g_cfg_triggeriwreset = 0;
 
 #define CFG_MAX_OPTS	16
 #define CFG_OPT_MAXSTR	100
@@ -330,8 +331,6 @@ Cfg_menu g_cfg_imagewriter_menu[] = {
 { "Proportional Font", KNMP(g_imagewriter_prop_font), CFGTYPE_FILE },
 { "", 0, 0, 0, 0 },
 { "", 0, 0, 0, 0 },
-{ "Apply Changes", (void *)cfg_iwreset, 0, 0, CFGTYPE_FUNC },
-{ "", 0, 0, 0, 0 },
 { "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { 0, 0, 0, 0, 0 },
 };
@@ -379,6 +378,7 @@ Cfg_menu g_cfg_main_menu[] = {
 	"0x400000,4MB,0x600000,6MB,0x800000,8MB,0xa00000,10MB,0xc00000,12MB,"
 	"0xe00000,14MB", KNMP(g_mem_size_exp), CFGTYPE_INT },
 { "Dump text screen to file", (void *)cfg_text_screen_dump, 0, 0, CFGTYPE_FUNC},
+{ "Reset Virtual Imagewriter", (void *)cfg_iwreset, 0, 0, CFGTYPE_FUNC },
 { "", 0, 0, 0, 0 },
 { "Save changes to configuration file", (void *)config_write_config_gsport_file, 0, 0, 
 		CFGTYPE_FUNC },
@@ -3298,6 +3298,12 @@ config_control_panel()
 			cfg_get_tfe_name();
 		}
 #endif
+		/*If user enters the Virtual Imagewriter control panel, flag it so we can 
+		automatically apply changes on exit.*/
+		if(menuptr == g_cfg_imagewriter_menu)
+		{
+			g_cfg_triggeriwreset = 1;
+		}
 		key = -1;
 		while(g_config_control_panel & !(halt_sim&HALT_WANTTOQUIT)) {
 			video_update();
@@ -3383,6 +3389,11 @@ config_control_panel()
 		set_memory_c(0xe10400+i, g_save_text_screen_bytes[0x400+i], 0);
 	}
 	// And quit
+	if (g_cfg_triggeriwreset)
+	{
+		g_cfg_triggeriwreset = 0;
+		cfg_iwreset(); //Reset the virtual Imagewriter if the user was in the control panel.
+	}
 	g_config_control_panel = 0;
 	g_adb_repeat_vbl = g_vbl_count + 60;
 	g_cur_a2_stat = g_save_cur_a2_stat;
