@@ -196,8 +196,8 @@ Imagewriter::Imagewriter(Bit16u dpi, Bit16u paperSize, Bit16u bannerSize, char* 
 		outputHandle = NULL;
 
 		resetPrinter();
-
-		if (strcasecmp(output, "printer") == 0)
+		//Only initialize native printer here if multipage output is off. That way the user doesn't get prompted every page.
+		if (strcasecmp(output, "printer") == 0 && !multipageOutput)
 		{
 #if defined (WIN32)
 			// Show Print dialog to obtain a printer device context
@@ -222,9 +222,13 @@ Imagewriter::Imagewriter(Bit16u dpi, Bit16u paperSize, Bit16u bannerSize, char* 
 			pd.lpPrintTemplateName = (LPCSTR) NULL; 
 			pd.lpSetupTemplateName = (LPCSTR)  NULL; 
 			pd.hPrintTemplate = (HANDLE) NULL; 
-			pd.hSetupTemplate = (HANDLE) NULL; 
-			PrintDlg(&pd);
-			// TODO: what if user presses cancel?
+			pd.hSetupTemplate = (HANDLE) NULL;
+			if(!PrintDlg(&pd))
+			{
+				//If user presses cancel, warn them with a dialog and switch output to bitmap files 
+				this->output = "bmp";
+				MessageBox(NULL,"You did not select a printer.\nAll printer output will be saved as bitmap files.\nTo select a printer, press F4 and select 'Reset Virtual Imagewriter'",NULL,MB_ICONEXCLAMATION);
+			}
 			printerDC = pd.hDC;
 			ShowCursor(0);
 #endif // WIN32
@@ -1635,7 +1639,53 @@ SDL_FreeSurface(image);*/
 	if (strcasecmp(output, "printer") == 0)
 	{
 #if defined (WIN32)
-
+		if (multipageOutput && outputHandle == NULL)
+		{
+			ShowCursor(1);
+			PRINTDLG pd;
+			pd.lStructSize = sizeof(PRINTDLG); 
+			pd.hDevMode = (HANDLE) NULL; 
+			pd.hDevNames = (HANDLE) NULL; 
+			pd.Flags = PD_RETURNDC; 
+			pd.hwndOwner = NULL; 
+			pd.hDC = (HDC) NULL; 
+			pd.nFromPage = 1; 
+			pd.nToPage = 1; 
+			pd.nMinPage = 0; 
+			pd.nMaxPage = 0; 
+			pd.nCopies = 1; 
+			pd.hInstance = NULL; 
+			pd.lCustData = 0L; 
+			pd.lpfnPrintHook = (LPPRINTHOOKPROC) NULL; 
+			pd.lpfnSetupHook = (LPSETUPHOOKPROC) NULL; 
+			pd.lpPrintTemplateName = (LPCSTR) NULL; 
+			pd.lpSetupTemplateName = (LPCSTR)  NULL; 
+			pd.hPrintTemplate = (HANDLE) NULL; 
+			pd.hSetupTemplate = (HANDLE) NULL; 
+				if(!PrintDlg(&pd))
+				{
+					//If user clicks cancel, show warning dialog and force all output to bitmaps as failsafe.
+					MessageBox(NULL,"You did not select a printer.\nAll output from this print job will be saved as bitmap files.",NULL,MB_ICONEXCLAMATION);
+					findNextName("page", ".bmp", &fname[0]);
+					SDL_SaveBMP(page, fname); //Save first page as bitmap.
+					outputHandle = printerDC;
+					printerDC = NULL;
+					ShowCursor(0);
+					return;
+				}
+				else
+				{
+					//Create device context.
+					printerDC = pd.hDC;
+					ShowCursor(0);
+				}
+		}
+		if (!printerDC) //Fall thru for subsequent pages if printer dialog was cancelled.
+		{
+			findNextName("page", ".bmp", &fname[0]);
+			SDL_SaveBMP(page, fname); //Save remaining pages.
+			return;
+		}
 		Bit32u physW = GetDeviceCaps(printerDC, PHYSICALWIDTH);
 		Bit32u physH = GetDeviceCaps(printerDC, PHYSICALHEIGHT);
 		Bit16u printeroffsetW = GetDeviceCaps(printerDC, PHYSICALOFFSETX);  //printer x offset in actual pixels
