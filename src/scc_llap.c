@@ -40,6 +40,7 @@ static bool bridge_initialized = false;
 
 void scc_llap_init()
 {
+	atbridge_set_diagnostics(g_appletalk_diagnostics);
 	bridge_initialized = atbridge_init();
 	atbridge_set_net(g_appletalk_network_hint);
 }
