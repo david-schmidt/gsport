@@ -1229,11 +1229,8 @@ doc_sound_end(int osc, int can_repeat, double eff_dsamps, double dsamps)
 	rptr->cur_acc = 0;		/* reset internal accumulator*/
 	if((mode == 3) || (omode == 3)) {
 		/* swap mode (even if we're one_shot and partner is swap)! */
-		/* unless we're one-shot and we hit a 0-byte--then */
-		/* Olivier Goguel says just stop */
 		rptr->ctl |= 1;
-		one_shot_stop = (mode == 1) && (!can_repeat);
-		if(!one_shot_stop && !orptr->running &&
+		if(!orptr->running &&
 							(orptr->ctl & 0x1)) {
 			orptr->ctl = orptr->ctl & (~1);
 			start_sound(other_osc, eff_dsamps, dsamps);
