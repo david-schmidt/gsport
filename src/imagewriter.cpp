@@ -227,7 +227,7 @@ Imagewriter::Imagewriter(Bit16u dpi, Bit16u paperSize, Bit16u bannerSize, char* 
 			{
 				//If user presses cancel, warn them with a dialog and switch output to bitmap files 
 				this->output = "bmp";
-				MessageBox(NULL,"You did not select a printer.\nAll printer output will be saved as bitmap files.\nTo select a printer, press F4 and select 'Reset Virtual Imagewriter'",NULL,MB_ICONEXCLAMATION);
+				MessageBox(NULL,"You did not select a printer.\nAll printer output will be saved as bitmap files.\nTo select a printer, press F4 and select 'Reset Virtual ImageWriter'",NULL,MB_ICONEXCLAMATION);
 			}
 			printerDC = pd.hDC;
 			ShowCursor(0);
@@ -1707,7 +1707,7 @@ SDL_FreeSurface(image);*/
 		{
 			DOCINFO docinfo;
 			docinfo.cbSize = sizeof(docinfo);
-			docinfo.lpszDocName = "GSport Virtual Imagewriter";
+			docinfo.lpszDocName = "GSport Virtual ImageWriter";
 			docinfo.lpszOutput = NULL;
 			docinfo.lpszDatatype = NULL;
 			docinfo.fwType = 0;

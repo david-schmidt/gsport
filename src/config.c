@@ -232,10 +232,17 @@ Cfg_menu g_cfg_rom_menu[] = {
 
 Cfg_menu g_cfg_serial_menu[] = {
 { "Serial Port Configuration", g_cfg_serial_menu, 0, 0, CFGTYPE_MENU },
+#ifdef HAVE_SDL
 { "Port 0 (slot 1),0,Only use socket 6501,1,Use real port if avail,2,Virtual Imagewriter",
 		KNMP(g_serial_type[0]), CFGTYPE_INT },
 { "Port 1 (slot 2),0,Only use socket 6502,1,Use real port if avail,2,Virtual Imagewriter",
 		KNMP(g_serial_type[1]), CFGTYPE_INT },
+#else
+{ "Port 0 (slot 1),0,Only use socket 6501,1,Use real port if avail",
+		KNMP(g_serial_type[0]), CFGTYPE_INT },
+{ "Port 1 (slot 2),0,Only use socket 6502,1,Use real port if avail",
+		KNMP(g_serial_type[1]), CFGTYPE_INT },
+#endif
 { "Serial Output,0,Send full 8-bit data,1,Mask off high bit",
 		KNMP(g_serial_out_masking), CFGTYPE_INT },
 { "Modem on port 0 (slot 1),0,Simple socket emulation mode,1,Modem with "
@@ -278,16 +285,16 @@ Cfg_menu g_cfg_ethernet_menu[] = {
 { "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { 0, 0, 0, 0, 0 },
 };
-
+#ifdef HAVE_SDL
 Cfg_menu g_cfg_printer_menu[] = {
-{ "Virtual Printer Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
+{ "Virtual Epson Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
 { "Virtual Printer Type,0,Epson LQ",
 		KNMP(g_printer), CFGTYPE_INT },
 { "Printer DPI,60,60x60 dpi,180,180x180 dpi,360,360x360 dpi",
 		KNMP(g_printer_dpi), CFGTYPE_INT },
 { "Printer Output Type,bmp,Windows Bitmap,ps,Postscript (B&W),printer,Direct to host printer,text,Text file",
 		KNMP(g_printer_output), CFGTYPE_STR },
-{ "Multipage Files? (PS Only),0,No,1,Yes",
+{ "Multipage Files? (PS and Direct to Host Only),0,No,1,Yes",
 		KNMP(g_printer_multipage), CFGTYPE_INT },
 { "Printer Timeout,0,Never,2,2 sec.,15,15 sec.,30,30 sec.,60, 1 min.",
 		KNMP(g_printer_timeout), CFGTYPE_INT },
@@ -307,8 +314,8 @@ Cfg_menu g_cfg_printer_menu[] = {
 };
 
 Cfg_menu g_cfg_imagewriter_menu[] = {
-{ "Virtual Imagewriter Configuration", g_cfg_imagewriter_menu, 0, 0, CFGTYPE_MENU },
-{ "Virtual Printer Type,0,Imagewriter II,1,Imagewriter LQ",
+{ "Virtual ImageWriter Configuration", g_cfg_imagewriter_menu, 0, 0, CFGTYPE_MENU },
+{ "Virtual Printer Type,0,ImageWriter II,1,ImageWriter LQ",
 		KNMP(g_imagewriter), CFGTYPE_INT },
 { "Paper Size,0,US Letter (8.5x11in),1,US Legal (8.5x14in),2,ISO A4 (210 x 297mm),3,ISO B5 (176 x 250mm),4,Wide Fanfold (14 x 11in),5,Ledger (11 x 17in),6,ISO A3 (297 x 420mm)",
 		KNMP(g_imagewriter_paper), CFGTYPE_INT },
@@ -318,12 +325,12 @@ Cfg_menu g_cfg_imagewriter_menu[] = {
 		KNMP(g_imagewriter_banner), CFGTYPE_INT },
 { "Printer Output Type,bmp,Windows Bitmap,ps,Postscript (B&W),colorps,Postscript (Color),printer,Direct to host printer,text,Text file",
 		KNMP(g_imagewriter_output), CFGTYPE_STR },
-{ "Multipage Files? (PS Only),0,No,1,Yes",
+{ "Multipage Files? (PS and Direct to Host Only),0,No,1,Yes",
 		KNMP(g_imagewriter_multipage), CFGTYPE_INT },
 { "Printer Timeout,0,Never,2,2 sec.,15,15 sec.,30,30 sec.,60, 1 min.",
 		KNMP(g_imagewriter_timeout), CFGTYPE_INT },
 { "", 0, 0, 0, 0 },
-{ "Imagewriter Fonts", 0, 0, 0, 0 },
+{ "ImageWriter Fonts", 0, 0, 0, 0 },
 { "-----------------", 0, 0, 0, 0 },
 { "", 0, 0, 0, 0 },
 { "Fixed Width Font", KNMP(g_imagewriter_fixed_font), CFGTYPE_FILE },
@@ -334,6 +341,7 @@ Cfg_menu g_cfg_imagewriter_menu[] = {
 { "Back to Main Config", g_cfg_main_menu, 0, 0, CFGTYPE_MENU },
 { 0, 0, 0, 0, 0 },
 };
+#endif
 
 Cfg_menu g_cfg_devel_menu[] = {
 { "Developer Options", g_cfg_devel_menu, 0, 0, CFGTYPE_MENU },
@@ -367,8 +375,10 @@ Cfg_menu g_cfg_main_menu[] = {
 { "Serial Port Configuration", g_cfg_serial_menu, 0, 0, CFGTYPE_MENU },
 { "Ethernet Card Configuration", g_cfg_ethernet_menu, 0, 0, CFGTYPE_MENU },
 { "Parallel Card Configuration", g_cfg_parallel_menu, 0, 0, CFGTYPE_MENU },
-{ "Virtual Printer Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
-{ "Virtual Imagewriter Configuration", g_cfg_imagewriter_menu, 0, 0, CFGTYPE_MENU },
+#ifdef HAVE_SDL
+{ "Virtual Epson Configuration", g_cfg_printer_menu, 0, 0, CFGTYPE_MENU },
+{ "Virtual ImageWriter Configuration", g_cfg_imagewriter_menu, 0, 0, CFGTYPE_MENU },
+#endif
 { "Developer Options", g_cfg_devel_menu, 0, 0, CFGTYPE_MENU },
 { "Auto-update configuration file,0,Manual,1,Immediately",
 		KNMP(g_config_gsport_auto_update), CFGTYPE_INT },
@@ -378,7 +388,9 @@ Cfg_menu g_cfg_main_menu[] = {
 	"0x400000,4MB,0x600000,6MB,0x800000,8MB,0xa00000,10MB,0xc00000,12MB,"
 	"0xe00000,14MB", KNMP(g_mem_size_exp), CFGTYPE_INT },
 { "Dump text screen to file", (void *)cfg_text_screen_dump, 0, 0, CFGTYPE_FUNC},
-{ "Reset Virtual Imagewriter", (void *)cfg_iwreset, 0, 0, CFGTYPE_FUNC },
+#ifdef HAVE_SDL
+{ "Reset Virtual ImageWriter", (void *)cfg_iwreset, 0, 0, CFGTYPE_FUNC },
+#endif
 { "", 0, 0, 0, 0 },
 { "Save changes to configuration file", (void *)config_write_config_gsport_file, 0, 0, 
 		CFGTYPE_FUNC },
@@ -3298,12 +3310,14 @@ config_control_panel()
 			cfg_get_tfe_name();
 		}
 #endif
+#ifdef HAVE_SDL
 		/*If user enters the Virtual Imagewriter control panel, flag it so we can 
 		automatically apply changes on exit.*/
 		if(menuptr == g_cfg_imagewriter_menu)
 		{
 			g_cfg_triggeriwreset = 1;
 		}
+#endif
 		key = -1;
 		while(g_config_control_panel & !(halt_sim&HALT_WANTTOQUIT)) {
 			video_update();
