@@ -233,9 +233,9 @@ Cfg_menu g_cfg_rom_menu[] = {
 Cfg_menu g_cfg_serial_menu[] = {
 { "Serial Port Configuration", g_cfg_serial_menu, 0, 0, CFGTYPE_MENU },
 #ifdef HAVE_SDL
-{ "Port 0 (slot 1),0,Only use socket 6501,1,Use real port if avail,2,Virtual Imagewriter",
+{ "Port 0 (slot 1),0,Only use socket 6501,1,Use real port if avail,2,Virtual ImageWriter",
 		KNMP(g_serial_type[0]), CFGTYPE_INT },
-{ "Port 1 (slot 2),0,Only use socket 6502,1,Use real port if avail,2,Virtual Imagewriter",
+{ "Port 1 (slot 2),0,Only use socket 6502,1,Use real port if avail,2,Virtual ImageWriter",
 		KNMP(g_serial_type[1]), CFGTYPE_INT },
 #else
 { "Port 0 (slot 1),0,Only use socket 6501,1,Use real port if avail",
