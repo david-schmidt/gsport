@@ -150,66 +150,82 @@ int	g_blue_right_shift = 0;
 char	g_status_buf[MAX_STATUS_LINES][STATUS_LINE_LENGTH + 1];
 char	*g_status_ptrs[MAX_STATUS_LINES] = { 0 };
 
+// These LORES/DHIRES RGB values were extracted from ROM 3 IIgs video signals by Koichi Nishida
+#define BLACK_RGB       0x000
+#define DEEP_RED_RGB    0xd03
+#define BROWN_RGB       0x850
+#define ORANGE_RGB      0xf60
+#define DARK_GREEN_RGB  0x072
+#define DARK_GRAY_RGB   0x555
+#define GREEN_RGB       0x1d0
+#define YELLOW_RGB      0xff0
+#define DARK_BLUE_RGB   0x009
+#define PURPLE_RGB      0xd2d
+#define LIGHT_GRAY_RGB  0xaaa
+#define PINK_RGB        0xf98
+#define MEDIUM_BLUE_RGB 0x22f
+#define LIGHT_BLUE_RGB  0x6af
+#define AQUAMARINE_RGB  0x4f9
+#define WHITE_RGB       0xfff
+
 const int g_dbhires_colors[] = {
-		/* rgb */
-		0x000,		/* 0x0 black */
-		0xd03,		/* 0x1 deep red */
-		0x852,		/* 0x2 brown */
-		0xf60,		/* 0x3 orange */
-		0x070,		/* 0x4 dark green */
-		0x555,		/* 0x5 dark gray */
-		0x0d0,		/* 0x6 green */
-		0xff0,		/* 0x7 yellow */
-		0x009,		/* 0x8 dark blue */
-		0xd0d,		/* 0x9 purple */
-		0xaaa,		/* 0xa light gray */
-		0xf98,		/* 0xb pink */
-		0x22f,		/* 0xc medium blue */
-		0x6af,		/* 0xd light blue */
-		0x0f9,		/* 0xe aquamarine */
-		0xfff		/* 0xf white */
+	BLACK_RGB,       // 0x0 black
+	DEEP_RED_RGB,    // 0x1 deep red
+	BROWN_RGB,       // 0x2 brown
+	ORANGE_RGB,      // 0x3 orange
+	DARK_GREEN_RGB,  // 0x4 dark green
+	DARK_GRAY_RGB,   // 0x5 dark gray
+	GREEN_RGB,       // 0x6 green
+	YELLOW_RGB,      // 0x7 yellow
+	DARK_BLUE_RGB,   // 0x8 dark blue
+	PURPLE_RGB,      // 0x9 purple
+	LIGHT_GRAY_RGB,  // 0xa light gray
+	PINK_RGB,        // 0xb pink
+	MEDIUM_BLUE_RGB, // 0xc medium blue
+	LIGHT_BLUE_RGB,  // 0xd light blue
+	AQUAMARINE_RGB,  // 0xe aquamarine
+	WHITE_RGB        // 0xf white
 };
 
 word32 g_dhires_convert[4096];	/* look up table of 7 bits (concat): */
 				/* { 4 bits, |3 prev bits| } */
 
 const byte g_dhires_colors_16[] = {
-		0x00,	/* 0x0 black */
-		0x02,	/* 0x1 dark blue */
-		0x04,	/* 0x2 dark green */
-		0x06,	/* 0x3 medium blue */
-		0x08,	/* 0x4 brown */
-		0x0a,	/* 0x5 light gray */
-		0x0c,	/* 0x6 green */
-		0x0e,	/* 0x7 aquamarine */
-		0x01,	/* 0x8 deep red */
-		0x03,	/* 0x9 purple */
-		0x05,	/* 0xa dark gray */
-		0x07,	/* 0xb light blue */
-		0x09,	/* 0xc orange */
-		0x0b,	/* 0xd pink */
-		0x0d,	/* 0xe yellow */
-		0x0f/* 0xf white */
+	0x00, // 0x0 black
+	0x02, // 0x1 dark blue
+	0x04, // 0x2 dark green
+	0x06, // 0x3 medium blue
+	0x08, // 0x4 brown
+	0x0a, // 0x5 light gray
+	0x0c, // 0x6 green
+	0x0e, // 0x7 aquamarine
+	0x01, // 0x8 deep red
+	0x03, // 0x9 purple
+	0x05, // 0xa dark gray
+	0x07, // 0xb light blue
+	0x09, // 0xc orange
+	0x0b, // 0xd pink
+	0x0d, // 0xe yellow
+	0x0f  // 0xf white
 };
 
- int  g_lores_colors[] = {
-		/* rgb */
-		0x000,		/* 0x0 black */
-		0xd03,		/* 0x1 deep red */
-		0x009,		/* 0x2 dark blue */
-		0xd0d,		/* 0x3 purple */
-		0x070,		/* 0x4 dark green */
-		0x555,		/* 0x5 dark gray */
-		0x22f,		/* 0x6 medium blue */
-		0x6af,		/* 0x7 light blue */
-		0x852,		/* 0x8 brown */
-		0xf60,		/* 0x9 orange */
-		0xaaa,		/* 0xa light gray */
-		0xf98,		/* 0xb pink */
-		0x0d0,		/* 0xc green */
-		0xff0,		/* 0xd yellow */
-		0x0f9,		/* 0xe aquamarine */
-		0xfff		/* 0xf white */
+int g_lores_colors[] = {
+	BLACK_RGB,       // 0x0 black
+	DEEP_RED_RGB,    // 0x1 deep red
+	DARK_BLUE_RGB,   // 0x2 dark blue
+	PURPLE_RGB,      // 0x3 purple
+	DARK_GREEN_RGB,  // 0x4 dark green
+	DARK_GRAY_RGB,   // 0x5 dark gray
+	MEDIUM_BLUE_RGB, // 0x6 medium blue
+	LIGHT_BLUE_RGB,  // 0x7 light blue
+	BROWN_RGB,       // 0x8 brown
+	ORANGE_RGB,      // 0x9 orange
+	LIGHT_GRAY_RGB,  // 0xa light gray
+	PINK_RGB,        // 0xb pink
+	GREEN_RGB,       // 0xc green
+	YELLOW_RGB,      // 0xd yellow
+	AQUAMARINE_RGB,  // 0xe aquamarine
+	WHITE_RGB        // 0xf white
 };
 
 const word32 g_bw_hires_convert[4] = {
