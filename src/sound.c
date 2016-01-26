@@ -1170,7 +1170,6 @@ doc_sound_end(int osc, int can_repeat, double eff_dsamps, double dsamps)
 	Doc_reg	*rptr, *orptr;
 	int	mode, omode;
 	int	other_osc;
-	int	one_shot_stop;
 	int	ctl;
 
 	/* handle osc stopping and maybe interrupting */
