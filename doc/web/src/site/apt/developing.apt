@@ -27,7 +27,7 @@ The Win32 code in GSport is leveraged from KEGS32.
 and {{{http://www.cygwin.com/}Cygwin}} as well as via standard Microsoft compiler suites.
 
  In order to compile with the standard Microsoft compiler suites, download and 
-install {{{https://www.visualstudio.com/downloads/download-visual-studio-vs}Microsoft Visual Studio Community 2015 from Microsoft's website}.
+install {{{https://www.visualstudio.com/downloads/download-visual-studio-vs}Microsoft Visual Studio Community 2015 from Microsoft's website}}.
 The build process requires Perl, such as {{{http://www.activestate.com/activeperl}ActiveState ActivePerl}}.
 Within Visual Studio, open the "gsport.sln" solution file.  Set the "gsport" project as the "StartUp Project",
 and choose "Build Solution" from the "Build" menu.
