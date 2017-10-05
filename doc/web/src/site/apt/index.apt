@@ -1,7 +1,7 @@
  -----
  GSport Project Page
  -----
- David Schmidt (david__schmidt at users dot souceforge dot net)
+ David Schmidt (1110325+david-schmidt@users.noreply.github.com)
  -----
 
 GSport
@@ -23,5 +23,5 @@ of cross-platform development of IIgs emulation.
  Some interesting advances that initially spawned this project are Uthernet and printer support.  
 As those objectives are met, we will move on to the next objectives.
 Do you have something that you wish a GS emulator did?
-Submit a request {{{http://sourceforge.net/tracker/?group_id=315628&atid=1327836}here,}}
-or better yet - dive in and {{{https://sourceforge.net/project/memberlist.php?group_id=315628}contribute!}}
+Submit an issue {{{https://github.com/david-schmidt/gsport/issues}here,}}
+or better yet - dive in and {{{https://github.com/david-schmidt/gsport}contribute!}}
