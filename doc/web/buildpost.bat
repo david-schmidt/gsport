@@ -8,3 +8,4 @@ perl -i.orig -p ..\..\removeMaven.re operating.html
 perl -i.orig -p ..\..\removeMaven.re printer.html
 erase *.orig
 cd ..\..
+xcopy /y target\site\* /s ..\..\docs
