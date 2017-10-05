@@ -5,7 +5,7 @@
   <artifactId>doc</artifactId>
   <version>0.31</version>
   <name>GSport</name>
-  <url>http://maven.apache.org/maven2</url>
+  <url>https://github.com/david-schmidt/gsport</url>
   <inceptionYear>2010</inceptionYear>
   <organization>
     <name>GSport Contributors</name>

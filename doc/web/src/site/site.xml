@@ -8,13 +8,13 @@
   </bannerRight>
   <body>
     <links>
-      <item name="Download" href="http://sourceforge.net/projects/gsport/files"/>
-      <item name="Sourceforge Project Page" href="http://sourceforge.net/projects/gsport/"/>
+      <item name="Download" href="http://github.com/david-schmidt/gsport/releases"/>
+      <item name="Project Development Page" href="http://github.com/david-schmidt/gsport"/>
     </links>
 
     <menu name="GSport">
       <item name="Main" href="index.html"/>
-      <item name="Download" href="http://sourceforge.net/projects/gsport/files"/>
+      <item name="Download" href="http://github.com/david-schmidt/gsport/releases"/>
       <item name="Operating" href="operating.html"/>
       <item name="Developing" href="developing.html"/>
       <item name="Emulated Appletalk" href="appletalk.html"/>

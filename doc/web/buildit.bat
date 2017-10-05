@@ -5,3 +5,4 @@
 call c:\dev\env
 rmdir /q /s target
 call mvn site
+xcopy target\site\* /s ..\..\docs
