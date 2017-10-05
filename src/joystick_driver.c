@@ -205,9 +205,10 @@ joystick_update(double dcycs)
 	ret1 = joyGetDevCaps(id, &joycap, sizeof(joycap));
 	ret2 = joyGetPos(id, &info);
 	if(ret1 == JOYERR_NOERROR && ret2 == JOYERR_NOERROR) {
-		g_paddle_val[0] = (info.wXpos - joycap.wXmin) * 32768 /
+		/* val should be -32767 to +32767 */
+		g_paddle_val[0] = -32767 + (info.wXpos - joycap.wXmin) * 65535 /
 						(joycap.wXmax - joycap.wXmin);
-		g_paddle_val[1] = (info.wYpos - joycap.wYmin) * 32768 /
+		g_paddle_val[1] = -32767 + (info.wYpos - joycap.wYmin) * 65535 /
 						(joycap.wYmax - joycap.wYmin);
 		if(info.wButtons & JOY_BUTTON1) {
 			g_paddle_buttons = g_paddle_buttons | 1;
