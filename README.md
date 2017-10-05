@@ -1,0 +1,1 @@
+Apple II GS emulator based on Kent Dickey's KEGS
