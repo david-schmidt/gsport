@@ -4,3 +4,4 @@ s@\</body\>@\<!-- Piwik --\> \<script type\=\"text\/javascript\"\> var pkBaseURL
 s@<img src="images/download.png" alt="" />@<a href="https://github.com/david-schmidt/gsport/releases" target\="_new"><img src="images/download.png" /></a>@ig;
 s@<img src="images/gsport.png" />@<a href="https://github.com/david-schmidt/gsport/releases" target\="_new"><img src="images/gsport.png" /></a>@ig;
 s@\<img class="poweredBy" alt="Built by Maven" src="\./images/logos/maven-feather.png" \/\>@@ig;
+s@http://github.com@https://github.com@ig;
