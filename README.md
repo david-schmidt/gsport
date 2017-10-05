@@ -1,9 +1,8 @@
 # GSport: an Apple IIgs Emulator 
 
-GSport is a portable (in the programming sense) Apple IIgs emulator, based on the KEGS cross-platform IIgs emulator by Kent Dickey. The base emulator builds and runs on all of the same platforms that KEGS did, and the new capabilities are being integrated as contributors have time and interest.
+GSport is a portable (in the programming sense) Apple IIgs emulator, based on the KEGS cross-platform IIgs emulator by Kent Dickey. The base emulator builds and runs on all of the same platforms that KEGS did, and the new capabilities are being integrated as contributors have time and interest.  Full documentation is available at the GSport website [here.](https://david-schmidt.github.io/gsport/)
 
-
-![alt](https://raw.githubusercontent.com/david-schmidt/gsport/master/doc/web/src/site/resources/images/gsport.png) [![Download Link](https://raw.githubusercontent.com/david-schmidt/gsport/master/doc/web/src/site/resources/images/download.png)](https://github.com/david-schmidt/gsport/releases)
+[![alt](https://raw.githubusercontent.com/david-schmidt/gsport/master/doc/web/src/site/resources/images/gsport.png)](https://david-schmidt.github.io/gsport/) [![Download Link](https://raw.githubusercontent.com/david-schmidt/gsport/master/doc/web/src/site/resources/images/download.png)](https://github.com/david-schmidt/gsport/releases)
 
 ## Project Goals
 
