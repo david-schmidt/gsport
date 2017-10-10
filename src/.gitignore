@@ -1,0 +1,6 @@
+*.o
+gsport.exe
+/16inst_c.h
+/8inst_c.h
+/size_c.h
+/vars

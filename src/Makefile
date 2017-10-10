@@ -52,7 +52,7 @@ gsportmac: $(OBJECTS) compile_time.o
 	rm -rf ../GSportDmg
 	mkdir ../GSportDmg
 	mkdir ../GSportDmg/GSport
-	cp ../COPYING.txt ../GSportDmg/GSport
+	cp ../LICENSE ../GSportDmg/GSport
 	cp -f parallel.rom ../GSportDmg/GSport
 	cp -f ../lib/NoBoot.po ../GSportDmg/GSport
 	mv ../GSport.app ../GSportDmg/GSport
@@ -85,7 +85,7 @@ gsport.exe: $(OBJECTS) compile_time.o
 	cp -f ../lib/NoBoot.po ../GSport.app
 	cp -f GSport.bat ../GSport.app/GSport.bat
 	cp -f parallel.rom ../GSport.app
-	cp -f ../COPYING.txt ../GSport.app
+	cp -f ../LICENSE ../GSport.app
 	cp -f ../GSport.html ../GSport.app
 
 8inst_c.h: instable.h
