@@ -1,0 +1,21 @@
+TARGET = gsport
+NAME = gsport
+PERL = perl
+CC = clang
+LD = clang++
+AS = cc
+
+OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ)  $(FSTOBJ) sdl2_driver.o sdl2snd_driver.o fix_mac_menu.o
+ARCHS = ppc, i386, ppc64, x86_64
+
+# OPTIONS FOR COMPILING C SOURCE
+CCOPTS = -O2 -Wall -fomit-frame-pointer -std=gnu99 -DHAVE_ICON -DHAVE_SDL `sdl2-config --cflags`
+# OPTIONS FOR COMPILING C++ SOURCE
+CPPOPTS = -O2 -DHAVE_TFE -DHAVE_SDL `freetype-config --cflags` `sdl2-config --cflags`
+
+EXTRA_LIBS =  -lSDL2_image
+OPTS = -DGSPORT_LITTLE_ENDIAN   
+SUFFIX =
+LDFLAGS = `sdl2-config --static-libs` `freetype-config  --libs` -framework Cocoa
+LDOPTS =
+EXTRA_SPECIALS =
