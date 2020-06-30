@@ -146,7 +146,9 @@
 #define ALL_STAT_FLASH_STATE		(1 << (BIT_ALL_STAT_FLASH_STATE))
 #define ALL_STAT_A2VID_PALETTE		(0xf << (BIT_ALL_STAT_A2VID_PALETTE))
 
+#ifndef BORDER_WIDTH
 #define BORDER_WIDTH		32
+#endif
 
 //#define EFF_BORDER_WIDTH	(BORDER_WIDTH + (640-560))
 
@@ -155,8 +157,8 @@
 
 /* BASE_MARGIN_BOTTOM+MARGIN_TOP must equal 62.  There are 262 scan lines */
 /*  at 60Hz (15.7KHz line rate) and so we just make 62 border lines */
-#define BASE_MARGIN_TOP		32
-#define BASE_MARGIN_BOTTOM	30
+#define BASE_MARGIN_TOP		BORDER_WIDTH
+#define BASE_MARGIN_BOTTOM	(BORDER_WIDTH-2)
 #define BASE_MARGIN_LEFT	BORDER_WIDTH
 #define BASE_MARGIN_RIGHT	BORDER_WIDTH
 
