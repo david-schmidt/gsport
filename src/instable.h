@@ -1,6 +1,6 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2020 by GSport contributors
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
@@ -2231,8 +2231,12 @@ instcb_SYM		/*  WAI */
 	b	dispatch
 	stw	scratch2,r%g_wait_pending(scratch1)
 #else
-	g_wait_pending = 1;
-	CYCLES_FINISH
+	if(g_irq_pending) {
+		g_wait_pending = 0;
+		INC_KPC_1;
+	} else {
+		g_wait_pending = 1;
+	}
 #endif
 
 instcc_SYM		/*  CPY abs */
