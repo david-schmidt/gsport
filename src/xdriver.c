@@ -21,7 +21,14 @@
 
 # if !defined(__CYGWIN__) && !defined(__POWERPC__)
 /* No shared memory on Cygwin */
+
+#ifndef X_RENDER
+/* Enabled in the Makefile: Required to enable scaling */
+/* # define X_RENDER */
+#endif
+
 # define X_SHARED_MEM
+
 #endif /* CYGWIN */
 
 #include <X11/Xlib.h>
@@ -35,6 +42,10 @@
 # include <sys/ipc.h>
 # include <sys/shm.h>
 # include <X11/extensions/XShm.h>
+#endif
+
+#ifdef X_RENDER
+#include <X11/extensions/Xrender.h>
 #endif
 
 int XShmQueryExtension(Display *display);
@@ -88,6 +99,18 @@ extern int g_blue_right_shift;
 int g_use_shmem = 1;
 #else
 int g_use_shmem = 0;
+#endif
+
+#ifdef X_RENDER
+#ifndef X_RENDER_SCALE
+# define X_RENDER_SCALE 1
+#endif
+int g_use_xrender = 1;
+unsigned int g_xscreen_scale = X_RENDER_SCALE;
+Picture g_xrender_win;
+Picture g_xrender_a2_screen;
+Pixmap g_xrender_a2_pix;
+GC g_xrender_gc;
 #endif
 
 extern Kimage g_mainwin_kimage;
@@ -307,7 +330,7 @@ show_xcolor_array()
 
 	for(i = 0; i < 256; i++) {
 		printf("%02x: %08x\n", i, g_palette_8to1624[i]);
-			
+
 #if 0
 		printf("%02x: %04x %04x %04x, %02x %x\n",
 			i, xcolor_array[i].red, xcolor_array[i].green,
@@ -397,6 +420,7 @@ dev_video_init()
 	int	cnt;
 	int	font_height;
 	int	base_height;
+	int	base_width = X_A2_WINDOW_WIDTH;
 	int	screen_num;
 	char	*myTextString[1];
 	word32	lores_col;
@@ -523,17 +547,66 @@ dev_video_init()
 	create_win_list |= CWColormap | CWBorderPixel | CWBackPixel;
 
 	base_height = X_A2_WINDOW_HEIGHT;
+
+#ifdef X_RENDER
+	if (g_use_xrender) {
+		int dummy = 0;
+		ret = XRenderQueryExtension(g_display, &dummy, &dummy);
+		if(ret == 0) {
+			printf("XRenderQueryExtension ret: %d\n", ret);
+			printf("not using XRender memory\n");
+			g_use_xrender = 0;
+		} else {
+			printf("Will use XRender for X\n");
+		//	g_use_shmem = 0; // not necessary
+		}
+	}
+	if (g_use_xrender) {
+		base_width *= g_xscreen_scale;
+		base_height	*= g_xscreen_scale;
+	}
+#endif
         if (g_win_status_debug)
                 base_height += MAX_STATUS_LINES * 13;
         
 	g_a2_win = XCreateWindow(g_display, RootWindow(g_display, screen_num),
-		0, 0, BASE_WINDOW_WIDTH, base_height,
+		0, 0, base_width, base_height,
 		0, g_screen_depth, InputOutput, g_vis,
 		create_win_list, &win_attr);
 
 	XSetWindowColormap(g_display, g_a2_win, g_a2_colormap);
 
 	XFlush(g_display);
+
+#ifdef X_RENDER
+	if (g_use_xrender) {
+		XWindowAttributes attrs;
+		XGetWindowAttributes(g_display, g_a2_win, &attrs);
+
+		XRenderPictFormat* format = XRenderFindVisualFormat(g_display, attrs.visual);
+
+		g_xrender_win = XRenderCreatePicture(g_display, g_a2_win,
+								format, 0, NULL);
+		/* Also create the backbuffer we transfer to, we don't
+		 * 'draw' in the window itself */
+		Pixmap pix = XCreatePixmap(g_display,
+								g_a2_win, X_A2_WINDOW_WIDTH, X_A2_WINDOW_HEIGHT, 24);
+		g_xrender_gc = XCreateGC(g_display, pix, 0, NULL);
+		g_xrender_a2_screen = XRenderCreatePicture(
+					g_display, pix,
+					XRenderFindStandardFormat(g_display, PictStandardRGB24),
+					0, NULL);
+		if (g_xscreen_scale != 1) {
+			XTransform t = {};
+			t.matrix[0][0] = XDoubleToFixed(1);
+			t.matrix[1][1] = XDoubleToFixed(1);
+			t.matrix[2][2] = XDoubleToFixed(g_xscreen_scale);
+
+			XRenderSetPictureTransform(g_display, g_xrender_a2_screen, &t);
+		}
+		g_xrender_a2_pix = pix;
+	}
+#endif
 
 /* Check for XShm */
 #ifdef X_SHARED_MEM
@@ -582,11 +655,11 @@ dev_video_init()
 	XStringListToTextProperty(myTextString, 1, &my_winText);
 
 	my_winSizeHints.flags = PSize | PMinSize | PMaxSize;
-	my_winSizeHints.width = BASE_WINDOW_WIDTH;
+	my_winSizeHints.width = base_width;
 	my_winSizeHints.height = base_height;
-	my_winSizeHints.min_width = BASE_WINDOW_WIDTH;
+	my_winSizeHints.min_width = base_width;
 	my_winSizeHints.min_height = base_height;
-	my_winSizeHints.max_width = BASE_WINDOW_WIDTH;
+	my_winSizeHints.max_width = base_width;
 	my_winSizeHints.max_height = base_height;
 	my_winClassHint.res_name = "GSport";
 	my_winClassHint.res_class = "GSport";
@@ -746,7 +819,10 @@ x_set_mask_and_shift(word32 x_mask, word32 *mask_ptr, int *shift_left_ptr,
 	int	i;
 
 	/* Shift until we find first set bit in mask, then remember mask,shift*/
-
+#ifdef __GCC__
+	shift = x_mask? ffs(x_mask) - 1 : 0;
+	x_mask >>= shift;
+#else
 	shift = 0;
 	for(i = 0; i < 32; i++) {
 		if(x_mask & 1) {
@@ -756,6 +832,7 @@ x_set_mask_and_shift(word32 x_mask, word32 *mask_ptr, int *shift_left_ptr,
 		x_mask = x_mask >> 1;
 		shift++;
 	}
+#endif
 	*mask_ptr = x_mask;
 	*shift_left_ptr = shift;
 	/* Now, calculate shift_right_ptr */
@@ -924,21 +1001,27 @@ get_ximage(Kimage *kimage_ptr)
 }
 
 
-void 
+void
 x_toggle_status_lines()
 {
     XSizeHints my_winSizeHints;
     XClassHint my_winClassHint;
     int base_height = X_A2_WINDOW_HEIGHT;
+    int base_width = X_A2_WINDOW_WIDTH;
+
+#ifdef X_RENDER
+	base_height *= g_xscreen_scale;
+	base_width *= g_xscreen_scale;
+#endif
     if ((g_win_status_debug = !g_win_status_debug))
         base_height += MAX_STATUS_LINES * 13;
     //printf("Resize returns %d\n", XResizeWindow(g_display, g_a2_win, BASE_WINDOW_WIDTH, base_height));
     my_winSizeHints.flags = PSize | PMinSize | PMaxSize;
-    my_winSizeHints.width = BASE_WINDOW_WIDTH;
+    my_winSizeHints.width = base_width;
     my_winSizeHints.height = base_height;
-    my_winSizeHints.min_width = BASE_WINDOW_WIDTH;
+    my_winSizeHints.min_width = base_width;
     my_winSizeHints.min_height = base_height;
-    my_winSizeHints.max_width = BASE_WINDOW_WIDTH;
+    my_winSizeHints.max_width = base_width;
     my_winSizeHints.max_height = base_height;
     my_winClassHint.res_name = "GSport";
     my_winClassHint.res_class = "GSport";
@@ -956,8 +1039,14 @@ x_redraw_status_lines()
 	int	line;
 	int	height;
 	int	margin;
+	int base = X_A2_WINDOW_HEIGHT;
 	word32	white, black;
 
+#ifdef X_RENDER
+	if (g_use_xrender) {
+		base *= g_xscreen_scale;
+	}
+#endif
     if (g_win_status_debug)
     {
         height = g_text_FontSt->ascent + g_text_FontSt->descent;
@@ -979,10 +1068,10 @@ x_redraw_status_lines()
                 continue;
             }
             XDrawImageString(g_display, g_a2_win, g_a2_winGC, 0,
-                             X_A2_WINDOW_HEIGHT + height*line + margin,
+                             base + height*line + margin,
                              buf, strlen(buf));
         }
-        
+
         XFlush(g_display);
     }
 }
@@ -995,6 +1084,27 @@ x_push_kimage(Kimage *kimage_ptr, int destx, int desty, int srcx, int srcy,
 	XImage	*xim;
 
 	xim = (XImage *)kimage_ptr->dev_handle;
+
+#ifdef X_RENDER
+	if (g_use_xrender) {
+#ifdef X_SHARED_MEM
+		if(g_use_shmem) {
+			XShmPutImage(g_display, g_xrender_a2_pix, g_xrender_gc, xim,
+			srcx, srcy, destx, desty, width, height, False);
+		} else
+#endif
+		/* transfer to server */
+		XPutImage(g_display, g_xrender_a2_pix, g_xrender_gc, xim,
+			srcx, srcy, destx, desty, width, height);
+		/* accerated copy + scale to window */
+		XRenderComposite(g_display, PictOpSrc,
+						g_xrender_a2_screen, None, g_xrender_win,
+						0, 0, 0, 0, 0, 0,
+						X_A2_WINDOW_WIDTH * g_xscreen_scale,
+						X_A2_WINDOW_HEIGHT * g_xscreen_scale);
+		return;
+	}
+#endif
 
 #ifdef X_SHARED_MEM
 	if(g_use_shmem) {
@@ -1024,9 +1134,19 @@ int
 x_update_mouse(int raw_x, int raw_y, int button_states, int buttons_valid)
 {
 	int	x, y;
+#ifdef X_RENDER
+	if (g_use_xrender) {
+		int ml = BASE_MARGIN_LEFT * g_xscreen_scale;
+		int mt = BASE_MARGIN_TOP * g_xscreen_scale;
 
-	x = raw_x - BASE_MARGIN_LEFT;
-	y = raw_y - BASE_MARGIN_TOP;
+		x = (raw_x - ml) / g_xscreen_scale;
+		y = (raw_y - mt) / g_xscreen_scale;
+	} else
+#endif
+	{
+		x = raw_x - BASE_MARGIN_LEFT;
+		y = raw_y - BASE_MARGIN_TOP;
+	}
 
 	if(g_warp_pointer && (x == A2_WINDOW_WIDTH/2) &&
 			(y == A2_WINDOW_HEIGHT/2) && (buttons_valid == 0) ) {

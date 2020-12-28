@@ -61,8 +61,11 @@ gsportmac: $(OBJECTS) compile_time.o
 	arch/mac/makedmg.sh .. GSportDmg GSport GSport 7
 
 # Linux for X builds:
+gsportx: CCOPTS += -DX_RENDER -DX_RENDER_SCALE=2 -DBORDER_WIDTH=8
+gsportx: EXTRA_LIBS += -lXrender
 gsportx: $(OBJECTS) compile_time.o
-	$(LD) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11
+	$(LD) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) \
+		$(XLIBS) $(EXTRA_LIBS) -lX11
 	echo $(OBJECTS)
 	mv gsportx ..
 	cp -f ../config.template ../config.txt 

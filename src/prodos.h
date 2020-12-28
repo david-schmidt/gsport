@@ -19,25 +19,31 @@
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#ifdef __linux__
+#define PACKED __attribute__((packed))
+#else
+#define PACKED
+#endif
+
 typedef struct l2byte_st L2byte;
 struct l2byte_st {
 	byte low;
 	byte hi;
-};
+} PACKED;
 
 typedef struct l3byte_st L3byte;
 struct l3byte_st {
 	byte low;
 	byte hi;
 	byte higher;
-};
+} PACKED;
 
 typedef L2byte Block;
 
 typedef struct pro_time_st Pro_time;
 struct pro_time_st {
 	byte times[4];
-};
+} PACKED;
 
 typedef struct file_entry_st File_entry;
 struct file_entry_st {
@@ -63,7 +69,7 @@ struct file_entry_st {
 	Pro_time last_mod;
 /* 0x25 */
 	Block header_pointer;
-};
+} PACKED;
 
 STRUCT(Vol_hdr) {
 /* 0x4 */
@@ -86,14 +92,14 @@ STRUCT(Vol_hdr) {
 	Block bit_map;
 /* 0x29 */
 	L2byte total_blocks;
-};
+} PACKED;
 
 typedef struct directory_st Directory;
 struct directory_st {
 	Block prev_blk;
 	Block next_blk;
 	File_entry file_entries[13];
-};
+} PACKED;
 
 STRUCT(ProDisk) {
 	int	fd;
