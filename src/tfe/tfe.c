@@ -459,14 +459,6 @@ void tfe_reset(void)
     }
 }
 
-#ifdef DOS_TFE
-static void set_standard_tfe_interface(void)
-{
-    char *dev, errbuf[PCAP_ERRBUF_SIZE];
-    dev = pcap_lookupdev(errbuf);
-    util_string_set(&tfe_interface, dev);
-}
-#endif
 
 static
 int tfe_activate_i(void)
@@ -505,10 +497,6 @@ int tfe_activate_i(void)
 #ifdef TFE_DEBUG_INIT
     log_message(tfe_log, "tfe_activate: Allocated memory successfully.");
     log_message(tfe_log, "\ttfe at $%08X, tfe_packetpage at $%08X", tfe, tfe_packetpage );
-#endif
-
-#ifdef DOS_TFE
-    set_standard_tfe_interface();
 #endif
 
     if (!tfe_arch_activate(tfe_interface)) {
