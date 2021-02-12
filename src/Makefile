@@ -1,12 +1,12 @@
 # GSport central makefile - you need a 'vars' file linked/copied from a 'vars_xxx' template to build.
-
-OBJECTS1 = adb.o clock.o config.o dis.o engine_c.o scc.o iwm.o \
-	joystick_driver.o moremem.o paddles.o parallel.o printer.o \
-	sim65816.o smartport.o sound.o sound_driver.o video.o \
-	scc_socket_driver.o imagewriter.o scc_imagewriter.o scc_llap.o
-ATOBJ = atbridge/aarp.o atbridge/atbridge.o atbridge/elap.o atbridge/llap.o atbridge/port.o 
+OBJECTS1 = adb.o clock.o config.o debug.o dis.o engine_c.o scc.o iwm.o \
+	joystick_driver.o moremem.o paddles.o parallel.o printer.o sim65816.o \
+	smartport.o sound.o sound_driver.o video.o scc_socket_driver.o glog.o \
+	imagewriter.o scc_imagewriter.o scc_llap.o options.o
+ATOBJ = atbridge/aarp.o atbridge/atbridge.o atbridge/elap.o atbridge/llap.o atbridge/port.o
 PCAPOBJ = atbridge/pcap_delay.o
 TFEOBJ = tfe/tfe.o tfe/tfearch.o tfe/tfesupp.o
+FSTOBJ = unix_host_common.o host_common.o host_fst.o host_mli.o
 
 include vars
 
@@ -25,68 +25,51 @@ clean:
 	- rm -f compile_time.o
 	- rm -f 8inst_c.h
 	- rm -f 16inst_c.h
-	- rm -rf ../GSport.app
-	- rm -rf ../GSportDmg
 
 specials: 8inst_s 16inst_s 8size 16size 8inst_c 16inst_c size_c size_s
 
 specials_clean:
 	rm -f 8inst_s 16inst_s 8size 16size 8inst_c 16inst_c size_c size_s
 
+# Linux/OSX/RPi SDL builds
+gsport: $(OBJECTS) compile_time.o
+	$(LD) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS)
+	echo $(OBJECTS)
+	cp gsport ..
 
-# Mac builds:
-gsportmac: $(OBJECTS) compile_time.o
-	$(CC) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o gsport $(EXTRA_LIBS)
-	mkdir -p ../GSport.app/Contents/Resources/English.lproj/main.nib
-	mkdir -p ../GSport.app/Contents/MacOS
-	mv gsport ../GSport.app/Contents/MacOS/GSport
-	echo "APPL????" > ../GSport.app/Contents/PkgInfo
-	cp -f arch/mac/Info.plist ../GSport.app/Contents/
-	cp -f arch/mac/info.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
-	cp -f arch/mac/classes.nib ../GSport.app/Contents/Resources/English.lproj/main.nib
-	cp -f arch/mac/objects.xib ../GSport.app/Contents/Resources/English.lproj/main.nib
-	cp -f arch/mac/gsporticon.icns ../GSport.app/Contents/Resources/
-	cp -f arch/mac/525.icns ../GSport.app/Contents/Resources/
-	cp -f arch/mac/2mg.icns ../GSport.app/Contents/Resources/
-	touch '../GSport.app/Icon?'
-	rm -rf ../GSportDmg
-	mkdir ../GSportDmg
-	mkdir ../GSportDmg/GSport
-	cp ../LICENSE ../GSportDmg/GSport
-	cp -f parallel.rom ../GSportDmg/GSport
-	cp -f ../lib/NoBoot.po ../GSportDmg/GSport
-	mv ../GSport.app ../GSportDmg/GSport
-	cp -f ../config.template ../GSportDmg/GSport/config.txt
-	cp ../GSport.html ../GSportDmg/GSport/GSport.html
-	arch/mac/makedmg.sh .. GSportDmg GSport GSport 7
-
-# Linux for X builds:
+# Linux/OSX XWindows builds
 gsportx: $(OBJECTS) compile_time.o
 	$(LD) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11
 	echo $(OBJECTS)
 	mv gsportx ..
-	cp -f ../config.template ../config.txt 
 
+# NOT CURRENTLY SUPPORTED
 # Linux framebuffer builds:
 gsportfb: $(OBJECTS) compile_time.o
 	$(LD) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS)
 	echo $(OBJECTS)
 	mv gsportfb ..
-	cp -f ../config.template ../config.txt 
 
-# Mingw32 (native windows) builds:
-gsport.exe: $(OBJECTS) compile_time.o
+# Mingw32 / Cygwin builds:  The Win32 API version
+gsport32.exe: $(OBJECTS) compile_time.o
 	g++ $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32 -lshell32
-	mkdir -p ../GSport.app/lib
-	cp -f gsport.exe ../GSport.app/GSport.exe
-	cp -f ../config.template ../GSport.app/config.txt
-	cp -f ../lib/*.ttf ../GSport.app/lib
-	cp -f ../lib/arch/win32/*.dll ../GSport.app
-	cp -f ../lib/NoBoot.po ../GSport.app
-	cp -f GSport.bat ../GSport.app/GSport.bat
-	cp -f parallel.rom ../GSport.app
-	cp -f ../LICENSE ../GSport.app
-	cp -f ../GSport.html ../GSport.app
+	#mkdir -p ../GSport.app/lib
+	#cp -f gsport.exe ../GSport.app/GSport.exe
+	#cp -f ../config.template ../GSport.app/config.txt
+	#cp -f ../lib/*.ttf ../GSport.app/lib
+	#cp -f ../lib/arch/win32/*.dll ../GSport.app
+	#cp -f ../lib/NoBoot.po ../GSport.app
+	#cp -f GSport.bat ../GSport.app/GSport.bat
+	#cp -f parallel.rom ../GSport.app
+	#cp -f ../COPYING.txt ../GSport.app
+	cp gsport32.exe ..
+
+# Mingw32 / Cygwin builds:  The SDL version (builds, but non-functioning)
+gsport.exe: $(OBJECTS) compile_time.o
+	#g++ $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32 -lshell32
+	#g++ $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS)  -mwindows
+	g++ $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(EXTRA_LIBS) -lwinmm -lgdi32 -ldsound -lcomctl32 -lws2_32 -lshell32
+	cp gsport.exe ..
 
 8inst_c.h: instable.h
 	$(PERL) make_inst c 8 instable.h > 8inst_c.h

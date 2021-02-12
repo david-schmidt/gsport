@@ -1,0 +1,18 @@
+TARGET = gsportfb
+OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ) fbdriver.o
+CC = gcc
+CCOPTS = -O2 -Wall -fomit-frame-pointer -std=gnu99 -march=armv6
+OPTS = -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DHAVE_ATBRIDGE
+SUFFIX =
+NAME = gsportfb
+LDFLAGS =
+LDOPTS =
+LD = g++
+EXTRA_LIBS = -ldl
+EXTRA_SPECIALS =
+
+AS = cc
+PERL = perl
+
+XOPTS = -I/usr/X11R6/include
+

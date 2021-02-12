@@ -1,6 +1,7 @@
 /*
  GSport - an Apple //gs Emulator
- Copyright (C) 2010 by GSport contributors
+ Copyright (C) 2010 - 2019 by GSport contributors
+ Copyright (C) 2016 - 2018  Dagen Brock
  
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 

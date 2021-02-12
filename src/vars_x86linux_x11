@@ -1,0 +1,21 @@
+TARGET = gsportx
+NAME = gsportx
+PERL = perl
+CC = gcc
+LD = g++
+AS = cc
+
+OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ) $(FSTOBJ) xdriver.o
+#-march=i686 is causing "error: CPU you selected does not support x86-64 instruction set" on ubuntu
+#CCOPTS = -O2 -Wall -fomit-frame-pointer -std=gnu99 -march=i686 -DHAVE_TFE -DHAVE_ATBRIDGE -DTOGGLE_STATUS
+CCOPTS = -O2 -Wall -fomit-frame-pointer -std=gnu99 -DHAVE_TFE -DHAVE_ATBRIDGE -DTOGGLE_STATUS
+OPTS = -DGSPORT_LITTLE_ENDIAN 
+SUFFIX =
+LDFLAGS =
+LDOPTS =
+# added -ldl for ubuntu
+EXTRA_LIBS = -lXext -ldl
+EXTRA_SPECIALS =
+
+
+XOPTS = -I/usr/X11R6/include

@@ -1,0 +1,16 @@
+TARGET = gsport
+NAME = gsport
+PERL = perl
+CC = gcc
+LD = g++
+#LD = gcc
+AS = cc
+
+OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ) $(FSTOBJ) sdl2_driver.o sdl2snd_driver.o
+CCOPTS = -O2 -Wall -fomit-frame-pointer -std=gnu99 -march=armv6
+OPTS = -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DHAVE_ATBRIDGE -DHAVE_SDL -I/usr/include/SDL2 -I/usr/include/freetype2
+
+EXTRA_LIBS = -ldl -lfreetype -lSDL2 -lSDL2_image
+
+XOPTS = -I/usr/X11R6/include
+

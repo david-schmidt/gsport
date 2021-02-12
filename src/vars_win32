@@ -1,9 +1,13 @@
-TARGET = gsport.exe
-OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ) scc_windriver.o win32snd_driver.o win_console.o win_generic.o gsport32.o
+TARGET = gsport32.exe
+
+FSTOBJ = host_common.o win32_host_common.o host_mli.o win32_host_fst.o
+
+OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ) $(FSTOBJ) scc_windriver.o win32snd_driver.o win_console.o win_generic.o gsport32.o
 CCOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DWIN_SOUND -DTOGGLE_STATUS -DWIN32 -D_WIN32 -D__USE_W32_SOCKETS -D_WINSOCK2API_ -std=gnu99 -DHAVE_ATBRIDGE
 CPPOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DTOGGLE_STATUS -DWIN32 -D_WIN32 -D__USE_W32_SOCKETS -D_WINSOCK2API_ -DHAVE_ATBRIDGE
+
 SUFFIX = ".exe"
-NAME = gsport
+NAME = gsport32
 EXTRA_LIBS = -Larch/win32 -lcomdlg32 -lShlwapi -lIPHlpApi
 
 XOPTS = -Wall -fomit-frame-pointer -march=i686
