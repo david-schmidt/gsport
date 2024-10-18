@@ -458,6 +458,18 @@ void Imagewriter::updateSwitch()
 	curMap[0x7c] = intCharSets[charmap][7];
 	curMap[0x7d] = intCharSets[charmap][8];
 	curMap[0x7e] = intCharSets[charmap][9];
+
+	if (switcha & SWITCHA_PERFORATIONSKIP)
+	{
+		topMargin = 0.25;
+		bottomMargin = pageHeight - 0.25;
+	}
+	else
+	{
+		topMargin = 0.0;
+		bottomMargin = pageHeight - 0.0;
+	}
+
 	//MSB control (Switch B-6)
 	if (!(switchb & 32))
 	{
@@ -858,6 +870,9 @@ bool Imagewriter::processCommandChar(Bit8u ch)
 			pageHeight = (Real64)PARAM4(0)/144;
 			bottomMargin = pageHeight;
 			topMargin = 0.0;
+			// trigger margins computation
+			updateSwitch();
+
 			break;
 			}
 		case 0x21: // Select bold font (ESC !) IW
