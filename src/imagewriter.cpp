@@ -123,6 +123,11 @@ Imagewriter::Imagewriter(Bit16u dpi, Bit16u paperSize, Bit16u bannerSize, char* 
 		}
 		else
 		{
+			if (paperSize >= N_PAPER_SIZES)
+			{
+				printf("Printer: unsupported paper size %d\n", paperSize);
+				paperSize = 0;
+			}
 			defaultPageWidth = ((Real64)paperSizes[paperSize][0]/(Real64)72);
 			defaultPageHeight = ((Real64)paperSizes[paperSize][1]/(Real64)72);
 		}
