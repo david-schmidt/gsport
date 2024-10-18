@@ -284,10 +284,10 @@ void Imagewriter::resetPrinter()
 		lineSpacing = (Real64)1/6;
 		cpi = 12.0;
 		printRes = 2;
-		style &= (0xffff - STYLE_PROP);
 		definedUnit = 96;
 		curCharTable = 1;
-		style = 0;
+		style = STYLE_BASE;
+		score = SCORE_NONE;
 		extraIntraSpace = 0.0;
 		printUpperContr = true;
 		bitGraph.remBytes = 0;
