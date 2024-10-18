@@ -84,6 +84,19 @@ extern "C" char* g_imagewriter_prop_font;
 extern "C" int iw_scc_write;
 #include "iw_charmaps.h"
 
+#define SWITCHA_CHARSET_MASK    0x07
+#define SWITCHA_CHARSET_US      0x00
+#define SWITCHA_CHARSET_IT      0x01
+#define SWITCHA_CHARSET_DK      0x02
+#define SWITCHA_CHARSET_UK      0x03
+#define SWITCHA_CHARSET_DE      0x04
+#define SWITCHA_CHARSET_SE      0x05
+#define SWITCHA_CHARSET_FR      0x06
+#define SWITCHA_CHARSET_ES      0x07
+
+#define SWITCHA_PERFORATIONSKIP 0x10
+#define SWITCHA_LFAFTERCR       0x80
+
 #ifdef HAVE_SDL
 void Imagewriter::FillPalette(Bit8u redmax, Bit8u greenmax, Bit8u bluemax, Bit8u colorID, SDL_Palette* pal)
 {
@@ -288,7 +301,7 @@ void Imagewriter::resetPrinter()
 		multiPointSize = 0.0;
 		multicpi = 0.0;
 		hmi = -1.0;
-		switcha = 0;
+		switcha = SWITCHA_CHARSET_US;
 		switchb = ' ';
 		numPrintAsChar = 0;
 		LQtypeFace = fixed;
@@ -434,7 +447,7 @@ void Imagewriter::updateFont()
 void Imagewriter::updateSwitch()
 {
 	//Set international character mappping (Switches A-1 to A3)
-	int charmap = (switcha & 7);
+	int charmap = (switcha & SWITCHA_CHARSET_MASK);
 	curMap[0x23] = intCharSets[charmap][0];
 	curMap[0x40] = intCharSets[charmap][1];
 	curMap[0x5b] = intCharSets[charmap][2];
@@ -1143,7 +1156,7 @@ bool Imagewriter::processCommandChar(Bit8u ch)
 		return true;
 	case 0x0d:		// Carriage Return (CR)
 		curX = leftMargin;
-		if ((switcha & 128)) curY += lineSpacing; // If switch A-8 is set, send a LF after CR
+		if ((switcha & SWITCHA_LFAFTERCR)) curY += lineSpacing; // If switch A-8 is set, send a LF after CR
 		if (!autoFeed)
 			return true;
 	case 0x0a:		// Line feed
