@@ -84,6 +84,19 @@ extern "C" char* g_imagewriter_prop_font;
 extern "C" int iw_scc_write;
 #include "iw_charmaps.h"
 
+#define SWITCHA_CHARSET_MASK    0x07
+#define SWITCHA_CHARSET_US      0x00
+#define SWITCHA_CHARSET_IT      0x01
+#define SWITCHA_CHARSET_DK      0x02
+#define SWITCHA_CHARSET_UK      0x03
+#define SWITCHA_CHARSET_DE      0x04
+#define SWITCHA_CHARSET_SE      0x05
+#define SWITCHA_CHARSET_FR      0x06
+#define SWITCHA_CHARSET_ES      0x07
+
+#define SWITCHA_PERFORATIONSKIP 0x10
+#define SWITCHA_LFAFTERCR       0x80
+
 #ifdef HAVE_SDL
 void Imagewriter::FillPalette(Bit8u redmax, Bit8u greenmax, Bit8u bluemax, Bit8u colorID, SDL_Palette* pal)
 {
@@ -123,6 +136,11 @@ Imagewriter::Imagewriter(Bit16u dpi, Bit16u paperSize, Bit16u bannerSize, char* 
 		}
 		else
 		{
+			if (paperSize >= N_PAPER_SIZES)
+			{
+				printf("Printer: unsupported paper size %d\n", paperSize);
+				paperSize = 0;
+			}
 			defaultPageWidth = ((Real64)paperSizes[paperSize][0]/(Real64)72);
 			defaultPageHeight = ((Real64)paperSizes[paperSize][1]/(Real64)72);
 		}
@@ -266,10 +284,10 @@ void Imagewriter::resetPrinter()
 		lineSpacing = (Real64)1/6;
 		cpi = 12.0;
 		printRes = 2;
-		style &= (0xffff - STYLE_PROP);
 		definedUnit = 96;
 		curCharTable = 1;
-		style = 0;
+		style = STYLE_BASE;
+		score = SCORE_NONE;
 		extraIntraSpace = 0.0;
 		printUpperContr = true;
 		bitGraph.remBytes = 0;
@@ -283,7 +301,7 @@ void Imagewriter::resetPrinter()
 		multiPointSize = 0.0;
 		multicpi = 0.0;
 		hmi = -1.0;
-		switcha = 0;
+		switcha = SWITCHA_CHARSET_US;
 		switchb = ' ';
 		numPrintAsChar = 0;
 		LQtypeFace = fixed;
@@ -429,7 +447,7 @@ void Imagewriter::updateFont()
 void Imagewriter::updateSwitch()
 {
 	//Set international character mappping (Switches A-1 to A3)
-	int charmap = switcha &= 7;
+	int charmap = (switcha & SWITCHA_CHARSET_MASK);
 	curMap[0x23] = intCharSets[charmap][0];
 	curMap[0x40] = intCharSets[charmap][1];
 	curMap[0x5b] = intCharSets[charmap][2];
@@ -440,8 +458,20 @@ void Imagewriter::updateSwitch()
 	curMap[0x7c] = intCharSets[charmap][7];
 	curMap[0x7d] = intCharSets[charmap][8];
 	curMap[0x7e] = intCharSets[charmap][9];
+
+	if (switcha & SWITCHA_PERFORATIONSKIP)
+	{
+		topMargin = 0.25;
+		bottomMargin = pageHeight - 0.25;
+	}
+	else
+	{
+		topMargin = 0.0;
+		bottomMargin = pageHeight - 0.0;
+	}
+
 	//MSB control (Switch B-6)
-	if (!(switchb&32))
+	if (!(switchb & 32))
 	{
 		msb = 255;
 	}
@@ -840,6 +870,9 @@ bool Imagewriter::processCommandChar(Bit8u ch)
 			pageHeight = (Real64)PARAM4(0)/144;
 			bottomMargin = pageHeight;
 			topMargin = 0.0;
+			// trigger margins computation
+			updateSwitch();
+
 			break;
 			}
 		case 0x21: // Select bold font (ESC !) IW
@@ -1061,7 +1094,7 @@ bool Imagewriter::processCommandChar(Bit8u ch)
 			while (x < paramc(0))
 			{
 				curY += lineSpacing;
-				if (curY > bottomMargin)
+				if (curY > bottomMargin - lineSpacing)
 					newPage(true,false);
 				x++;
 			}
@@ -1115,7 +1148,7 @@ bool Imagewriter::processCommandChar(Bit8u ch)
 		{
 			curX = leftMargin;
 			curY += lineSpacing;
-			if (curY > bottomMargin)
+			if (curY > bottomMargin - lineSpacing)
 				newPage(true,false);
 		}
 		else
@@ -1127,7 +1160,7 @@ bool Imagewriter::processCommandChar(Bit8u ch)
 					moveTo = verttabs[i];
 
 			// Nothing found => Act like FF
-			if (moveTo > bottomMargin || moveTo < 0)
+			if (moveTo > bottomMargin - lineSpacing || moveTo < 0)
 				newPage(true,false);
 			else
 				curY = moveTo;
@@ -1138,13 +1171,13 @@ bool Imagewriter::processCommandChar(Bit8u ch)
 		return true;
 	case 0x0d:		// Carriage Return (CR)
 		curX = leftMargin;
-		if ((switcha&=128)) curY += lineSpacing; // If switch A-8 is set, send a LF after CR
+		if ((switcha & SWITCHA_LFAFTERCR)) curY += lineSpacing; // If switch A-8 is set, send a LF after CR
 		if (!autoFeed)
 			return true;
 	case 0x0a:		// Line feed
 		//curX = leftMargin;
 		curY += lineSpacing;
-		if (curY > bottomMargin)
+		if (curY > bottomMargin - lineSpacing)
 			newPage(true,false);
 		return true;
 	case 0x0e:		//Select double width printing (SO) IW
@@ -1289,7 +1322,7 @@ void Imagewriter::printChar(Bit8u ch)
 	// For line printing
 	Bit16u lineStart = PIXX;
 	// Print a slashed zero if the softswitch B-1 is set
-	if(switchb&1 && ch=='0') slashzero(penX,penY);
+	if(switchb & 1 && ch=='0') slashzero(penX,penY);
 	// advance the cursor to the right
 	Real64 x_advance;
 	if (style &	STYLE_PROP)
@@ -1320,7 +1353,7 @@ void Imagewriter::printChar(Bit8u ch)
 	if((curX + x_advance) > rightMargin) {
 		curX = leftMargin;
 		curY += lineSpacing;
-		if (curY > bottomMargin) newPage(true,false);
+		if (curY > bottomMargin - lineSpacing) newPage(true,false);
 	}
 #endif // HAVE_SDL
 }
