@@ -1,11 +1,18 @@
 TARGET = gsport.exe
-OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ) scc_windriver.o win32snd_driver.o win_console.o win_generic.o gsport32.o
-CCOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DWIN_SOUND -DHAVE_SDL -DTOGGLE_STATUS -DWIN32 -D_WIN32 -D__USE_W32_SOCKETS -D_WINSOCK2API_ -std=gnu99 -DHAVE_ATBRIDGE
-CPPOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_TFE -DHAVE_SDL -DTOGGLE_STATUS -DWIN32 -D_WIN32 -D__USE_W32_SOCKETS -D_WINSOCK2API_ -DHAVE_ATBRIDGE -I /usr/include/freetype2 -I/usr/include/SDL 
+NAME = gsport
+
+FSTOBJ = win32_host_fst.o
+
+OBJECTS = sdl2_driver.o $(OBJECTS1)  $(FSTOBJ) sdl2snd_driver.o
+
+CCOPTS = -O2 -DGSPORT_LITTLE_ENDIAN  -DHAVE_SDL -DWIN_SDL -DTOGGLE_STATUS -I/usr/include/SDL2  -L/cygdrive/c/mingw/lib -I/cygdrive/c/mingw/include/SDL2/
+CPPOPTS = -O2 -DGSPORT_LITTLE_ENDIAN -DHAVE_SDL -DWIN_SDL -DTOGGLE_STATUS -I/usr/include/freetype2  -L/cygdrive/c/mingw/lib -I/cygdrive/c/mingw/include/SDL2/
 
 SUFFIX = ".exe"
-NAME = gsport
-EXTRA_LIBS = -Larch/win32 -lSDL -lfreetype -lcomdlg32 -lShlwapi -lIPHlpApi
+EXTRA_LIBS = -Larch/win32 -lSDL2main  -lSDL2 -lfreetype -lcomdlg32 -lShlwapi -lIPHlpApi  -lcygwin
+EXTRA_LIBS = -L/usr/local/lib -lcygwin -lSDL2main  -lSDL2 -mwindows -lfreetype -lcomdlg32 -lShlwapi -lIPHlpApi -L/usr/lib -lpthread -lSDL2_image -L/cygdrive/c/mingw/lib -I/cygdrive/c/mingw/include/SDL2/
+
+
 
 XOPTS = -Wall -fomit-frame-pointer -march=i686
 XLIBS =

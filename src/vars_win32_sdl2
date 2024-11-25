@@ -1,0 +1,21 @@
+TARGET = gsport.exe
+NAME = gsport
+
+MINGW_HOME = /cygdrive/c/mingw/i686-w64-mingw32
+
+FSTOBJ = host_common.o win32_host_common.o host_mli.o win32_host_fst.o
+
+OBJECTS = sdl2_driver.o $(OBJECTS1)  $(FSTOBJ) sdl2snd_driver.o scc_windriver.o 
+
+CCOPTS = -O3 -DGSPORT_LITTLE_ENDIAN -DWIN32 -D_WIN32 -DHAVE_SDL -DWIN_SDL -DTOGGLE_STATUS -I$(MINGW_HOME)/include/SDL2 -DWINSDL_BORDERHACK  -D__USE_W32_SOCKETS -D_WINSOCK2API_ 
+CPPOPTS = -O3 -DGSPORT_LITTLE_ENDIAN -DWIN32 -D_WIN32 -DHAVE_SDL -DWIN_SDL -DTOGGLE_STATUS -I/usr/include/freetype2 -I$(MINGW_HOME)/include/SDL2  -D__USE_W32_SOCKETS -D_WINSOCK2API_ 
+
+SUFFIX = ".exe"
+# working in cygwin
+EXTRA_LIBS = -lcygwin -lSDL2main  -lSDL2 -lfreetype -lcomdlg32 -lShlwapi -lIPHlpApi -lpthread -lSDL2_image -L$(MINGW_HOME)/lib/ 
+EXTRA_LIBS = -lcygwin -lSDL2main  -lSDL2 -lfreetype -lcomdlg32 -lShlwapi -lIPHlpApi -lpthread -lSDL2_image -L$(MINGW_HOME)/lib/ -Larch/win32 -lshell32
+
+
+
+#XOPTS = -Wall -fomit-frame-pointer -march=i686
+XLIBS =
