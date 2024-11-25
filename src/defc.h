@@ -1,21 +1,21 @@
 /*
  GSport - an Apple //gs Emulator
  Copyright (C) 2010 by GSport contributors
- 
+
  Based on the KEGS emulator written by and Copyright (C) 2003 Kent Dickey
 
- This program is free software; you can redistribute it and/or modify it 
- under the terms of the GNU General Public License as published by the 
- Free Software Foundation; either version 2 of the License, or (at your 
+ This program is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License as published by the
+ Free Software Foundation; either version 2 of the License, or (at your
  option) any later version.
 
- This program is distributed in the hope that it will be useful, but 
- WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  for more details.
 
- You should have received a copy of the GNU General Public License along 
- with this program; if not, write to the Free Software Foundation, Inc., 
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
@@ -58,12 +58,18 @@ void U_STACK_TRACE();
 #define DRECIP_DCYCS_IN_16MS	(1.0 / (DCYCS_IN_16MS))
 
 #ifdef GSPORT_LITTLE_ENDIAN
+#ifdef __GNUC__
+# define BIGEND(a) __builtin_bswap32(a)
+# define GET_BE_WORD16(a)	__builtin_bswap16(a)
+# define GET_BE_WORD32(a)	(BIGEND(a))
+#else
 # define BIGEND(a)    ((((a) >> 24) & 0xff) +			\
 			(((a) >> 8) & 0xff00) + 		\
 			(((a) << 8) & 0xff0000) + 		\
 			(((a) << 24) & 0xff000000))
 # define GET_BE_WORD16(a)	((((a) >> 8) & 0xff) + (((a) << 8) & 0xff00))
 # define GET_BE_WORD32(a)	(BIGEND(a))
+#endif
 #else
 # define BIGEND(a)	(a)
 # define GET_BE_WORD16(a)	(a)
@@ -184,6 +190,7 @@ STRUCT(Engine_reg) {
 STRUCT(Kimage) {
 	void	*dev_handle;
 	void	*dev_handle2;
+	void	*dev_handle3;	/* for xrender ! */
 	byte	*data_ptr;
 	int	width_req;
 	int	width_act;
