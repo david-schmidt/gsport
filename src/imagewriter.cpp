@@ -286,7 +286,7 @@ void Imagewriter::resetPrinter()
 		printRes = 2;
 		definedUnit = 96;
 		curCharTable = 1;
-		style = STYLE_BASE;
+		style = STYLE_BOLD;
 		score = SCORE_NONE;
 		extraIntraSpace = 0.0;
 		printUpperContr = true;
