@@ -62,7 +62,7 @@ gsportmac: $(OBJECTS) compile_time.o
 
 # Linux for X builds:
 gsportx: $(OBJECTS) compile_time.o
-	$(LD) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11
+	$(LD) $(CCOPTS) $(LDOPTS) $(OBJECTS) compile_time.o $(LDFLAGS) -o $(NAME)$(SUFFIX) $(XLIBS) $(EXTRA_LIBS) -lX11 -ldl
 	echo $(OBJECTS)
 	mv gsportx ..
 	cp -f ../config.template ../config.txt 
