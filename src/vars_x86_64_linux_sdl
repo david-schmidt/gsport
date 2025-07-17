@@ -1,0 +1,18 @@
+TARGET = gsportx
+OBJECTS = $(OBJECTS1) $(TFEOBJ) $(ATOBJ) $(PCAPOBJ) xdriver.o
+CC = gcc
+CCOPTS = -O2 -Wall -fomit-frame-pointer -std=gnu99 -DHAVE_SDL -DHAVE_TFE -DHAVE_ATBRIDGE -DTOGGLE_STATUS -I/usr/include/SDL -I/usr/include/freetype2
+CPPOPTS = -O2 -DHAVE_TFE -DHAVE_SDL -DTOGGLE_STATUS -DHAVE_ATBRIDGE -I/usr/include/freetype2 -I/usr/include/SDL
+OPTS = -DGSPORT_LITTLE_ENDIAN 
+SUFFIX =
+NAME = gsportx
+LDFLAGS =
+LDOPTS =
+LD = g++
+EXTRA_LIBS = -lXext -lfreetype -lSDL
+EXTRA_SPECIALS =
+
+AS = cc
+PERL = perl
+
+XOPTS = -I/usr/X11R6/include
